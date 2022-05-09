@@ -1,6 +1,6 @@
-import { makeStyles } from '@material-ui/core/styles';
+import { makeStyles } from 'tss-react/mui';
 
-export default makeStyles({
+export default makeStyles()({
   media: {
     height: 0,
     paddingTop: '56.25%',

@@ -1,7 +1,6 @@
-import { makeStyles } from '@material-ui/core/styles';
-import { deepPurple } from '@material-ui/core/colors';
+import { makeStyles } from 'tss-react/mui';
 
-export default makeStyles((theme) => ({
+export default makeStyles()((theme) => ({
   appBar: {
     borderRadius: 15,
     margin: '30px 0',
@@ -37,7 +36,7 @@ export default makeStyles((theme) => ({
     alignItems: 'center',
   },
   purple: {
-    color: theme.palette.getContrastText(deepPurple[500]),
-    backgroundColor: deepPurple[500],
+    color: theme.palette.getContrastText('rgba(87, 8, 97)'),
+    backgroundColor: 'rgba(87, 8, 97)',
   },
 }));
