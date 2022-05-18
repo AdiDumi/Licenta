@@ -1,21 +1,37 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import { Container } from '@mui/material';
-import { BrowserRouter, Routes , Route } from 'react-router-dom';
+import {Routes, Route } from 'react-router-dom';
 
-import Home from './components/Home/Home';
-import Navbar from './components/Navbar/Navbar';
-import Auth from './components/Auth/Auth';
+import LogIn from './components/LogIn/LogIn';
+import Dashboard from "./components/Dashboard/Dashboard";
 
-const App = () => (
-  <BrowserRouter>
-    <Container maxWidth="lg">
-      <Navbar />
-      <Routes>
-        <Route path="/" exact element={<Home/>} />
-        <Route path="/auth" exact element={<Auth/>} />
-      </Routes>
-    </Container>
-  </BrowserRouter>
-);
+function setToken(userToken) {
+    localStorage.setItem('token', JSON.stringify(userToken));
+}
+
+function getToken() {
+    const tokenString = localStorage.getItem('token');
+    const userToken = JSON.parse(tokenString);
+    return userToken?.token
+}
+
+function App() {
+    const token = getToken();
+
+    useEffect(() => {
+        if (!token) {
+            return <LogIn setToken={setToken}/>
+        }
+    });
+
+    return (
+        <Container maxWidth="lg">
+            <Routes>
+                <Route path="/" exact element={<LogIn setToken={setToken}/>}/>
+                <Route path="/dashboard" exact element={<Dashboard/>}/>
+            </Routes>
+        </Container>
+    );
+}
 
 export default App;
