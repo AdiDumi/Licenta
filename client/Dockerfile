@@ -1,14 +1,14 @@
 FROM node:17-alpine
 
-WORKDIR .
+WORKDIR /client_docker
 
-COPY package.json ./
-
-COPY package-lock.json ./
-
-COPY . .
+COPY package.json .
 
 RUN npm install
+
+RUN mkdir -p node_modules/.cache && chmod -R 777 node_modules/.cache
+
+COPY . .
 
 EXPOSE 3000
 

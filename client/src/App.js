@@ -1,34 +1,25 @@
-import React, {useEffect} from 'react';
+import React from 'react';
 import { Container } from '@mui/material';
 import {Routes, Route } from 'react-router-dom';
 
 import LogIn from './components/LogIn/LogIn';
 import Dashboard from "./components/Dashboard/Dashboard";
-
-function setToken(userToken) {
-    localStorage.setItem('token', JSON.stringify(userToken));
-}
-
-function getToken() {
-    const tokenString = localStorage.getItem('token');
-    const userToken = JSON.parse(tokenString);
-    return userToken?.token
-}
+import Feedbacks from "./components/Feedback/FeedbackPage";
+import {useToken} from "./useToken";
 
 function App() {
-    const token = getToken();
+    const { token, setToken, deleteToken } = useToken();
 
-    useEffect(() => {
-        if (!token) {
-            return <LogIn setToken={setToken}/>
-        }
-    });
+    if (!token) {
+        return <LogIn setToken={setToken}/>
+    }
 
     return (
         <Container maxWidth="lg">
             <Routes>
                 <Route path="/" exact element={<LogIn setToken={setToken}/>}/>
-                <Route path="/dashboard" exact element={<Dashboard/>}/>
+                <Route path="/dashboard" exact element={<Dashboard deleteToken={deleteToken}/>}/>
+                <Route path="/feedbacks" exact element={<Feedbacks deleteToken={deleteToken}/>}/>
             </Routes>
         </Container>
     );

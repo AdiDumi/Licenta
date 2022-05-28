@@ -9,13 +9,12 @@ import {Container, Avatar, Typography, Button, TextField, Box, CssBaseline} from
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 
 const validationSchema = yup.object({
-    email: yup
+    username: yup
         .string('Enter your email')
-        .email('Enter a valid email')
         .required('Email is required'),
     password: yup
         .string('Enter your password')
-        .min(8, 'Password should be of minimum 8 characters length')
+        .min(6, 'Password should be of minimum 8 characters length')
         .required('Password is required'),
 });
 
@@ -24,15 +23,17 @@ export default function LogIn({setToken}) {
 
     const formik = useFormik({
         initialValues: {
-            email: 'email@bitdefender.biz',
+            username: 'email@bitdefender.biz',
             password: '',
         },
         validationSchema: validationSchema,
         onSubmit: values => {
-            console.log(values);
+            console.log(JSON.stringify(values));
+
             try {
-                axios.post('http://localhost:5000/login', JSON.stringify(values)).then(response => {
-                    setToken(response.data.token);
+                axios.post(process.env.REACT_APP_BACKEND_URL + process.env.REACT_APP_BACKEND_PORT + '/login', values).then(response => {
+                    console.log(response.data)
+                    setToken(response.data);
                     navigate("/dashboard");
                 });
                 // }).then(
@@ -84,15 +85,15 @@ export default function LogIn({setToken}) {
                       margin="normal"
                       required
                       fullWidth
-                      id="email"
+                      id="username"
                       label="Email Address"
-                      name="email"
-                      type="email"
-                      autoComplete="email"
-                      value={formik.values.email}
+                      name="username"
+                      type="username"
+                      autoComplete="username"
+                      value={formik.values.username}
                       onChange={formik.handleChange}
-                      error={formik.touched.email && Boolean(formik.errors.email)}
-                      helperText={formik.touched.email && formik.errors.email}
+                      error={formik.touched.username && Boolean(formik.errors.username)}
+                      helperText={formik.touched.username && formik.errors.username}
                       autoFocus
                   />
                   <TextField
