@@ -1,0 +1,45 @@
+version: '3.7'
+services:
+
+  server:
+    build: ./server
+    container_name: server_c
+    ports:
+      - '5000:5000'
+    volumes:
+      - ./server:/server_docker
+      - /server_docker/node_modules
+    depends_on:
+      - mongo
+    networks:
+      - app-network
+
+  mongo:
+    image: mongo
+    container_name: mongo_c
+    ports:
+      - '27017:27017'
+    volumes:
+      - ./data:/data/db
+    networks:
+      - app-network
+
+  client:
+    build: ./client
+    container_name: client_c
+    volumes:
+      - ./client:/client_docker
+      - /client_docker/node_modules
+    ports:
+      - '3000:3000'
+    stdin_open: true
+    tty: true
+    networks:
+      - app-network
+    depends_on:
+      - server
+
+networks:
+  app-network:
+    name: app-network
+    driver: bridge

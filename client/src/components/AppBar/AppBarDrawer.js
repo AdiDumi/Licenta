@@ -113,8 +113,7 @@ export default function AppBarDrawer({deleteToken, currentPage}) {
     }
 
     return(
-        <Box sx={{ display: 'flex' }}>
-            <CssBaseline />
+        <div>
             <AppBar position="fixed" open={open}>
                 <Toolbar>
                     <IconButton
@@ -217,6 +216,6 @@ export default function AppBarDrawer({deleteToken, currentPage}) {
                     </ListItem>
                 </List>
             </Drawer>
-        </Box>
+        </div>
     );
 }

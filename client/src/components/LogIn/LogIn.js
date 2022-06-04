@@ -10,8 +10,8 @@ import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 
 const validationSchema = yup.object({
     username: yup
-        .string('Enter your email')
-        .required('Email is required'),
+        .string('Enter your username')
+        .required('Username is required'),
     password: yup
         .string('Enter your password')
         .min(6, 'Password should be of minimum 8 characters length')
@@ -23,16 +23,13 @@ export default function LogIn({setToken}) {
 
     const formik = useFormik({
         initialValues: {
-            username: 'email@bitdefender.biz',
+            username: 'cn=admin,dc=grow,dc=app',
             password: '',
         },
         validationSchema: validationSchema,
         onSubmit: values => {
-            console.log(JSON.stringify(values));
-
             try {
                 axios.post(process.env.REACT_APP_BACKEND_URL + process.env.REACT_APP_BACKEND_PORT + '/login', values).then(response => {
-                    console.log(response.data)
                     setToken(response.data);
                     navigate("/dashboard");
                 });
