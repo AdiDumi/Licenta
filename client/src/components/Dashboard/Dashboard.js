@@ -26,32 +26,44 @@ export default function Dashboard({deleteToken}) {
         {
             reporter: "Alin",
             message: "You did it!",
-            date: "o data"
+            date: "o data",
+            type: "improve"
         },
         {
             reporter: "Aldi",
             message: "You did it!",
-            date: "o data"
+            date: "o data",
+            type: "improve"
         },
         {
             reporter: "Nico",
             message: "You did it!",
-            date: "o data"
+            date: "o data",
+            type: "good"
         },
         {
             reporter: "Alin2",
             message: "You did it!",
-            date: "o data"
+            date: "o data",
+            type: "improve"
         },
         {
             reporter: "Aldi2",
             message: "You did it!",
-            date: "o data"
+            date: "o data",
+            type: "good"
         },
         {
             reporter: "Nico2",
             message: "You did it!",
-            date: "o data"
+            date: "o data",
+            type: "good"
+        },
+        {
+            reporter: "Nico222",
+            message: "You did it!",
+            date: "o data",
+            type: "good"
         },
     ];
     //useEffect(() => {
@@ -87,29 +99,35 @@ export default function Dashboard({deleteToken}) {
                                     p: 2,
                                     display: 'flex',
                                     flexDirection: 'column',
+                                    border: 1,
+                                    borderColor: 'blue'
                                 }}
                             >
                                 <Typography> Your last feedbacks </Typography>
                                 <Grid container spacing={4}>
-                                    {feedbacks.length > 0 ? feedbacks.map(feedback => (
-                                        <Grid item xs={"auto"} sm={6} md={4} key={feedback.reporter}>
-                                            <Card sx={{ minWidth: 275 }}>
+                                    {feedbacks.length > 0 ? feedbacks.slice(0,6).map((feedback, index) => (
+                                        <Grid item xs={"auto"} sm={6} md={4} key={index}>
+                                            <Card sx={{
+                                                minWidth: 275,
+                                                border: 3,
+                                                borderColor: (feedback.type === 'good') ? '#2196f3' : (feedback.type === 'improve') ? 'yellow' : 'black'
+                                            }}>
                                                 <CardActionArea>
                                                     <CardContent>
-                                                        <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
-                                                            From {feedback.reporter}
+                                                        <Typography sx={{ fontSize: 18 }} color="text.secondary" component="div">
+                                                            From <Typography sx={{textDecoration: 'underline', fontSize: 18}} display="inline" color="text.primary">{feedback.reporter}</Typography>
                                                         </Typography>
-                                                        <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
+                                                        <Typography sx={{ fontSize: 15 }} color="text.secondary" gutterBottom>
                                                             On {feedback.date}
                                                         </Typography>
-                                                        <Typography variant="h5" component="div">
+                                                        <Typography noWrap variant="h5" component="div">
                                                             {feedback.message}
                                                         </Typography>
                                                     </CardContent>
-                                                    <CardActions>
-                                                        <Button startIcon={<Add/>} onClick={handleFeed} size="small">Feed Back</Button>
-                                                    </CardActions>
                                                 </CardActionArea>
+                                                <CardActions>
+                                                    <Button startIcon={<Add/>} onClick={handleFeed} size="small">Feed Back</Button>
+                                                </CardActions>
                                             </Card>
                                         </Grid>
                                     )) : <div> No last Feedbacks </div>}
