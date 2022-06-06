@@ -8,23 +8,38 @@ import {
     Container,
     CssBaseline,
     Dialog,
-    DialogActions,
-    DialogContent,
-    DialogContentText,
-    DialogTitle, FormControlLabel,
+    DialogContentText, DialogTitle, FormControlLabel,
     FormGroup,
-    Grid, Pagination, Radio, RadioGroup, Snackbar, Tab, Tabs,
-    TextField,
+    Grid, Pagination, Paper, Radio, RadioGroup, Snackbar, Tab, Tabs,
+    TextField, ToggleButton,
     Toolbar,
     Typography
 } from "@mui/material";
 import AppBarDrawer from "../AppBar/AppBarDrawer";
 import MuiAlert from '@mui/material/Alert';
+import MuiDialogContent from '@mui/material/DialogContent';
+import MuiDialogActions from '@mui/material/DialogActions';
 import {AddComment, Inbox, Outbox, ThumbUp} from "@mui/icons-material";
+import axios from "axios";
+import {withStyles} from "tss-react/mui";
+import {useNavigate} from "react-router-dom";
 
 const Alert = React.forwardRef(function Alert(props, ref) {
     return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
 });
+
+const DialogContent = withStyles(MuiDialogContent, theme => ({
+    root: {
+        padding: theme.spacing(2)
+    }
+}));
+
+const DialogActions = withStyles(MuiDialogActions, theme => ({
+    root: {
+        margin: 0,
+        padding: theme.spacing(1)
+    }
+}));
 
 function TabPanel(props) {
     const { children, value, index } = props;
@@ -38,8 +53,13 @@ function TabPanel(props) {
     );
 }
 
-export default function Feedbacks({deleteToken}) {
-    const [open, setOpen] = React.useState(false);
+export default function Feedbacks({deleteToken, token}) {
+    const navigate = useNavigate();
+    const [render, setRender] = React.useState('');
+    const [selected, setSelected] = React.useState(false);
+    const [openForm, setOpenForm] = React.useState(false);
+    const [selectedFeedback, setSelectedFeedback] = React.useState('');
+    const [openDialogFeedback, setOpenDialogFeedback] = React.useState(false);
     const [openSnackbar, setOpenSnackbar] = React.useState(false);
     const [feedbackType, setFeedbackType] = React.useState('good');
     const [tab, setTab] = React.useState(0);
@@ -62,12 +82,55 @@ export default function Feedbacks({deleteToken}) {
         setTab(newValue);
     };
 
-    const handleClickOpen = () => {
-        setOpen(true);
+    const handleClickOpenForm = () => {
+        setOpenForm(true);
     };
 
-    const handleClose = () => {
-        setOpen(false);
+    const handleCloseForm = () => {
+        setOpenForm(false);
+    };
+
+    const handleClickOpenFeedback = (event) => {
+        setOpenDialogFeedback(true);
+        setSelectedFeedback(JSON.parse(event.currentTarget.attributes.feedbackid.textContent));
+    };
+
+    const handleCloseFeedback = () => {
+        setOpenDialogFeedback(false);
+        if(!selectedFeedback.seen) {
+            axios.post(process.env.REACT_APP_BACKEND_URL + process.env.REACT_APP_BACKEND_PORT + '/feedback/markAsSeen',
+                {
+                    _id: selectedFeedback._id
+                },
+                {
+                    headers: {
+                        'Authorization': 'Bearer ' + token
+                    }
+                }).then(response => {
+                console.log(response.data);
+            })
+        }
+        if(selected || !selectedFeedback.seen)
+            setRender(selectedFeedback._id + Math.random(50));
+        setSelected(false);
+        setSelectedFeedback('');
+    };
+
+    const handleUpdateFeed = () => {
+        if(selected) {
+            axios.post(process.env.REACT_APP_BACKEND_URL + process.env.REACT_APP_BACKEND_PORT + '/feedback/markAsLiked',
+                {
+                    _id: selectedFeedback._id
+                },
+                {
+                    headers: {
+                        'Authorization': 'Bearer ' + token
+                    }
+                }).then(response => {
+                console.log(response.data);
+            })
+        }
+        handleCloseFeedback();
     };
 
     const handleChangeRadio = (event) => {
@@ -80,15 +143,34 @@ export default function Feedbacks({deleteToken}) {
 
     const handleSubmit = (event) => {
         event.preventDefault();
-        console.log(checkboxValue);
-        console.log(feedbackType);
-        console.log(selectedEmployee);
-        console.log(feedbackMessage);
+        var typeFeed = 2, anonym = false;
+        if (feedbackType === 'good') {
+            typeFeed = 1;
+        }
+        if (checkboxValue === "on") {
+            anonym = true;
+        }
+        axios.post(process.env.REACT_APP_BACKEND_URL + process.env.REACT_APP_BACKEND_PORT + '/feedback/add',
+            {
+                manager: selectedEmployee,
+                receiver: selectedEmployee,
+                message: feedbackMessage,
+                type: typeFeed,
+                anonymous: anonym
+            },
+            {
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                }
+        }).then(response => {
+            console.log(response.data);
+            setRender(selectedEmployee);
+        })
         setCheckboxValue("off");
         setFeedbackType('good');
         setSelectedEmployee('');
         setFeedbackMessage('');
-        setOpen(false);
+        setOpenForm(false);
         setOpenSnackbar(true);
     };
 
@@ -101,283 +183,35 @@ export default function Feedbacks({deleteToken}) {
     }, [sentFeedbacks]);
 
     useEffect(() => {
-        setReceivedFeedbacks([
-            {
-                reporter: "Alin",
-                message: "You did it!",
-                date: "o data",
-                type: "fasafaf",
-                liked: 1
-            },
-            {
-                reporter: "Aldi",
-                message: "You did it!",
-                date: "o data",
-                type: "improve",
-                liked: 1
-            },
-            {
-                reporter: "Nico",
-                message: "You did it!",
-                date: "o data",
-                type: "good",
-                liked: 1
-            },
-            {
-                reporter: "Alin2",
-                message: "You did it!",
-                date: "o data",
-                type: "good",
-                liked: 0
-            },
-            {
-                reporter: "Aldi2",
-                message: "You did it!",
-                date: "o data",
-                type: "good",
-                liked: 1
-            },
-            {
-                reporter: "Nico2",
-                message: "You did it!",
-                date: "o data",
-                type: "improve",
-                liked: 0
-            },
-            {
-                reporter: "Alin3",
-                message: "You did it!",
-                date: "o data",
-                type: "good",
-                liked: 0
-            },
-            {
-                reporter: "Aldi3",
-                message: "You did it!",
-                date: "o data",
-                type: "good",
-                liked: 0
-            },
-            {
-                reporter: "Nico3",
-                message: "You did it! nafjwajdnaj wkdm kawdl mawk fmiawj dlamdli awmd ilawd ia",
-                date: "o data",
-                type: "good",
-                liked: 0
-            },
-            {
-                reporter: "Alin23",
-                message: "You did it!",
-                date: "o data",
-                type: "improve",
-                liked: 0
-            },
-            {
-                reporter: "Aldi23",
-                message: "You did it!",
-                date: "o data",
-                type: "improve",
-                liked: 0
-            },
-            {
-                reporter: "Nico23",
-                message: "You did it!",
-                date: "o data",
-                type: "good",
-                liked: 0
-            },
-            {
-                reporter: "Alin4",
-                message: "You did it!",
-                date: "o data",
-                type: "good",
-                liked: 0
-            },
-            {
-                reporter: "Aldi4",
-                message: "You did it!",
-                date: "o data",
-                type: "improve",
-                liked: 0
-            },
-            {
-                reporter: "Nico4",
-                message: "You did it!",
-                date: "o data",
-                type: "good",
-                liked: 0
-            },
-            {
-                reporter: "Alin24",
-                message: "You did it!",
-                date: "o data",
-                type: "good",
-                liked: 0
-            },
-            {
-                reporter: "Aldi24",
-                message: "You did it!",
-                date: "o data",
-                type: "improve",
-                liked: 0
-            },
-            {
-                reporter: "Nico24",
-                message: "You did it!",
-                date: "o data",
-                type: "improve",
-                liked: 0
-            },
-        ]);
-        setSentFeedbacks([
-            {
-                to: "Alin",
-                message: "You did it!",
-                date: "o data",
-                type: "good",
-                liked: 1
-            },
-            {
-                to: "Aldi",
-                message: "You did it!",
-                date: "o data",
-                type: "improve",
-                liked: 0
-            },
-            {
-                to: "Nico",
-                message: "You did it!",
-                date: "o data",
-                type: "good",
-                liked: 0
-            },
-            {
-                to: "Alin2",
-                message: "You did it!",
-                date: "o data",
-                type: "good",
-                liked: 1
-            },
-            {
-                to: "Aldi2",
-                message: "You did it!",
-                date: "o data",
-                type: "good",
-                liked: 1
-            },
-            {
-                to: "Nico2",
-                message: "You did it!",
-                date: "o data",
-                type: "improve",
-                liked: 0
-            },
-            {
-                to: "Alin3",
-                message: "You did it!",
-                date: "o data",
-                type: "good",
-                liked: 1
-            },
-            {
-                to: "Aldi3",
-                message: "You did it!",
-                date: "o data",
-                type: "good",
-                liked: 0
-            },
-            {
-                to: "Nico3",
-                message: "You did it! nafjwajdnaj wkdm kawdl mawk fmiawj dlamdli awmd ilawd ia",
-                date: "o data",
-                type: "good",
-                liked: 0
-            },
-            {
-                to: "Alin23",
-                message: "You did it!",
-                date: "o data",
-                type: "improve",
-                liked: 0
-            },
-            {
-                to: "Aldi23",
-                message: "You did it!",
-                date: "o data",
-                type: "improve",
-                liked: 0
-            },
-            {
-                to: "Nico23",
-                message: "You did it!",
-                date: "o data",
-                type: "good",
-                liked: 1
-            },
-            {
-                to: "Alin4",
-                message: "You did it!",
-                date: "o data",
-                type: "good",
-                liked: 0
-            },
-            {
-                to: "Aldi4",
-                message: "You did it!",
-                date: "o data",
-                type: "improve",
-                liked: 0
-            },
-            {
-                to: "Nico4",
-                message: "You did it!",
-                date: "o data",
-                type: "good",
-                liked: 1
-            },
-            {
-                to: "Alin24",
-                message: "You did it!",
-                date: "o data",
-                type: "good",
-                liked: 1
-            },
-            {
-                to: "Aldi24",
-                message: "You did it!",
-                date: "o data",
-                type: "improve",
-                liked: 1
-            },
-            {
-                to: "Nico24",
-                message: "You did it!",
-                date: "o data",
-                type: "improve",
-                liked: 0
-            },
-            {
-                to: "Nico223134",
-                message: "You did it!",
-                date: "o data",
-                type: "improve",
-                liked: 0
-            },
-        ]);
+        axios.get(process.env.REACT_APP_BACKEND_URL + process.env.REACT_APP_BACKEND_PORT + '/feedback/recv', {
+            headers: {
+                'Authorization': 'Bearer ' + token
+            }
+        }).then(response => {
+            setReceivedFeedbacks(response.data);
+        }).catch(error => {
+            if(error.response.data.error === 'Authentification failed. Check secret token.') {
+                deleteToken();
+                navigate("/");
+            }
+        })
+        axios.get(process.env.REACT_APP_BACKEND_URL + process.env.REACT_APP_BACKEND_PORT + '/feedback/sent', {
+            headers: {
+                'Authorization': 'Bearer ' + token
+            }
+        }).then(response => {
+            setSentFeedbacks(response.data);
+        }).catch(error => {
+            if(error.response.data.error === 'Authentification failed. Check secret token.') {
+                deleteToken();
+                navigate("/");
+            }
+        })
         setCompanyEmployees([
-            { label: 'The Shawshank Redemption'},
-            { label: 'The Godfather'},
-            { label: 'The Godfather: Part II'},
-            { label: 'The Dark Knight' },
-            { label: '12 Angry Men' },
-            { label: "Schindler's List" },
-            { label: 'Pulp Fiction' },
-            { label: 'The Lord of the Rings: The Return of the King' },
-            { label: 'The Good, the Bad and the Ugly' },
-            { label: 'Fight Club' },
-            { label: 'The Lord of the Rings: The Fellowship of the Ring' }
+            { label: 'cn=admin,dc=grow,dc=app'},
+            { label: 'cn=developer,dc=grow,dc=app'},
         ]);
-    }, []);
+    }, [render]);
 
     return(
         <Box sx={{ display: 'flex' }}>
@@ -392,7 +226,7 @@ export default function Feedbacks({deleteToken}) {
                     <Grid container spacing={1}>
                         {/* Feedbacks button */}
                         <Grid item sm={12}>
-                            <Button startIcon={<AddComment/>} variant={"contained"} onClick={handleClickOpen}> Give Feedback</Button>
+                            <Button startIcon={<AddComment/>} variant={"contained"} onClick={handleClickOpenForm}> Give Feedback</Button>
                         </Grid>
                         {/* Feedbacks tabs */}
                         <Grid item sm={12}>
@@ -403,29 +237,39 @@ export default function Feedbacks({deleteToken}) {
                             <TabPanel value={tab} index={0}>
                                 <Grid container spacing={2}>
                                     {receivedFeedbacks.length > 0 ? receivedFeedbacks
+                                        .sort((a, b) => (a.seen > b.seen) ? 1 : (a.seen === b.seen) ? ((new Date(a.receivedDate).getTime() < new Date(b.receivedDate).getTime()) ? 1 : -1) : -1)
                                         .slice((pageReceivedFeedbacks - 1) * feedbacksPerPage, pageReceivedFeedbacks * feedbacksPerPage)
-                                        .map((feedback, index) => (
-                                        <Grid item xs={"auto"} sm={6} md={4} key={index}>
-                                            {feedback.liked === 1 ? <Typography>New</Typography> : <Typography> &nbsp; </Typography>}
+                                        .map(feedback => (
+                                        <Grid item xs={"auto"} sm={6} md={4} key={feedback._id}>
+                                            {feedback.seen === false ? <Typography sx={{ color: 'red' }}>New</Typography> : <Typography> &nbsp; </Typography>}
                                             <Card sx={{
                                                 border: 3,
-                                                borderColor: (feedback.type === 'good') ? '#2196f3' : (feedback.type === 'improve') ? 'yellow' : 'black',
+                                                borderColor: (feedback.type === 1) ? '#2196f3' : (feedback.type === 2) ? 'yellow' : 'black',
                                                 position: 'relative',
                                             }} >
-                                                <CardActionArea>
+                                                <CardActionArea onClick={handleClickOpenFeedback} feedbackid={JSON.stringify(feedback)}>
                                                     <CardContent>
-                                                        <Typography sx={{ fontSize: 17 }} color="text.secondary" component="div">
-                                                            From: <Typography sx={{textDecoration: 'underline', fontSize: 18}} display="inline" color="text.primary">{feedback.reporter}</Typography>
-                                                            {feedback.liked === 1 ?
-                                                                <ThumbUp sx={{
-                                                                    position: 'absolute',
-                                                                    left: '300px',
-                                                                    color: 'green'
-                                                                }}/>
-                                                                : null}
-                                                        </Typography>
+                                                        {feedback.anonymous === true ?
+                                                            <Typography sx={{ fontSize: 17 }} color="text.secondary" component="div">
+                                                                Anonymous
+                                                            </Typography> :
+                                                            <Typography sx={{ fontSize: 17 }} color="text.secondary" component="div"> From:
+                                                                <Typography sx={{textDecoration: 'underline', fontSize: 18}} display="inline" color="text.primary">
+                                                                    {feedback.reporter}
+                                                                </Typography>
+                                                            </Typography>
+                                                        }
+                                                        {feedback.appreciated === true ?
+                                                            <ThumbUp sx={{
+                                                                position: 'absolute',
+                                                                left: '300px',
+                                                                bottom: '90px',
+                                                                color: (feedback.type === 1) ? '#2196f3' : (feedback.type === 2) ? 'yellow' : 'black'
+                                                            }}/>
+                                                            : null
+                                                        }
                                                         <Typography sx={{ fontSize: 15 }} variant="subtitle2" color="text.secondary" gutterBottom>
-                                                            On {feedback.date}
+                                                            On {new Date(feedback.receivedDate).toDateString()}
                                                         </Typography>
                                                         <Typography noWrap sx={{ fontSize: 28 }} component="div">
                                                             {feedback.message}
@@ -434,7 +278,7 @@ export default function Feedbacks({deleteToken}) {
                                                 </CardActionArea>
                                             </Card>
                                         </Grid>
-                                    )) : <div> You have no received feedbacks </div>}
+                                    )) : <Typography> You have no received feedbacks </Typography>}
                                 </Grid>
                                 <Box py={1} display="flex" justifyContent="center">
                                     <Pagination
@@ -453,28 +297,29 @@ export default function Feedbacks({deleteToken}) {
                             <TabPanel value={tab} index={1}>
                                 <Grid container spacing={4}>
                                     {sentFeedbacks.length > 0 ? sentFeedbacks
+                                        .sort((a, b) => (new Date(a.receivedDate).getTime() < new Date(b.receivedDate).getTime()) ? 1 : -1)
                                         .slice((pageSentFeedbacks - 1) * feedbacksPerPage, pageSentFeedbacks * feedbacksPerPage)
-                                        .map((feedback, index) => (
-                                            <Grid item xs={"auto"} sm={6} md={4} key={index}>
+                                        .map(feedback => (
+                                            <Grid item xs={"auto"} sm={6} md={4} key={feedback._id}>
                                                 <Card sx={{
                                                     minWidth: 275,
                                                     border: 3,
-                                                    borderColor: (feedback.type === 'good') ? '#2196f3' : (feedback.type === 'improve') ? 'yellow' : 'black',
+                                                    borderColor: (feedback.type === 1) ? '#2196f3' : (feedback.type === 2) ? 'yellow' : 'black',
                                                     position: 'relative'
                                                 }} >
                                                     <CardContent>
                                                         <Typography sx={{ fontSize: 17 }} color="text.secondary" component="div">
-                                                            To: <Typography sx={{textDecoration: 'underline', fontSize: 18}} display="inline" color="text.primary">{feedback.to}</Typography>
-                                                            {feedback.liked === 1 ?
+                                                            To: <Typography sx={{textDecoration: 'underline', fontSize: 18}} display="inline" color="text.primary">{feedback.receiver}</Typography>
+                                                            {feedback.appreciated === true ?
                                                                 <ThumbUp sx={{
                                                                     position: 'absolute',
                                                                     left: '300px',
-                                                                    color: 'green'
+                                                                    color: (feedback.type === 1) ? '#2196f3' : (feedback.type === 2) ? 'yellow' : 'black',
                                                                 }}/>
                                                                 : null}
                                                         </Typography>
                                                         <Typography sx={{ fontSize: 15 }} variant="subtitle2" color="text.secondary" gutterBottom>
-                                                            On {feedback.date}
+                                                            On {new Date(feedback.receivedDate).toDateString()} {feedback.anonymous === true ? 'as anonymous' : ' '}
                                                         </Typography>
                                                         <Typography noWrap sx={{ fontSize: 30 }} component="div">
                                                             {feedback.message}
@@ -482,7 +327,7 @@ export default function Feedbacks({deleteToken}) {
                                                     </CardContent>
                                                 </Card>
                                             </Grid>
-                                        )) : <div> You have no sent feedbacks </div>}
+                                        )) : <Typography> You have no sent feedbacks </Typography>}
                                 </Grid>
                                 <Box py={1} display="flex" justifyContent="center">
                                     <Pagination
@@ -499,12 +344,12 @@ export default function Feedbacks({deleteToken}) {
                         </Grid>
                     </Grid>
                 </Container>
-                <Dialog open={open} onClose={handleClose}  fullWidth maxWidth={"md"}>
+                <Dialog open={openForm} onClose={handleCloseForm}  fullWidth maxWidth={"md"}>
                     <form
                         onSubmit={handleSubmit}
                         id="myform"
                     >
-                        <DialogTitle>Give Feedback</DialogTitle>
+                        <DialogTitle variant="h6">Give Feedback</DialogTitle>
                         <DialogContent>
                             <DialogContentText>
                                 Please write a constructive feedback
@@ -549,10 +394,66 @@ export default function Feedbacks({deleteToken}) {
                             />
                         </DialogContent>
                         <DialogActions>
-                            <Button variant={"contained"} onClick={handleClose}>Cancel</Button>
+                            <Button variant={"contained"} onClick={handleCloseForm}>Cancel</Button>
                             <Button type="submit" variant={"contained"} form="myform">Send</Button>
                         </DialogActions>
                     </form>
+                </Dialog>
+                <Dialog open={openDialogFeedback} onClose={handleCloseFeedback}  fullWidth maxWidth={"md"}>
+                    <Paper
+                        sx={{
+                            border: 3,
+                            borderColor: (selectedFeedback.type === 1) ? '#2196f3' : (selectedFeedback.type === 2) ? 'yellow' : 'black',
+                            position: 'relative'
+                        }}
+                    >
+                    <DialogTitle variant="h6">
+                        Feedback from {selectedFeedback.reporter}
+                        <ToggleButton
+                            value="check"
+                            color="primary"
+                            selected={selectedFeedback.appreciated === true ? true : selected}
+                            onChange={() => {
+                                setSelected(!selected);
+                            }}
+                            sx={{
+                                position: 'absolute',
+                                left: '650px',
+                            }}
+                        >
+                            <div style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                flexWrap: 'wrap',
+                            }}>
+                                <span>Appreciate feedback </span>
+                                <ThumbUp/>
+                            </div>
+                        </ToggleButton>
+                    </DialogTitle>
+                    <DialogContent>
+                        <DialogContentText>
+                            On {new Date(selectedFeedback.receivedDate).toDateString()}
+                        </DialogContentText>
+                        <TextField
+                            autoFocus
+                            margin="dense"
+                            id="name"
+                            label="Feedback Message"
+                            type="text"
+                            fullWidth
+                            multiline
+                            InputProps={{
+                                readOnly: true,
+                            }}
+                            variant="outlined"
+                            value={selectedFeedback.message}
+                        />
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={handleUpdateFeed} variant={"outlined"}>Save</Button>
+                    </DialogActions>
+                    </Paper>
                 </Dialog>
                 <Snackbar open={openSnackbar} autoHideDuration={6000} onClose={handleCloseSnackbar}>
                     <Alert onClose={handleCloseSnackbar} severity="success" sx={{ width: '100%' }}>

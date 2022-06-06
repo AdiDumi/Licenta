@@ -23,7 +23,7 @@ export default function LogIn({setToken}) {
 
     const formik = useFormik({
         initialValues: {
-            username: 'cn=admin,dc=grow,dc=app',
+            username: 'admin@grow.app',
             password: '',
         },
         validationSchema: validationSchema,
