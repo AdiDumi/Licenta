@@ -1,11 +1,11 @@
 import React from 'react';
 import {
-    Button,
+    Button, createTheme,
     Divider,
     IconButton,
     List,
     ListItem, ListItemButton, ListItemIcon,
-    ListItemText,
+    ListItemText, ThemeProvider,
     Toolbar,
     Typography,
 } from "@mui/material";
@@ -22,6 +22,23 @@ import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import {useNavigate} from "react-router-dom";
 
 const drawerWidth = 240;
+
+const theme = createTheme({
+    typography: {
+        fontFamily: [
+            '-apple-system',
+            'BlinkMacSystemFont',
+            '"Segoe UI"',
+            'Roboto',
+            '"Helvetica Neue"',
+            'Arial',
+            'sans-serif',
+            '"Apple Color Emoji"',
+            '"Segoe UI Emoji"',
+            '"Segoe UI Symbol"',
+        ].join(','),
+    },
+});
 
 const openedMixin = (theme) => ({
     width: drawerWidth,
@@ -114,6 +131,7 @@ export default function AppBarDrawer({deleteToken, currentPage}) {
 
     return(
         <div>
+            <ThemeProvider theme={theme}>
             <AppBar position="fixed" open={open}>
                 <Toolbar>
                     <IconButton
@@ -130,6 +148,9 @@ export default function AppBarDrawer({deleteToken, currentPage}) {
                     </IconButton>
                     <Typography variant="h6" noWrap component="div">
                         {currentPage}
+                    </Typography>
+                    <Typography variant="h6" noWrap component="div" sx={{ fontFamily: 'sans-serif',  fontWeight: 700, marginRight: 5, justifyContent: "center", marginLeft: "auto"}}>
+                        COMMUNITY CATALYST
                     </Typography>
                     <Button variant="text"
                             color="inherit"
@@ -216,6 +237,7 @@ export default function AppBarDrawer({deleteToken, currentPage}) {
                     </ListItem>
                 </List>
             </Drawer>
+            </ThemeProvider>
         </div>
     );
 }

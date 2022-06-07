@@ -14,12 +14,13 @@ const validationSchema = yup.object({
         .required('Username is required'),
     password: yup
         .string('Enter your password')
-        .min(6, 'Password should be of minimum 8 characters length')
+        .min(6, 'Password should be of minimum 6 characters length')
         .required('Password is required'),
 });
 
 export default function LogIn({setToken}) {
     const navigate = useNavigate();
+    const [loginError, setLoginError] = React.useState("");
 
     const formik = useFormik({
         initialValues: {
@@ -28,22 +29,21 @@ export default function LogIn({setToken}) {
         },
         validationSchema: validationSchema,
         onSubmit: values => {
-            try {
-                axios.post(process.env.REACT_APP_BACKEND_URL + process.env.REACT_APP_BACKEND_PORT + '/login', values).then(response => {
-                    setToken(response.data);
-                    navigate("/dashboard");
-                });
-                // }).then(
-                //     () => {
-                //navigate("/dashboard");
-                //window.location.reload();
-                //     },
-                //     (error) => {
-                //         console.log(error);
-                //     });
-            } catch (error) {
-                console.log(error);
-            }
+                axios.post(process.env.REACT_APP_BACKEND_URL + process.env.REACT_APP_BACKEND_PORT + '/login',
+                    {},
+                    {
+                        auth: {
+                            username: values.username,
+                            password: values.password
+                        }
+                    })
+                    .then(response => {
+                        setToken(response.data);
+                        navigate("/dashboard");
+                    })
+                    .catch((error) => {
+                        setLoginError(error.response.data.error.lde_message);
+                    });
         },
     })
 
@@ -62,64 +62,68 @@ export default function LogIn({setToken}) {
             alignItems: 'center',
         }}>
             <Container component="main" maxWidth="xs">
-              <CssBaseline />
-              <Box
-                  sx={{
-                    marginTop: 8,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                  }}
-              >
-                <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>
-                  <LockOutlinedIcon />
-                </Avatar>
-                <Typography component="h1" variant="h5">
-                  Log In
-                </Typography>
-                <form onSubmit={formik.handleSubmit} autoComplete="on">
-                  <TextField
-                      margin="normal"
-                      required
-                      fullWidth
-                      id="username"
-                      label="Email Address"
-                      name="username"
-                      type="username"
-                      autoComplete="username"
-                      value={formik.values.username}
-                      onChange={formik.handleChange}
-                      error={formik.touched.username && Boolean(formik.errors.username)}
-                      helperText={formik.touched.username && formik.errors.username}
-                      autoFocus
-                  />
-                  <TextField
-                      margin="normal"
-                      required
-                      fullWidth
-                      name="password"
-                      label="Password"
-                      type="password"
-                      id="password"
-                      autoComplete="current-password"
-                      value={formik.values.password}
-                      onChange={formik.handleChange}
-                      error={formik.touched.password && Boolean(formik.errors.password)}
-                      helperText={formik.touched.password && formik.errors.password}
-                  />
-                  <Button
-                      type="submit"
-                      fullWidth
-                      variant="contained"
-                      sx={{ mt: 3, mb: 2 }}
-                  >
-                    Log In
-                  </Button>
-                </form>
-              </Box>
+                <CssBaseline />
+                <Box
+                    sx={{
+                        marginTop: 8,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                    }}
+                >
+                    <Typography component="h1" variant="h5">
+                        Community Catalyst
+                    </Typography>
+                    <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>
+                        <LockOutlinedIcon />
+                    </Avatar>
+                    <Typography component="h1" variant="h5">
+                        Log In
+                    </Typography>
+                    <form onSubmit={formik.handleSubmit} autoComplete="on">
+                        <TextField
+                            margin="normal"
+                            fullWidth
+                            id="username"
+                            label="Email Address*"
+                            name="username"
+                            value={formik.values.username}
+                            onChange={e => {
+                                setLoginError('');
+                                formik.handleChange(e);
+                            }}
+                            error={(formik.touched.username && Boolean(formik.errors.username)) || (loginError !== '')}
+                            helperText={formik.touched.username && (formik.errors.username || loginError)}
+                            autoFocus
+                        />
+                        <TextField
+                            margin="normal"
+                            fullWidth
+                            name="password"
+                            label="Password*"
+                            type="password"
+                            id="password"
+                            value={formik.values.password}
+                            onChange={e => {
+                                setLoginError('');
+                                formik.handleChange(e)
+                            }}
+                            error={(formik.touched.password && Boolean(formik.errors.password)) || (loginError !== '')}
+                            helperText={formik.touched.password && (formik.errors.password || loginError)}
+                        />
+                        <Button
+                            type="submit"
+                            fullWidth
+                            variant="contained"
+                            sx={{ mt: 3, mb: 2 }}
+                        >
+                            Log In
+                        </Button>
+                    </form>
+                </Box>
             </Container>
-          </Box>
-      );
+        </Box>
+    );
 }
 
 LogIn.propTypes = {

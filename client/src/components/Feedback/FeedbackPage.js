@@ -5,7 +5,7 @@ import {
     Button,
     Card, CardActionArea,
     CardContent, Checkbox,
-    Container,
+    Container, createTheme,
     CssBaseline,
     Dialog,
     DialogContentText, DialogTitle, FormControlLabel,
@@ -46,8 +46,8 @@ function TabPanel(props) {
 
     return (
         value === index && (
-            <Box sx={{ p: 3 }}>
-                <Typography component={'div'}>{children}</Typography>
+            <Box sx={{ p: 2}}>
+                {children}
             </Box>
         )
     );
@@ -235,7 +235,7 @@ export default function Feedbacks({deleteToken, token}) {
                                 <Tab sx={{ fontSize: 18 }} icon={<Outbox />} iconPosition="start" label="Sent Feedbacks"/>
                             </Tabs>
                             <TabPanel value={tab} index={0}>
-                                <Grid container spacing={2}>
+                                <Grid container spacing={2} sx={{backgroundColor: '#c4ffc2'}}>
                                     {receivedFeedbacks.length > 0 ? receivedFeedbacks
                                         .sort((a, b) => (a.seen > b.seen) ? 1 : (a.seen === b.seen) ? ((new Date(a.receivedDate).getTime() < new Date(b.receivedDate).getTime()) ? 1 : -1) : -1)
                                         .slice((pageReceivedFeedbacks - 1) * feedbacksPerPage, pageReceivedFeedbacks * feedbacksPerPage)
@@ -271,7 +271,7 @@ export default function Feedbacks({deleteToken, token}) {
                                                         <Typography sx={{ fontSize: 15 }} variant="subtitle2" color="text.secondary" gutterBottom>
                                                             On {new Date(feedback.receivedDate).toDateString()}
                                                         </Typography>
-                                                        <Typography noWrap sx={{ fontSize: 28 }} component="div">
+                                                        <Typography noWrap sx={{ fontSize: 30 }} component="div">
                                                             {feedback.message}
                                                         </Typography>
                                                     </CardContent>
@@ -280,13 +280,12 @@ export default function Feedbacks({deleteToken, token}) {
                                         </Grid>
                                     )) : <Typography> You have no received feedbacks </Typography>}
                                 </Grid>
-                                <Box py={1} display="flex" justifyContent="center">
+                                <Box py={1} display="flex" justifyContent="center" sx={{ position: 'relative', left: '-16px', width: 1135, backgroundColor: '#c4ffc2'}}>
                                     <Pagination
                                         onChange={(e, value) => {
                                             setPageReceivedFeedbacks(value)
                                         }}
                                         style={{
-                                            display: "flex",
                                             justifyContent: "center",
                                         }}
                                         page={pageReceivedFeedbacks}
@@ -295,7 +294,7 @@ export default function Feedbacks({deleteToken, token}) {
                                 </Box>
                             </TabPanel>
                             <TabPanel value={tab} index={1}>
-                                <Grid container spacing={4}>
+                                <Grid container spacing={3} sx={{backgroundColor: '#c4ffc2'}}>
                                     {sentFeedbacks.length > 0 ? sentFeedbacks
                                         .sort((a, b) => (new Date(a.receivedDate).getTime() < new Date(b.receivedDate).getTime()) ? 1 : -1)
                                         .slice((pageSentFeedbacks - 1) * feedbacksPerPage, pageSentFeedbacks * feedbacksPerPage)
@@ -329,7 +328,7 @@ export default function Feedbacks({deleteToken, token}) {
                                             </Grid>
                                         )) : <Typography> You have no sent feedbacks </Typography>}
                                 </Grid>
-                                <Box py={1} display="flex" justifyContent="center">
+                                <Box py={1} display="flex" justifyContent="center" sx={{ position: 'relative', left: '-19px', width: 1140, backgroundColor: '#c4ffc2'}}>
                                     <Pagination
                                         onChange={(e, value) => setPageSentFeedbacks(value)}
                                         style={{

@@ -62,7 +62,8 @@ export default function Dashboard({deleteToken, token}) {
                                     display: 'flex',
                                     flexDirection: 'column',
                                     border: 1,
-                                    borderColor: 'blue'
+                                    borderColor: 'blue',
+                                    backgroundColor: '#c4ffc2'
                                 }}
                             >
                                 <Typography> Your last feedbacks </Typography>
@@ -123,6 +124,9 @@ export default function Dashboard({deleteToken, token}) {
                                     p: 2,
                                     display: 'flex',
                                     flexDirection: 'column',
+                                    border: 1,
+                                    borderColor: 'red',
+                                    backgroundColor: '#c4ffc2'
                                 }}
                             >
                                 <div>No last objectives</div>
