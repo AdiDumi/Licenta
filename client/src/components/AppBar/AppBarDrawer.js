@@ -23,23 +23,6 @@ import {useNavigate} from "react-router-dom";
 
 const drawerWidth = 240;
 
-const theme = createTheme({
-    typography: {
-        fontFamily: [
-            '-apple-system',
-            'BlinkMacSystemFont',
-            '"Segoe UI"',
-            'Roboto',
-            '"Helvetica Neue"',
-            'Arial',
-            'sans-serif',
-            '"Apple Color Emoji"',
-            '"Segoe UI Emoji"',
-            '"Segoe UI Symbol"',
-        ].join(','),
-    },
-});
-
 const openedMixin = (theme) => ({
     width: drawerWidth,
     transition: theme.transitions.create('width', {
@@ -131,7 +114,6 @@ export default function AppBarDrawer({deleteToken, currentPage}) {
 
     return(
         <div>
-            <ThemeProvider theme={theme}>
             <AppBar position="fixed" open={open}>
                 <Toolbar>
                     <IconButton
@@ -237,7 +219,6 @@ export default function AppBarDrawer({deleteToken, currentPage}) {
                     </ListItem>
                 </List>
             </Drawer>
-            </ThemeProvider>
         </div>
     );
 }

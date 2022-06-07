@@ -280,7 +280,7 @@ export default function Feedbacks({deleteToken, token}) {
                                         </Grid>
                                     )) : <Typography> You have no received feedbacks </Typography>}
                                 </Grid>
-                                <Box py={1} display="flex" justifyContent="center" sx={{ position: 'relative', left: '-16px', width: 1135, backgroundColor: '#c4ffc2'}}>
+                                <Box py={1} display="flex" justifyContent="center" sx={{ position: 'relative', left: '-16px', width: 1137, backgroundColor: '#c4ffc2'}}>
                                     <Pagination
                                         onChange={(e, value) => {
                                             setPageReceivedFeedbacks(value)
@@ -294,7 +294,7 @@ export default function Feedbacks({deleteToken, token}) {
                                 </Box>
                             </TabPanel>
                             <TabPanel value={tab} index={1}>
-                                <Grid container spacing={3} sx={{backgroundColor: '#c4ffc2'}}>
+                                <Grid container spacing={2} sx={{backgroundColor: '#c4ffc2'}}>
                                     {sentFeedbacks.length > 0 ? sentFeedbacks
                                         .sort((a, b) => (new Date(a.receivedDate).getTime() < new Date(b.receivedDate).getTime()) ? 1 : -1)
                                         .slice((pageSentFeedbacks - 1) * feedbacksPerPage, pageSentFeedbacks * feedbacksPerPage)
@@ -307,8 +307,8 @@ export default function Feedbacks({deleteToken, token}) {
                                                     position: 'relative'
                                                 }} >
                                                     <CardContent>
-                                                        <Typography sx={{ fontSize: 17 }} color="text.secondary" component="div">
-                                                            To: <Typography sx={{textDecoration: 'underline', fontSize: 18}} display="inline" color="text.primary">{feedback.receiver}</Typography>
+                                                        <Typography sx={{ fontSize: 19 }} color="text.secondary" component="div">
+                                                            To: <Typography sx={{textDecoration: 'underline', fontSize: 19}} display="inline" color="text.primary">{feedback.receiver}</Typography>
                                                             {feedback.appreciated === true ?
                                                                 <ThumbUp sx={{
                                                                     position: 'absolute',
@@ -317,10 +317,10 @@ export default function Feedbacks({deleteToken, token}) {
                                                                 }}/>
                                                                 : null}
                                                         </Typography>
-                                                        <Typography sx={{ fontSize: 15 }} variant="subtitle2" color="text.secondary" gutterBottom>
+                                                        <Typography sx={{ fontSize: 17 }} variant="subtitle2" color="text.secondary" gutterBottom>
                                                             On {new Date(feedback.receivedDate).toDateString()} {feedback.anonymous === true ? 'as anonymous' : ' '}
                                                         </Typography>
-                                                        <Typography noWrap sx={{ fontSize: 30 }} component="div">
+                                                        <Typography noWrap sx={{ fontSize: 35 }} component="div">
                                                             {feedback.message}
                                                         </Typography>
                                                     </CardContent>
@@ -328,7 +328,7 @@ export default function Feedbacks({deleteToken, token}) {
                                             </Grid>
                                         )) : <Typography> You have no sent feedbacks </Typography>}
                                 </Grid>
-                                <Box py={1} display="flex" justifyContent="center" sx={{ position: 'relative', left: '-19px', width: 1140, backgroundColor: '#c4ffc2'}}>
+                                <Box py={1} display="flex" justifyContent="center" sx={{ position: 'relative', left: '-16px', width: 1137, backgroundColor: '#c4ffc2'}}>
                                     <Pagination
                                         onChange={(e, value) => setPageSentFeedbacks(value)}
                                         style={{

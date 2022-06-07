@@ -71,8 +71,8 @@ export default function LogIn({setToken}) {
                         alignItems: 'center',
                     }}
                 >
-                    <Typography component="h1" variant="h5">
-                        Community Catalyst
+                    <Typography sx={{fontFamily: 'sans-serif',  fontWeight: 700}} component="h1" variant="h5">
+                        COMMUNITY CATALYST
                     </Typography>
                     <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>
                         <LockOutlinedIcon />
