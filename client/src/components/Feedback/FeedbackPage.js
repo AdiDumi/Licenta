@@ -5,12 +5,12 @@ import {
     Button,
     Card, CardActionArea,
     CardContent, Checkbox,
-    Container, createTheme,
+    Container, createFilterOptions,
     CssBaseline,
     Dialog,
     DialogContentText, DialogTitle, FormControlLabel,
     FormGroup,
-    Grid, Pagination, Paper, Radio, RadioGroup, Snackbar, Tab, Tabs,
+    Grid, Pagination, Paper, Radio, RadioGroup, Snackbar, Switch, Tab, Tabs,
     TextField, ToggleButton,
     Toolbar,
     Typography
@@ -19,7 +19,7 @@ import AppBarDrawer from "../AppBar/AppBarDrawer";
 import MuiAlert from '@mui/material/Alert';
 import MuiDialogContent from '@mui/material/DialogContent';
 import MuiDialogActions from '@mui/material/DialogActions';
-import {AddComment, Inbox, Outbox, ThumbUp} from "@mui/icons-material";
+import {AddComment, Inbox, Outbox, ThumbUp, Visibility, VisibilityOff} from "@mui/icons-material";
 import axios from "axios";
 import {withStyles} from "tss-react/mui";
 import {useNavigate} from "react-router-dom";
@@ -55,6 +55,11 @@ function TabPanel(props) {
 
 export default function Feedbacks({deleteToken, token}) {
     const navigate = useNavigate();
+    const [errorMessageAutocomplete, setErrorMessageAutocomplete] = React.useState('');
+    const [touchedAutocomplete, setTouchedAutocomplete] = React.useState(false);
+    const [errorMessageField, setErrorMessageField] = React.useState('');
+    const [isManager, setIsManager] = React.useState(false);
+    const [checked, setChecked] = React.useState(true);
     const [render, setRender] = React.useState('');
     const [selected, setSelected] = React.useState(false);
     const [openForm, setOpenForm] = React.useState(false);
@@ -67,8 +72,11 @@ export default function Feedbacks({deleteToken, token}) {
     const [numberOfPagesReceivedFeedbacks, setNumberOfPagesReceivedFeedbacks] = React.useState(1);
     const [pageSentFeedbacks, setPageSentFeedbacks] = React.useState(1);
     const [numberOfPagesSentFeedbacks, setNumberOfPagesSentFeedbacks] = React.useState(1);
+    const [pageTeamFeedbacks, setPageTeamFeedbacks] = React.useState(1);
+    const [numberOfPagesTeamFeedbacks, setNumberOfPagesTeamFeedbacks] = React.useState(1);
     const [receivedFeedbacks, setReceivedFeedbacks] = React.useState([]);
     const [sentFeedbacks, setSentFeedbacks] = React.useState([]);
+    const [teamFeedbacks, setTeamFeedbacks] = React.useState([]);
 
     const feedbacksPerPage = 9;
 
@@ -77,6 +85,11 @@ export default function Feedbacks({deleteToken, token}) {
     const [checkboxValue, setCheckboxValue] = React.useState("off");
     const [selectedEmployee, setSelectedEmployee] = React.useState("");
     const [feedbackMessage, setFeedbackMessage] = React.useState("");
+    const defaultFilterOptions = createFilterOptions();
+
+    const filterOptions = (options, state) => {
+        return defaultFilterOptions(options, state).slice(0, 10);
+    };
 
     const handleChangeTab = (event, newValue) => {
         setTab(newValue);
@@ -87,6 +100,14 @@ export default function Feedbacks({deleteToken, token}) {
     };
 
     const handleCloseForm = () => {
+        setCheckboxValue("off");
+        setFeedbackType('good');
+        setSelectedEmployee('');
+        setFeedbackMessage('');
+        setChecked(false);
+        setErrorMessageField('');
+        setTouchedAutocomplete(false);
+        setErrorMessageAutocomplete('');
         setOpenForm(false);
     };
 
@@ -150,28 +171,33 @@ export default function Feedbacks({deleteToken, token}) {
         if (checkboxValue === "on") {
             anonym = true;
         }
-        axios.post(process.env.REACT_APP_BACKEND_URL + process.env.REACT_APP_BACKEND_PORT + '/feedback/add',
-            {
-                manager: selectedEmployee,
-                receiver: selectedEmployee,
-                message: feedbackMessage,
-                type: typeFeed,
-                anonymous: anonym
-            },
-            {
-                headers: {
-                    'Authorization': 'Bearer ' + token
-                }
-        }).then(response => {
-            console.log(response.data);
-            setRender(selectedEmployee);
-        })
-        setCheckboxValue("off");
-        setFeedbackType('good');
-        setSelectedEmployee('');
-        setFeedbackMessage('');
-        setOpenForm(false);
-        setOpenSnackbar(true);
+        if(feedbackMessage !== '' && selectedEmployee !== '') {
+            axios.post(process.env.REACT_APP_BACKEND_URL + process.env.REACT_APP_BACKEND_PORT + '/feedback/add',
+                {
+                    manager: selectedEmployee,
+                    receiver: selectedEmployee,
+                    message: feedbackMessage,
+                    type: typeFeed,
+                    anonymous: anonym
+                },
+                {
+                    headers: {
+                        'Authorization': 'Bearer ' + token
+                    }
+                }).then(response => {
+                console.log(response.data);
+                setRender(selectedEmployee);
+                setOpenSnackbar(true);
+            })
+            handleCloseForm();
+        } else {
+            if(feedbackMessage === '') {
+                setErrorMessageField("Feedback message can't be empty");
+            }
+            if(selectedEmployee === '') {
+                setErrorMessageAutocomplete("The recipient can't be empty");
+            }
+        }
     };
 
     useEffect(() => {
@@ -181,6 +207,10 @@ export default function Feedbacks({deleteToken, token}) {
     useEffect(() => {
         setNumberOfPagesSentFeedbacks(Math.ceil(sentFeedbacks.length/feedbacksPerPage));
     }, [sentFeedbacks]);
+
+    useEffect(() => {
+        setNumberOfPagesTeamFeedbacks(Math.ceil(teamFeedbacks.length/feedbacksPerPage));
+    }, [teamFeedbacks]);
 
     useEffect(() => {
         axios.get(process.env.REACT_APP_BACKEND_URL + process.env.REACT_APP_BACKEND_PORT + '/feedback/recv', {
@@ -207,11 +237,44 @@ export default function Feedbacks({deleteToken, token}) {
                 navigate("/");
             }
         })
+        // axios get the 2 arrays
+        const exemplu = {
+            team : [
+                {
+                    key: 1
+                },
+                {
+                    key: 2
+                }],
+            others: [
+                {
+                    key: 3
+                },
+                {
+                    key: 4
+                }]
+        }
         setCompanyEmployees([
             { label: 'cn=admin,dc=grow,dc=app'},
             { label: 'cn=developer,dc=grow,dc=app'},
         ]);
+        axios.get(process.env.REACT_APP_BACKEND_URL + process.env.REACT_APP_BACKEND_PORT + '/feedback/sent', {
+            headers: {
+                'Authorization': 'Bearer ' + token
+            }
+        }).then(response => {
+            setTeamFeedbacks(response.data);
+        }).catch(error => {
+            if(error.response.data.error === 'Authentification failed. Check secret token.') {
+                deleteToken();
+                navigate("/");
+            }
+        })
     }, [render]);
+
+    useEffect(() => {
+        setIsManager(true);
+    }, [])
 
     return(
         <Box sx={{ display: 'flex' }}>
@@ -233,6 +296,7 @@ export default function Feedbacks({deleteToken, token}) {
                             <Tabs value={tab} variant="fullWidth" centered selectionFollowsFocus onChange={handleChangeTab} aria-label="basic tabs example">
                                 <Tab sx={{ fontSize: 18 }} icon={<Inbox />} iconPosition="start" label="Received Feedbacks"/>
                                 <Tab sx={{ fontSize: 18 }} icon={<Outbox />} iconPosition="start" label="Sent Feedbacks"/>
+                                {isManager === true ? <Tab sx={{ fontSize: 18 }} icon={<Outbox />} iconPosition="start" label="Team Feedbacks"/> : null }
                             </Tabs>
                             <TabPanel value={tab} index={0}>
                                 <Grid container spacing={2} sx={{backgroundColor: '#c4ffc2'}}>
@@ -287,6 +351,7 @@ export default function Feedbacks({deleteToken, token}) {
                                         }}
                                         style={{
                                             justifyContent: "center",
+                                            display: receivedFeedbacks.length > 0 ? "flex" : "none"
                                         }}
                                         page={pageReceivedFeedbacks}
                                         color="primary"
@@ -332,7 +397,7 @@ export default function Feedbacks({deleteToken, token}) {
                                     <Pagination
                                         onChange={(e, value) => setPageSentFeedbacks(value)}
                                         style={{
-                                            display: "flex",
+                                            display: sentFeedbacks.length > 0 ? "flex" : "none",
                                             justifyContent: "center",
                                         }}
                                         page={pageSentFeedbacks}
@@ -340,10 +405,67 @@ export default function Feedbacks({deleteToken, token}) {
                                         count={numberOfPagesSentFeedbacks}/>
                                 </Box>
                             </TabPanel>
+                            <TabPanel value={tab} index={2}>
+                                <Grid container spacing={2} sx={{backgroundColor: '#c4ffc2'}}>
+                                    {teamFeedbacks.length > 0 ? teamFeedbacks
+                                        .sort((a, b) => (new Date(a.receivedDate).getTime() < new Date(b.receivedDate).getTime()) ? 1 : -1)
+                                        .slice((pageSentFeedbacks - 1) * feedbacksPerPage, pageSentFeedbacks * feedbacksPerPage)
+                                        .map(feedback => (
+                                            <Grid item xs={"auto"} sm={6} md={4} key={feedback._id}>
+                                                <Card sx={{
+                                                    minWidth: 275,
+                                                    border: 3,
+                                                    borderColor: (feedback.type === 1) ? '#2196f3' : (feedback.type === 2) ? 'yellow' : 'black',
+                                                    position: 'relative'
+                                                }} >
+                                                    <CardContent>
+                                                        {feedback.anonymous === true ?
+                                                            <Typography sx={{ fontSize: 17 }} color="text.secondary" component="div">
+                                                                From anonymous
+                                                            </Typography> :
+                                                            <Typography sx={{ fontSize: 17 }} color="text.secondary" component="div"> From:
+                                                                <Typography sx={{textDecoration: 'underline', fontSize: 18}} display="inline" color="text.primary">
+                                                                    {feedback.reporter}
+                                                                </Typography>
+                                                            </Typography>
+                                                        }
+                                                        <Typography sx={{ fontSize: 19 }} color="text.secondary" component="div">
+                                                            To: <Typography sx={{textDecoration: 'underline', fontSize: 19}} display="inline" color="text.primary">{feedback.receiver}</Typography>
+                                                            {feedback.appreciated === true ?
+                                                                <ThumbUp sx={{
+                                                                    position: 'absolute',
+                                                                    left: '300px',
+                                                                    color: (feedback.type === 1) ? '#2196f3' : (feedback.type === 2) ? 'yellow' : 'black',
+                                                                }}/>
+                                                                : null}
+                                                        </Typography>
+                                                        <Typography sx={{ fontSize: 17 }} variant="subtitle2" color="text.secondary" gutterBottom>
+                                                            On {new Date(feedback.receivedDate).toDateString()}
+                                                        </Typography>
+                                                        <Typography noWrap sx={{ fontSize: 30 }} component="div">
+                                                            {feedback.message}
+                                                        </Typography>
+                                                    </CardContent>
+                                                </Card>
+                                            </Grid>
+                                        )) : <Typography> Your team has no feedbacks </Typography>}
+                                </Grid>
+                                <Box py={1} display="flex" justifyContent="center" sx={{ position: 'relative', left: '-16px', width: 1137, backgroundColor: '#c4ffc2'}}>
+                                    <Pagination
+                                        onChange={(e, value) => setPageTeamFeedbacks(value)}
+                                        style={{
+                                            display: teamFeedbacks.length > 0 ? "flex" : "none",
+                                            justifyContent: "center",
+                                        }}
+                                        page={pageTeamFeedbacks}
+                                        color="primary"
+                                        count={numberOfPagesTeamFeedbacks}/>
+                                </Box>
+                            </TabPanel>
                         </Grid>
                     </Grid>
                 </Container>
-                <Dialog open={openForm} onClose={handleCloseForm}  fullWidth maxWidth={"md"}>
+                <Dialog open={openForm} onClose={handleCloseForm} fullWidth maxWidth={"md"}>
                     <form
                         onSubmit={handleSubmit}
                         id="myform"
@@ -355,6 +477,7 @@ export default function Feedbacks({deleteToken, token}) {
                             </DialogContentText>
                             <FormGroup>
                                 <FormControlLabel control={<Checkbox onClick={e => setCheckboxValue(e.target.value)}/>} label="Anonymous" />
+                                <FormControlLabel control={<Switch icon={<VisibilityOff/>} checkedIcon={<Visibility/>} checked={checked} onChange={e => setChecked(e.target.checked)}/>} label={checked ? "visible for team lead" : "not visible for team lead"}/>
                             </FormGroup>
                             <Typography>Feedback type:</Typography>
                             <RadioGroup
@@ -370,13 +493,26 @@ export default function Feedbacks({deleteToken, token}) {
                             <Autocomplete
                                 disablePortal
                                 id="combo-box-demo"
+                                filterOptions={filterOptions}
                                 options={companyEmployees}
                                 sx={{ width: 300 }}
                                 inputValue={selectedEmployee}
                                 onInputChange={(event, newSelectedEmployee) => {
                                     setSelectedEmployee(newSelectedEmployee);
+                                    setErrorMessageAutocomplete('');
+                                    setTouchedAutocomplete(true);
                                 }}
-                                renderInput={(params) => <TextField {...params} label="To" />}
+                                onClose={e => setTouchedAutocomplete(false)}
+                                renderInput={(params) =>
+                                    <TextField
+                                        {...params}
+                                        onChange={e => {
+                                            setErrorMessageAutocomplete(e.target.value)
+                                        }}
+                                        error={!touchedAutocomplete && errorMessageAutocomplete !== ''}
+                                        helperText={!touchedAutocomplete && (errorMessageAutocomplete !== '' && errorMessageAutocomplete)}
+                                        label="Recipient"
+                                    />}
                             />
                             <TextField
                                 autoFocus
@@ -389,7 +525,12 @@ export default function Feedbacks({deleteToken, token}) {
                                 rows={4}
                                 variant="outlined"
                                 value={feedbackMessage}
-                                onChange={e => setFeedbackMessage(e.target.value)}
+                                onChange={e => {
+                                    setFeedbackMessage(e.target.value)
+                                    setErrorMessageField('');
+                                }}
+                                error={errorMessageField !== ''}
+                                helperText={errorMessageField !== '' && errorMessageField}
                             />
                         </DialogContent>
                         <DialogActions>
