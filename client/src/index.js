@@ -5,12 +5,32 @@ import reportWebVitals from "./reportWebVitals";
 import App from './App';
 import './index.css';
 import {BrowserRouter} from "react-router-dom";
+import {createTheme, ThemeProvider} from "@mui/material";
+
+const theme = createTheme({
+    palette: {
+        primary: {
+            main: "#14213D",
+        },
+        secondary: {
+            main: "#FDF0D5"
+        },
+        good: {
+            main: "#FCA311",
+        },
+        improve: {
+            main: "",
+        }
+    }
+});
 
 ReactDOM.render(
     <React.StrictMode>
 
         <BrowserRouter>
-            <App />
+            <ThemeProvider theme={theme}>
+                <App />
+            </ThemeProvider>
         </BrowserRouter>
     </React.StrictMode>,
     document.getElementById("root")

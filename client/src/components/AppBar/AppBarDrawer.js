@@ -1,11 +1,11 @@
 import React from 'react';
 import {
-    Button, createTheme,
+    Button,
     Divider,
     IconButton,
     List,
     ListItem, ListItemButton, ListItemIcon,
-    ListItemText, ThemeProvider,
+    ListItemText,
     Toolbar,
     Typography,
 } from "@mui/material";
@@ -15,13 +15,13 @@ import MuiDrawer from '@mui/material/Drawer';
 import MuiAppBar from '@mui/material/AppBar';
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
-import FeedbackIcon from '@mui/icons-material/Feedback';
-import FlagIcon from '@mui/icons-material/Flag';
-import DashboardIcon from '@mui/icons-material/Dashboard';
+import FeedbackIcon from '@mui/icons-material/FeedbackTwoTone';
+import FlagIcon from '@mui/icons-material/FlagTwoTone';
+import DashboardIcon from '@mui/icons-material/DashboardTwoTone';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import {useNavigate} from "react-router-dom";
 
-const drawerWidth = 240;
+const drawerWidth = 200;
 
 const openedMixin = (theme) => ({
     width: drawerWidth,
@@ -131,23 +131,24 @@ export default function AppBarDrawer({deleteToken, currentPage}) {
                     <Typography variant="h6" noWrap component="div">
                         {currentPage}
                     </Typography>
-                    <Typography variant="h6" noWrap component="div" sx={{ fontFamily: 'sans-serif',  fontWeight: 700, marginRight: 5, justifyContent: "center", marginLeft: "auto"}}>
+                    <Typography variant="h6" component="div" sx={{ fontFamily: 'sans-serif',  fontWeight: 700, marginLeft: "auto"}}>
                         COMMUNITY CATALYST
                     </Typography>
-                    <Button variant="text"
-                            color="inherit"
-                            sx={{
-                                marginRight: 5,
-                                justifyContent: "flex-end",
-                                marginLeft: "auto"
-                            }}
-                            endIcon={<AccountCircleIcon/>}
-                            onClick={handleLogout}>
+                    <Button
+                        variant="text"
+                        color="inherit"
+                        sx={{
+                            marginRight: 5,
+                            justifyContent: "flex-end",
+                            marginLeft: "auto"
+                        }}
+                        endIcon={<AccountCircleIcon/>}
+                        onClick={handleLogout}>
                         Log Out
                     </Button>
                 </Toolbar>
             </AppBar>
-            <Drawer variant="permanent" open={open}>
+            <Drawer variant="permanent" open={open} sx={{backgroundColor: 'red'}}>
                 <DrawerHeader>
                     <IconButton onClick={handleDrawerClose}>
                         { open===true ? <ChevronLeftIcon /> : <ChevronRightIcon />}
@@ -171,7 +172,7 @@ export default function AppBarDrawer({deleteToken, currentPage}) {
                                     justifyContent: 'center',
                                 }}
                             >
-                                <DashboardIcon />
+                                <DashboardIcon color={'primary'}/>
                             </ListItemIcon>
                             <ListItemText primary={"Dashboard"} sx={{ opacity: open ? 1 : 0 }} />
                         </ListItemButton>
@@ -192,7 +193,7 @@ export default function AppBarDrawer({deleteToken, currentPage}) {
                                     justifyContent: 'center',
                                 }}
                             >
-                                <FeedbackIcon />
+                                <FeedbackIcon color={'primary'}/>
                             </ListItemIcon>
                             <ListItemText primary={"Feedbacks"} sx={{ opacity: open ? 1 : 0 }} />
                         </ListItemButton>
@@ -212,7 +213,7 @@ export default function AppBarDrawer({deleteToken, currentPage}) {
                                     justifyContent: 'center',
                                 }}
                             >
-                                <FlagIcon />
+                                <FlagIcon color={'primary'}/>
                             </ListItemIcon>
                             <ListItemText primary={"Objectives"} sx={{ opacity: open ? 1 : 0 }} />
                         </ListItemButton>

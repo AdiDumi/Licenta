@@ -19,7 +19,14 @@ import AppBarDrawer from "../AppBar/AppBarDrawer";
 import MuiAlert from '@mui/material/Alert';
 import MuiDialogContent from '@mui/material/DialogContent';
 import MuiDialogActions from '@mui/material/DialogActions';
-import {AddComment, Inbox, Outbox, ThumbUp, Visibility, VisibilityOff} from "@mui/icons-material";
+import {
+    AddComment, GroupTwoTone,
+    MoveToInboxTwoTone,
+    OutboxTwoTone,
+    ThumbUp,
+    Visibility,
+    VisibilityOff
+} from "@mui/icons-material";
 import axios from "axios";
 import {withStyles} from "tss-react/mui";
 import {useNavigate} from "react-router-dom";
@@ -255,7 +262,7 @@ export default function Feedbacks({deleteToken, token}) {
                 }]
         }
         setCompanyEmployees([
-            { label: 'cn=admin,dc=grow,dc=app'},
+            { label: 'cn=admin,ou=Users,dc=grow,dc=app'},
             { label: 'cn=developer,dc=grow,dc=app'},
         ]);
         axios.get(process.env.REACT_APP_BACKEND_URL + process.env.REACT_APP_BACKEND_PORT + '/feedback/sent', {
@@ -285,7 +292,7 @@ export default function Feedbacks({deleteToken, token}) {
                 p: 3
             }}>
                 <Toolbar/>
-                <Container maxWidth="lg" sx={{ backgroundColor: '#FFFFFF', }}>
+                <Container maxWidth="lg">
                     <Grid container spacing={1}>
                         {/* Feedbacks button */}
                         <Grid item sm={12}>
@@ -293,19 +300,19 @@ export default function Feedbacks({deleteToken, token}) {
                         </Grid>
                         {/* Feedbacks tabs */}
                         <Grid item sm={12}>
-                            <Tabs value={tab} variant="fullWidth" centered selectionFollowsFocus onChange={handleChangeTab} aria-label="basic tabs example">
-                                <Tab sx={{ fontSize: 18 }} icon={<Inbox />} iconPosition="start" label="Received Feedbacks"/>
-                                <Tab sx={{ fontSize: 18 }} icon={<Outbox />} iconPosition="start" label="Sent Feedbacks"/>
-                                {isManager === true ? <Tab sx={{ fontSize: 18 }} icon={<Outbox />} iconPosition="start" label="Team Feedbacks"/> : null }
+                            <Tabs value={tab} textColor='primary' variant="fullWidth" centered selectionFollowsFocus onChange={handleChangeTab} aria-label="basic tabs example">
+                                <Tab sx={{ fontSize: 18 }} icon={<MoveToInboxTwoTone />} iconPosition="start" label="Received Feedbacks"/>
+                                <Tab sx={{ fontSize: 18 }} icon={<OutboxTwoTone />} iconPosition="start" label="Sent Feedbacks"/>
+                                {isManager === true ? <Tab sx={{ fontSize: 18 }} icon={<GroupTwoTone />} iconPosition="start" label="Team Feedbacks"/> : null }
                             </Tabs>
                             <TabPanel value={tab} index={0}>
-                                <Grid container spacing={2} sx={{backgroundColor: '#c4ffc2'}}>
+                                <Grid container spacing={2} sx={{height: 540}}>
                                     {receivedFeedbacks.length > 0 ? receivedFeedbacks
                                         .sort((a, b) => (a.seen > b.seen) ? 1 : (a.seen === b.seen) ? ((new Date(a.receivedDate).getTime() < new Date(b.receivedDate).getTime()) ? 1 : -1) : -1)
                                         .slice((pageReceivedFeedbacks - 1) * feedbacksPerPage, pageReceivedFeedbacks * feedbacksPerPage)
                                         .map(feedback => (
                                         <Grid item xs={"auto"} sm={6} md={4} key={feedback._id}>
-                                            {feedback.seen === false ? <Typography sx={{ color: 'red' }}>New</Typography> : <Typography> &nbsp; </Typography>}
+                                            {feedback.seen === false ? <Typography sx={{ color: '#E71523' }}>New</Typography> : <Typography> &nbsp; </Typography>}
                                             <Card sx={{
                                                 border: 3,
                                                 borderColor: (feedback.type === 1) ? '#2196f3' : (feedback.type === 2) ? 'yellow' : 'black',
@@ -344,7 +351,7 @@ export default function Feedbacks({deleteToken, token}) {
                                         </Grid>
                                     )) : <Typography> You have no received feedbacks </Typography>}
                                 </Grid>
-                                <Box py={1} display="flex" justifyContent="center" sx={{ position: 'relative', left: '-16px', width: 1137, backgroundColor: '#c4ffc2'}}>
+                                <Box py={1} display="flex" justifyContent="center" sx={{ position: 'relative', left: '-16px', width: 1137}}>
                                     <Pagination
                                         onChange={(e, value) => {
                                             setPageReceivedFeedbacks(value)
@@ -359,7 +366,7 @@ export default function Feedbacks({deleteToken, token}) {
                                 </Box>
                             </TabPanel>
                             <TabPanel value={tab} index={1}>
-                                <Grid container spacing={2} sx={{backgroundColor: '#c4ffc2'}}>
+                                <Grid container spacing={2} sx={{ height: 540}}>
                                     {sentFeedbacks.length > 0 ? sentFeedbacks
                                         .sort((a, b) => (new Date(a.receivedDate).getTime() < new Date(b.receivedDate).getTime()) ? 1 : -1)
                                         .slice((pageSentFeedbacks - 1) * feedbacksPerPage, pageSentFeedbacks * feedbacksPerPage)
@@ -367,13 +374,13 @@ export default function Feedbacks({deleteToken, token}) {
                                             <Grid item xs={"auto"} sm={6} md={4} key={feedback._id}>
                                                 <Card sx={{
                                                     minWidth: 275,
-                                                    border: 3,
-                                                    borderColor: (feedback.type === 1) ? '#2196f3' : (feedback.type === 2) ? 'yellow' : 'black',
+                                                    border: 4,
+                                                    borderColor: (feedback.type === 1) ? '#0053A0' : (feedback.type === 2) ? '#EFA825' : 'black',
                                                     position: 'relative'
                                                 }} >
                                                     <CardContent>
-                                                        <Typography sx={{ fontSize: 19 }} color="text.secondary" component="div">
-                                                            To: <Typography sx={{textDecoration: 'underline', fontSize: 19}} display="inline" color="text.primary">{feedback.receiver}</Typography>
+                                                        <Typography sx={{ fontSize: 17 }} color="text.secondary" component="div">
+                                                            To: <Typography sx={{textDecoration: 'underline', fontSize: 17}} display="inline" color="text.primary">{feedback.receiver}</Typography>
                                                             {feedback.appreciated === true ?
                                                                 <ThumbUp sx={{
                                                                     position: 'absolute',
@@ -382,10 +389,10 @@ export default function Feedbacks({deleteToken, token}) {
                                                                 }}/>
                                                                 : null}
                                                         </Typography>
-                                                        <Typography sx={{ fontSize: 17 }} variant="subtitle2" color="text.secondary" gutterBottom>
+                                                        <Typography sx={{ fontSize: 16 }} variant="subtitle2" color="text.secondary" gutterBottom>
                                                             On {new Date(feedback.receivedDate).toDateString()} {feedback.anonymous === true ? 'as anonymous' : ' '}
                                                         </Typography>
-                                                        <Typography noWrap sx={{ fontSize: 35 }} component="div">
+                                                        <Typography noWrap sx={{ fontSize: 33 }} component="div">
                                                             {feedback.message}
                                                         </Typography>
                                                     </CardContent>
@@ -393,7 +400,7 @@ export default function Feedbacks({deleteToken, token}) {
                                             </Grid>
                                         )) : <Typography> You have no sent feedbacks </Typography>}
                                 </Grid>
-                                <Box py={1} display="flex" justifyContent="center" sx={{ position: 'relative', left: '-16px', width: 1137, backgroundColor: '#c4ffc2'}}>
+                                <Box py={1} display="flex" justifyContent="center" sx={{ position: 'relative', left: '-16px', width: 1137}}>
                                     <Pagination
                                         onChange={(e, value) => setPageSentFeedbacks(value)}
                                         style={{
@@ -406,10 +413,10 @@ export default function Feedbacks({deleteToken, token}) {
                                 </Box>
                             </TabPanel>
                             <TabPanel value={tab} index={2}>
-                                <Grid container spacing={2} sx={{backgroundColor: '#c4ffc2'}}>
+                                <Grid container spacing={2} sx={{ height: 540}}>
                                     {teamFeedbacks.length > 0 ? teamFeedbacks
                                         .sort((a, b) => (new Date(a.receivedDate).getTime() < new Date(b.receivedDate).getTime()) ? 1 : -1)
-                                        .slice((pageSentFeedbacks - 1) * feedbacksPerPage, pageSentFeedbacks * feedbacksPerPage)
+                                        .slice((pageTeamFeedbacks - 1) * feedbacksPerPage, pageTeamFeedbacks * feedbacksPerPage)
                                         .map(feedback => (
                                             <Grid item xs={"auto"} sm={6} md={4} key={feedback._id}>
                                                 <Card sx={{
@@ -420,17 +427,17 @@ export default function Feedbacks({deleteToken, token}) {
                                                 }} >
                                                     <CardContent>
                                                         {feedback.anonymous === true ?
-                                                            <Typography sx={{ fontSize: 17 }} color="text.secondary" component="div">
+                                                            <Typography sx={{ fontSize: 16 }} color="text.secondary" component="div">
                                                                 From anonymous
                                                             </Typography> :
-                                                            <Typography sx={{ fontSize: 17 }} color="text.secondary" component="div"> From:
-                                                                <Typography sx={{textDecoration: 'underline', fontSize: 18}} display="inline" color="text.primary">
+                                                            <Typography sx={{ fontSize: 16 }} color="text.secondary" component="div"> From:
+                                                                <Typography sx={{textDecoration: 'underline', fontSize: 16}} display="inline" color="text.primary">
                                                                     {feedback.reporter}
                                                                 </Typography>
                                                             </Typography>
                                                         }
-                                                        <Typography sx={{ fontSize: 19 }} color="text.secondary" component="div">
-                                                            To: <Typography sx={{textDecoration: 'underline', fontSize: 19}} display="inline" color="text.primary">{feedback.receiver}</Typography>
+                                                        <Typography sx={{ fontSize: 16 }} color="text.secondary" component="div">
+                                                            To: <Typography sx={{textDecoration: 'underline', fontSize: 16}} display="inline" color="text.primary">{feedback.receiver}</Typography>
                                                             {feedback.appreciated === true ?
                                                                 <ThumbUp sx={{
                                                                     position: 'absolute',
@@ -439,10 +446,10 @@ export default function Feedbacks({deleteToken, token}) {
                                                                 }}/>
                                                                 : null}
                                                         </Typography>
-                                                        <Typography sx={{ fontSize: 17 }} variant="subtitle2" color="text.secondary" gutterBottom>
+                                                        <Typography sx={{ fontSize: 14 }} variant="subtitle2" color="text.secondary" gutterBottom>
                                                             On {new Date(feedback.receivedDate).toDateString()}
                                                         </Typography>
-                                                        <Typography noWrap sx={{ fontSize: 30 }} component="div">
+                                                        <Typography noWrap sx={{ fontSize: 28 }} component="div">
                                                             {feedback.message}
                                                         </Typography>
                                                     </CardContent>
@@ -450,7 +457,7 @@ export default function Feedbacks({deleteToken, token}) {
                                             </Grid>
                                         )) : <Typography> Your team has no feedbacks </Typography>}
                                 </Grid>
-                                <Box py={1} display="flex" justifyContent="center" sx={{ position: 'relative', left: '-16px', width: 1137, backgroundColor: '#c4ffc2'}}>
+                                <Box py={1} display="flex" justifyContent="center" sx={{ position: 'relative', left: '-16px', width: 1137}}>
                                     <Pagination
                                         onChange={(e, value) => setPageTeamFeedbacks(value)}
                                         style={{
@@ -534,7 +541,7 @@ export default function Feedbacks({deleteToken, token}) {
                             />
                         </DialogContent>
                         <DialogActions>
-                            <Button variant={"contained"} onClick={handleCloseForm}>Cancel</Button>
+                            <Button variant={"contained"} color='error' onClick={handleCloseForm} sx={{align: 'left'}}>Cancel</Button>
                             <Button type="submit" variant={"contained"} form="myform">Send</Button>
                         </DialogActions>
                     </form>
@@ -591,7 +598,7 @@ export default function Feedbacks({deleteToken, token}) {
                         />
                     </DialogContent>
                     <DialogActions>
-                        <Button onClick={handleUpdateFeed} variant={"outlined"}>Save</Button>
+                        <Button onClick={handleUpdateFeed} variant={"contained"}>Save</Button>
                     </DialogActions>
                     </Paper>
                 </Dialog>

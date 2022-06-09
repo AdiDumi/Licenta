@@ -1,10 +1,8 @@
 import React, {useEffect} from 'react';
 import {
     Box,
-    Button,
     Card,
     CardActionArea,
-    CardActions,
     CardContent,
     Container,
     CssBaseline,
@@ -14,7 +12,7 @@ import {
     Typography,
 } from "@mui/material";
 import axios from "axios";
-import {Add, ThumbUp} from "@mui/icons-material";
+import { ThumbUp } from "@mui/icons-material";
 import AppBarDrawer from "../AppBar/AppBarDrawer";
 import {useNavigate} from "react-router-dom";
 
@@ -52,7 +50,7 @@ export default function Dashboard({deleteToken, token}) {
                 overflow: 'auto',
             }}>
                 <Toolbar/>
-                <Container maxWidth="lg" sx={{ mt: 4, mb: 4, backgroundColor: '#FFFFFF', }}>
+                <Container maxWidth="lg" sx={{ mt: 4, mb: 4, }}>
                     <Grid container spacing={3}>
                         {/* Last Feedbacks */}
                         <Grid item sm={12}>
@@ -63,7 +61,8 @@ export default function Dashboard({deleteToken, token}) {
                                     flexDirection: 'column',
                                     border: 1,
                                     borderColor: 'blue',
-                                    backgroundColor: '#c4ffc2'
+                                    height: 340,
+                                    backgroundColor: '#669BBC'
                                 }}
                             >
                                 <Typography> Your last feedbacks </Typography>
@@ -74,12 +73,12 @@ export default function Dashboard({deleteToken, token}) {
                                         .map(feedback => (
                                         <Grid item xs={"auto"} sm={6} md={4} key={feedback._id}>
                                             <Card sx={{
-                                                minWidth: 275,
+                                                minWidth: 250,
                                                 border: 3,
                                                 borderColor: (feedback.type === 1) ? '#2196f3' : (feedback.type === 2) ? 'yellow' : 'black',
                                                 position: 'relative'
                                             }}>
-                                                <CardActionArea>
+                                                <CardActionArea onClick={handleFeed}>
                                                     <CardContent>
                                                         {feedback.anonymous === true ?
                                                             <Typography sx={{ fontSize: 17 }} color="text.secondary" component="div">
@@ -108,9 +107,6 @@ export default function Dashboard({deleteToken, token}) {
                                                         </Typography>
                                                     </CardContent>
                                                 </CardActionArea>
-                                                <CardActions>
-                                                    <Button startIcon={<Add/>} onClick={handleFeed} size="small">Feed Back</Button>
-                                                </CardActions>
                                             </Card>
                                         </Grid>
                                     )) : <Typography> No last Feedbacks </Typography>}
@@ -126,7 +122,8 @@ export default function Dashboard({deleteToken, token}) {
                                     flexDirection: 'column',
                                     border: 1,
                                     borderColor: 'red',
-                                    backgroundColor: '#c4ffc2'
+                                    height: 340,
+                                    backgroundColor: '#4A4E69'
                                 }}
                             >
                                 <div>No last objectives</div>

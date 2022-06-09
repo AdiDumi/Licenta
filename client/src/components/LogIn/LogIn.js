@@ -115,6 +115,7 @@ export default function LogIn({setToken}) {
                             type="submit"
                             fullWidth
                             variant="contained"
+                            color='primary'
                             sx={{ mt: 3, mb: 2 }}
                         >
                             Log In
