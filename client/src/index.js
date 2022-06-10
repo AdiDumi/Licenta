@@ -16,10 +16,10 @@ const theme = createTheme({
             main: "#FDF0D5"
         },
         good: {
-            main: "#FCA311",
+            main: "#0053A0",
         },
         improve: {
-            main: "",
+            main: "#EFA825",
         }
     }
 });

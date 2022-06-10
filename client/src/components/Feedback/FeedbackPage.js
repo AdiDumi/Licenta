@@ -245,22 +245,18 @@ export default function Feedbacks({deleteToken, token}) {
             }
         })
         // axios get the 2 arrays
-        const exemplu = {
-            team : [
-                {
-                    key: 1
-                },
-                {
-                    key: 2
-                }],
-            others: [
-                {
-                    key: 3
-                },
-                {
-                    key: 4
-                }]
-        }
+        axios.get(process.env.REACT_APP_BACKEND_URL + process.env.REACT_APP_BACKEND_PORT + '/feedback/sent', {
+            headers: {
+                'Authorization': 'Bearer ' + token
+            }
+        }).then(response => {
+            setSentFeedbacks(response.data);
+        }).catch(error => {
+            if(error.response.data.error === 'Authentification failed. Check secret token.') {
+                deleteToken();
+                navigate("/");
+            }
+        })
         setCompanyEmployees([
             { label: 'cn=admin,ou=Users,dc=grow,dc=app'},
             { label: 'cn=developer,dc=grow,dc=app'},
@@ -315,7 +311,7 @@ export default function Feedbacks({deleteToken, token}) {
                                             {feedback.seen === false ? <Typography sx={{ color: '#E71523' }}>New</Typography> : <Typography> &nbsp; </Typography>}
                                             <Card sx={{
                                                 border: 3,
-                                                borderColor: (feedback.type === 1) ? '#2196f3' : (feedback.type === 2) ? 'yellow' : 'black',
+                                                borderColor: (feedback.type === 1) ? '#0053A0' : (feedback.type === 2) ? '#EFA825' : 'black',
                                                 position: 'relative',
                                             }} >
                                                 <CardActionArea onClick={handleClickOpenFeedback} feedbackid={JSON.stringify(feedback)}>
@@ -335,7 +331,7 @@ export default function Feedbacks({deleteToken, token}) {
                                                                 position: 'absolute',
                                                                 left: '300px',
                                                                 bottom: '90px',
-                                                                color: (feedback.type === 1) ? '#2196f3' : (feedback.type === 2) ? 'yellow' : 'black'
+                                                                color: (feedback.type === 1) ? '#0053A0' : (feedback.type === 2) ? '#EFA825' : 'black'
                                                             }}/>
                                                             : null
                                                         }
@@ -385,7 +381,7 @@ export default function Feedbacks({deleteToken, token}) {
                                                                 <ThumbUp sx={{
                                                                     position: 'absolute',
                                                                     left: '300px',
-                                                                    color: (feedback.type === 1) ? '#2196f3' : (feedback.type === 2) ? 'yellow' : 'black',
+                                                                    color: (feedback.type === 1) ? '#0053A0' : (feedback.type === 2) ? '#EFA825' : 'black',
                                                                 }}/>
                                                                 : null}
                                                         </Typography>
@@ -422,7 +418,7 @@ export default function Feedbacks({deleteToken, token}) {
                                                 <Card sx={{
                                                     minWidth: 275,
                                                     border: 3,
-                                                    borderColor: (feedback.type === 1) ? '#2196f3' : (feedback.type === 2) ? 'yellow' : 'black',
+                                                    borderColor: (feedback.type === 1) ? '#0053A0' : (feedback.type === 2) ? '#EFA825' : 'black',
                                                     position: 'relative'
                                                 }} >
                                                     <CardContent>
@@ -442,7 +438,7 @@ export default function Feedbacks({deleteToken, token}) {
                                                                 <ThumbUp sx={{
                                                                     position: 'absolute',
                                                                     left: '300px',
-                                                                    color: (feedback.type === 1) ? '#2196f3' : (feedback.type === 2) ? 'yellow' : 'black',
+                                                                    color: (feedback.type === 1) ? '#0053A0' : (feedback.type === 2) ? '#EFA825' : 'black',
                                                                 }}/>
                                                                 : null}
                                                         </Typography>
@@ -540,7 +536,7 @@ export default function Feedbacks({deleteToken, token}) {
                                 helperText={errorMessageField !== '' && errorMessageField}
                             />
                         </DialogContent>
-                        <DialogActions>
+                        <DialogActions >
                             <Button variant={"contained"} color='error' onClick={handleCloseForm} sx={{align: 'left'}}>Cancel</Button>
                             <Button type="submit" variant={"contained"} form="myform">Send</Button>
                         </DialogActions>

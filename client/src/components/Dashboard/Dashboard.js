@@ -75,7 +75,7 @@ export default function Dashboard({deleteToken, token}) {
                                             <Card sx={{
                                                 minWidth: 250,
                                                 border: 3,
-                                                borderColor: (feedback.type === 1) ? '#2196f3' : (feedback.type === 2) ? 'yellow' : 'black',
+                                                borderColor: (feedback.type === 1) ? '#0053A0' : (feedback.type === 2) ? '#EFA825' : 'black',
                                                 position: 'relative'
                                             }}>
                                                 <CardActionArea onClick={handleFeed}>
@@ -95,7 +95,7 @@ export default function Dashboard({deleteToken, token}) {
                                                                 position: 'absolute',
                                                                 left: '300px',
                                                                 bottom: '80px',
-                                                                color: (feedback.type === 1) ? '#2196f3' : (feedback.type === 2) ? 'yellow' : 'black'
+                                                                color: (feedback.type === 1) ? '#0053A0' : (feedback.type === 2) ? '#EFA825' : 'black'
                                                             }}/>
                                                             : null
                                                         }

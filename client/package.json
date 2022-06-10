@@ -22,6 +22,7 @@
     "redux": "^4.2.0",
     "redux-thunk": "^2.4.1",
     "tss-react": "^3.6.2",
+    "use-state-with-callback": "^3.0.2",
     "web-vitals": "^2.1.4",
     "yup": "^0.32.11"
   },
