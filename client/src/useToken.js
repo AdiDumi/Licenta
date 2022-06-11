@@ -1,4 +1,4 @@
-import { useStateWithCallbackLazy } from 'use-state-with-callback';
+import React from 'react';
 
 export function useToken() {
     const getToken = () => {
@@ -7,16 +7,16 @@ export function useToken() {
         return userToken?.accessToken;
     };
 
-    const [token, setToken] = useStateWithCallbackLazy(getToken());
+    const [token, setToken] = React.useState(getToken());
 
     const saveToken = userToken => {
         localStorage.setItem('token', JSON.stringify(userToken));
-        setToken(userToken.accessToken, null);
+        setToken(userToken.accessToken);
     };
 
     const deleteToken = () => {
         localStorage.removeItem('token');
-        setToken(null, null);
+        setToken(null);
     }
 
     return {

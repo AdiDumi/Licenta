@@ -38,16 +38,8 @@ export default function LogIn({setToken}) {
                         }
                     })
                     .then(response => {
-                        setToken(response.data, (token) => {
-                            axios.get(process.env.REACT_APP_BACKEND_URL + process.env.REACT_APP_BACKEND_PORT + '/login/isUserManager', {
-                                headers: {
-                                    'Authorization': 'Bearer ' + token
-                                }
-                            }).then(response => {
-                                setToken(response.data, null);
-                                navigate("/dashboard");
-                            })
-                        });
+                        setToken(response.data);
+                        navigate("/dashboard");
                     })
                     .catch((error) => {
                         setLoginError(error.response.data.error.lde_message);

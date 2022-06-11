@@ -92,11 +92,6 @@ export default function Feedbacks({deleteToken, token}) {
     const [checkboxValue, setCheckboxValue] = React.useState("off");
     const [selectedEmployee, setSelectedEmployee] = React.useState("");
     const [feedbackMessage, setFeedbackMessage] = React.useState("");
-    const defaultFilterOptions = createFilterOptions();
-
-    const filterOptions = (options, state) => {
-        return defaultFilterOptions(options, state).slice(0, 10);
-    };
 
     const handleChangeTab = (event, newValue) => {
         setTab(newValue);
@@ -169,6 +164,52 @@ export default function Feedbacks({deleteToken, token}) {
         setOpenSnackbar(false);
     };
 
+    const handleInputChange = (event, newSelectedEmployee) => {
+        setSelectedEmployee(newSelectedEmployee);
+        setErrorMessageAutocomplete('');
+        setTouchedAutocomplete(true);
+        axios.get(process.env.REACT_APP_BACKEND_URL + process.env.REACT_APP_BACKEND_PORT + '/teamUsers', {
+            params: {
+                username: newSelectedEmployee
+            },
+            headers: {
+                'Authorization': 'Bearer ' + token
+            }
+        }).then(response => {
+            let list1 = response.data;
+            if(list1.length > 0)
+                list1.forEach(teammate => teammate["team"]=true);
+            axios.get(process.env.REACT_APP_BACKEND_URL + process.env.REACT_APP_BACKEND_PORT + '/otherUsers', {
+                params: {
+                    username: newSelectedEmployee
+                },
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                }
+            }).then(response => {
+                let list2 = response.data;
+                if(list2.length > 0)
+                    list2.forEach(user => user["team"]=false);
+                setCompanyEmployees(list1.concat(list2).map((option) => {
+                    return {
+                        first: option.team ? 'Team' : 'Others',
+                        ...option,
+                    }
+                }));
+            }).catch(error => {
+                if(error.response.data.error === 'Authentification failed. Check secret token.') {
+                    deleteToken();
+                    navigate("/");
+                }
+            })
+        }).catch(error => {
+            if(error.response.data.error === 'Authentification failed. Check secret token.') {
+                deleteToken();
+                navigate("/");
+            }
+        })
+    }
+
     const handleSubmit = (event) => {
         event.preventDefault();
         var typeFeed = 2, anonym = false;
@@ -220,6 +261,19 @@ export default function Feedbacks({deleteToken, token}) {
     }, [teamFeedbacks]);
 
     useEffect(() => {
+        axios.get(process.env.REACT_APP_BACKEND_URL + process.env.REACT_APP_BACKEND_PORT + '/feedback/team', {
+            headers: {
+                'Authorization': 'Bearer ' + token
+            }
+        }).then(response => {
+            setIsManager(response.data['isManager'])
+            setTeamFeedbacks(response.data['teamFeedback']);
+        }).catch(error => {
+            if(error.response.data.error === 'Authentification failed. Check secret token.') {
+                deleteToken();
+                navigate("/");
+            }
+        })
         axios.get(process.env.REACT_APP_BACKEND_URL + process.env.REACT_APP_BACKEND_PORT + '/feedback/recv', {
             headers: {
                 'Authorization': 'Bearer ' + token
@@ -244,29 +298,12 @@ export default function Feedbacks({deleteToken, token}) {
                 navigate("/");
             }
         })
-        // axios get the 2 arrays
-        axios.get(process.env.REACT_APP_BACKEND_URL + process.env.REACT_APP_BACKEND_PORT + '/feedback/sent', {
+        axios.get(process.env.REACT_APP_BACKEND_URL + process.env.REACT_APP_BACKEND_PORT + '/manager', {
             headers: {
                 'Authorization': 'Bearer ' + token
             }
         }).then(response => {
-            setSentFeedbacks(response.data);
-        }).catch(error => {
-            if(error.response.data.error === 'Authentification failed. Check secret token.') {
-                deleteToken();
-                navigate("/");
-            }
-        })
-        setCompanyEmployees([
-            { label: 'cn=admin,ou=Users,dc=grow,dc=app'},
-            { label: 'cn=developer,dc=grow,dc=app'},
-        ]);
-        axios.get(process.env.REACT_APP_BACKEND_URL + process.env.REACT_APP_BACKEND_PORT + '/feedback/sent', {
-            headers: {
-                'Authorization': 'Bearer ' + token
-            }
-        }).then(response => {
-            setTeamFeedbacks(response.data);
+            console.log(response.data);
         }).catch(error => {
             if(error.response.data.error === 'Authentification failed. Check secret token.') {
                 deleteToken();
@@ -274,10 +311,6 @@ export default function Feedbacks({deleteToken, token}) {
             }
         })
     }, [render]);
-
-    useEffect(() => {
-        setIsManager(true);
-    }, [])
 
     return(
         <Box sx={{ display: 'flex' }}>
@@ -496,15 +529,12 @@ export default function Feedbacks({deleteToken, token}) {
                             <Autocomplete
                                 disablePortal
                                 id="combo-box-demo"
-                                filterOptions={filterOptions}
-                                options={companyEmployees}
+                                options={companyEmployees.sort((a,b) => b.first.localeCompare(a.first))}
+                                getOptionLabel={(option) => option.uid}
+                                groupBy={(option) => option.first}
                                 sx={{ width: 300 }}
                                 inputValue={selectedEmployee}
-                                onInputChange={(event, newSelectedEmployee) => {
-                                    setSelectedEmployee(newSelectedEmployee);
-                                    setErrorMessageAutocomplete('');
-                                    setTouchedAutocomplete(true);
-                                }}
+                                onInputChange={handleInputChange}
                                 onClose={e => setTouchedAutocomplete(false)}
                                 renderInput={(params) =>
                                     <TextField

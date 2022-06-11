@@ -17,11 +17,23 @@ import AppBarDrawer from "../AppBar/AppBarDrawer";
 import {useNavigate} from "react-router-dom";
 
 
-export default function Dashboard({deleteToken, token}) {
+export default function Dashboard({deleteToken, token, setToken}) {
     const [feedbacks, setFeedbacks] = React.useState([])
     const navigate = useNavigate();
 
     useEffect(() => {
+        axios.get(process.env.REACT_APP_BACKEND_URL + process.env.REACT_APP_BACKEND_PORT + '/login/isUserManager', {
+            headers: {
+                'Authorization': 'Bearer ' + token
+            }
+        }).then(response => {
+            setToken(response.data);
+        }).catch(error => {
+            if(error.response.data.error === 'Authentification failed. Check secret token.') {
+                deleteToken();
+                navigate("/");
+            }
+        })
        axios.get(process.env.REACT_APP_BACKEND_URL + process.env.REACT_APP_BACKEND_PORT + '/feedback/recv', {
            headers: {
                'Authorization': 'Bearer ' + token

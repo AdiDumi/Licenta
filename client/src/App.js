@@ -16,7 +16,7 @@ function App() {
     return (
         <Routes>
                 <Route path="/" exact element={<LogIn setToken={setToken}/>}/>
-                <Route path="/dashboard" exact element={<Dashboard deleteToken={deleteToken} token={token}/>}/>
+                <Route path="/dashboard" exact element={<Dashboard deleteToken={deleteToken} token={token} setToken={setToken}/>}/>
                 <Route path="/feedbacks" exact element={<Feedbacks deleteToken={deleteToken} token={token}/>}/>
         </Routes>
     );
