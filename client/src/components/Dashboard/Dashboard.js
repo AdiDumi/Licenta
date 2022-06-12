@@ -22,18 +22,6 @@ export default function Dashboard({deleteToken, token, setToken}) {
     const navigate = useNavigate();
 
     useEffect(() => {
-        axios.get(process.env.REACT_APP_BACKEND_URL + process.env.REACT_APP_BACKEND_PORT + '/login/isUserManager', {
-            headers: {
-                'Authorization': 'Bearer ' + token
-            }
-        }).then(response => {
-            setToken(response.data);
-        }).catch(error => {
-            if(error.response.data.error === 'Authentification failed. Check secret token.') {
-                deleteToken();
-                navigate("/");
-            }
-        })
        axios.get(process.env.REACT_APP_BACKEND_URL + process.env.REACT_APP_BACKEND_PORT + '/feedback/recv', {
            headers: {
                'Authorization': 'Bearer ' + token

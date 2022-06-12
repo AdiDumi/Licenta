@@ -5,7 +5,7 @@ import {
     Button,
     Card, CardActionArea,
     CardContent, Checkbox,
-    Container, createFilterOptions,
+    Container,
     CssBaseline,
     Dialog,
     DialogContentText, DialogTitle, FormControlLabel,
@@ -176,9 +176,9 @@ export default function Feedbacks({deleteToken, token}) {
                 'Authorization': 'Bearer ' + token
             }
         }).then(response => {
-            let list1 = response.data;
-            if(list1.length > 0)
-                list1.forEach(teammate => teammate["team"]=true);
+            let team = response.data;
+            if(team.length > 0)
+                team.forEach(teammate => teammate["team"]="Team");
             axios.get(process.env.REACT_APP_BACKEND_URL + process.env.REACT_APP_BACKEND_PORT + '/otherUsers', {
                 params: {
                     username: newSelectedEmployee
@@ -187,15 +187,29 @@ export default function Feedbacks({deleteToken, token}) {
                     'Authorization': 'Bearer ' + token
                 }
             }).then(response => {
-                let list2 = response.data;
-                if(list2.length > 0)
-                    list2.forEach(user => user["team"]=false);
-                setCompanyEmployees(list1.concat(list2).map((option) => {
-                    return {
-                        first: option.team ? 'Team' : 'Others',
-                        ...option,
+                let others = response.data;
+                if(others.length > 0)
+                    others.forEach(user => user["team"]="Others");
+                axios.get(process.env.REACT_APP_BACKEND_URL + process.env.REACT_APP_BACKEND_PORT + '/manager', {
+                    headers: {
+                        'Authorization': 'Bearer ' + token
                     }
-                }));
+                }).then(response => {
+                    let manager = response.data;
+                    if(manager !== 'OK') {
+                        manager["team"] = "Manager"
+                    }
+                    if(team.length > 3)
+                        team = team.slice(0,3);
+                    if(others.length > 3)
+                        others = others.slice(0,3);
+                    setCompanyEmployees(team.concat(others).concat(manager));
+                }).catch(error => {
+                    if(error.response.data.error === 'Authentification failed. Check secret token.') {
+                        deleteToken();
+                        navigate("/");
+                    }
+                })
             }).catch(error => {
                 if(error.response.data.error === 'Authentification failed. Check secret token.') {
                     deleteToken();
@@ -292,18 +306,6 @@ export default function Feedbacks({deleteToken, token}) {
             }
         }).then(response => {
             setSentFeedbacks(response.data);
-        }).catch(error => {
-            if(error.response.data.error === 'Authentification failed. Check secret token.') {
-                deleteToken();
-                navigate("/");
-            }
-        })
-        axios.get(process.env.REACT_APP_BACKEND_URL + process.env.REACT_APP_BACKEND_PORT + '/manager', {
-            headers: {
-                'Authorization': 'Bearer ' + token
-            }
-        }).then(response => {
-            console.log(response.data);
         }).catch(error => {
             if(error.response.data.error === 'Authentification failed. Check secret token.') {
                 deleteToken();
@@ -528,14 +530,18 @@ export default function Feedbacks({deleteToken, token}) {
                             </RadioGroup>
                             <Autocomplete
                                 disablePortal
+                                autoComplete={true}
                                 id="combo-box-demo"
-                                options={companyEmployees.sort((a,b) => b.first.localeCompare(a.first))}
+                                options={companyEmployees.sort((a,b) => b.team.localeCompare(a.team))}
                                 getOptionLabel={(option) => option.uid}
-                                groupBy={(option) => option.first}
+                                groupBy={(option) => option.team}
                                 sx={{ width: 300 }}
                                 inputValue={selectedEmployee}
                                 onInputChange={handleInputChange}
-                                onClose={e => setTouchedAutocomplete(false)}
+                                isOptionEqualToValue={(option, value) => option.uid === value.uid}
+                                onClose={e => {
+                                    setTouchedAutocomplete(false)
+                                }}
                                 renderInput={(params) =>
                                     <TextField
                                         {...params}
