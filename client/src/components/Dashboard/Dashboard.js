@@ -17,7 +17,7 @@ import AppBarDrawer from "../AppBar/AppBarDrawer";
 import {useNavigate} from "react-router-dom";
 
 
-export default function Dashboard({deleteToken, token, setToken}) {
+export default function Dashboard({deleteToken, token}) {
     const [feedbacks, setFeedbacks] = React.useState([])
     const navigate = useNavigate();
 
@@ -59,6 +59,7 @@ export default function Dashboard({deleteToken, token, setToken}) {
                                     p: 2,
                                     display: 'flex',
                                     flexDirection: 'column',
+                                    alignItems: 'center',
                                     border: 1,
                                     borderColor: 'blue',
                                     height: 340,
@@ -120,13 +121,14 @@ export default function Dashboard({deleteToken, token, setToken}) {
                                     p: 2,
                                     display: 'flex',
                                     flexDirection: 'column',
+                                    alignItems: 'center',
                                     border: 1,
                                     borderColor: 'red',
                                     height: 340,
                                     backgroundColor: '#4A4E69'
                                 }}
                             >
-                                <div>No last objectives</div>
+                                <Typography>Your last objectives</Typography>
                             </Paper>
                         </Grid>
                     </Grid>

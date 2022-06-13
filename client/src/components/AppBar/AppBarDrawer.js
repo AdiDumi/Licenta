@@ -108,6 +108,10 @@ export default function AppBarDrawer({deleteToken, currentPage}) {
         navigate("/feedbacks");
     }
 
+    const handleObjective = () => {
+        navigate("/objectives");
+    }
+
     const handleDashboard = () => {
         navigate("/dashboard");
     }
@@ -205,6 +209,7 @@ export default function AppBarDrawer({deleteToken, currentPage}) {
                                 justifyContent: open ? 'initial' : 'center',
                                 px: 2.5,
                             }}
+                            onClick={handleObjective}
                         >
                             <ListItemIcon
                                 sx={{

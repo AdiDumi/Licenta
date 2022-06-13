@@ -10,7 +10,7 @@ import {
     Dialog,
     DialogContentText, DialogTitle, FormControlLabel,
     FormGroup,
-    Grid, Pagination, Paper, Radio, RadioGroup, Snackbar, Switch, Tab, Tabs,
+    Grid, Pagination, Paper, Radio, RadioGroup, Skeleton, Snackbar, Switch, Tab, Tabs,
     TextField, ToggleButton,
     Toolbar,
     Typography
@@ -62,6 +62,7 @@ function TabPanel(props) {
 
 export default function Feedbacks({deleteToken, token}) {
     const navigate = useNavigate();
+    const [loading, setLoading] = React.useState(true);
     const [errorMessageAutocomplete, setErrorMessageAutocomplete] = React.useState('');
     const [touchedAutocomplete, setTouchedAutocomplete] = React.useState(false);
     const [errorMessageField, setErrorMessageField] = React.useState('');
@@ -72,7 +73,8 @@ export default function Feedbacks({deleteToken, token}) {
     const [openForm, setOpenForm] = React.useState(false);
     const [selectedFeedback, setSelectedFeedback] = React.useState('');
     const [openDialogFeedback, setOpenDialogFeedback] = React.useState(false);
-    const [openSnackbar, setOpenSnackbar] = React.useState(false);
+    const [openSnackbarSuccess, setOpenSnackbarSuccess] = React.useState(false);
+    const [openSnackbarError, setOpenSnackbarError] = React.useState(false);
     const [feedbackType, setFeedbackType] = React.useState('good');
     const [tab, setTab] = React.useState(0);
     const [pageReceivedFeedbacks, setPageReceivedFeedbacks] = React.useState(1);
@@ -160,8 +162,12 @@ export default function Feedbacks({deleteToken, token}) {
         setFeedbackType(event.target.value);
     };
 
-    const handleCloseSnackbar = () => {
-        setOpenSnackbar(false);
+    const handleCloseSnackbarSuccess = () => {
+        setOpenSnackbarSuccess(false);
+    };
+
+    const handleCloseSnackbarError = () => {
+        setOpenSnackbarError(false);
     };
 
     const handleInputChange = (event, newSelectedEmployee) => {
@@ -198,6 +204,8 @@ export default function Feedbacks({deleteToken, token}) {
                     let manager = response.data;
                     if(manager !== 'OK') {
                         manager["team"] = "Manager"
+                    } else {
+                        manager=[];
                     }
                     if(team.length > 3)
                         team = team.slice(0,3);
@@ -233,11 +241,12 @@ export default function Feedbacks({deleteToken, token}) {
         if (checkboxValue === "on") {
             anonym = true;
         }
+        const receiver = companyEmployees.find((employee) => employee.uid === selectedEmployee);
         if(feedbackMessage !== '' && selectedEmployee !== '') {
             axios.post(process.env.REACT_APP_BACKEND_URL + process.env.REACT_APP_BACKEND_PORT + '/feedback/add',
                 {
                     manager: selectedEmployee,
-                    receiver: selectedEmployee,
+                    receiver: receiver,
                     message: feedbackMessage,
                     type: typeFeed,
                     anonymous: anonym
@@ -249,8 +258,8 @@ export default function Feedbacks({deleteToken, token}) {
                 }).then(response => {
                 console.log(response.data);
                 setRender(selectedEmployee);
-                setOpenSnackbar(true);
-            })
+                setOpenSnackbarSuccess(true);
+            }).catch(e => setOpenSnackbarError(true));
             handleCloseForm();
         } else {
             if(feedbackMessage === '') {
@@ -312,6 +321,7 @@ export default function Feedbacks({deleteToken, token}) {
                 navigate("/");
             }
         })
+        setLoading(false);
     }, [render]);
 
     return(
@@ -337,6 +347,7 @@ export default function Feedbacks({deleteToken, token}) {
                                 {isManager === true ? <Tab sx={{ fontSize: 18 }} icon={<GroupTwoTone />} iconPosition="start" label="Team Feedbacks"/> : null }
                             </Tabs>
                             <TabPanel value={tab} index={0}>
+                                {loading ? <Skeleton variant={"rectangular"} width={1200} height={400}/> :
                                 <Grid container spacing={2} sx={{height: 540}}>
                                     {receivedFeedbacks.length > 0 ? receivedFeedbacks
                                         .sort((a, b) => (a.seen > b.seen) ? 1 : (a.seen === b.seen) ? ((new Date(a.receivedDate).getTime() < new Date(b.receivedDate).getTime()) ? 1 : -1) : -1)
@@ -357,7 +368,7 @@ export default function Feedbacks({deleteToken, token}) {
                                                             </Typography> :
                                                             <Typography sx={{ fontSize: 17 }} color="text.secondary" component="div"> From:
                                                                 <Typography sx={{textDecoration: 'underline', fontSize: 18}} display="inline" color="text.primary">
-                                                                    {feedback.reporter}
+                                                                    {feedback.reporter.displayName}
                                                                 </Typography>
                                                             </Typography>
                                                         }
@@ -381,7 +392,7 @@ export default function Feedbacks({deleteToken, token}) {
                                             </Card>
                                         </Grid>
                                     )) : <Typography> You have no received feedbacks </Typography>}
-                                </Grid>
+                                </Grid>}
                                 <Box py={1} display="flex" justifyContent="center" sx={{ position: 'relative', left: '-16px', width: 1137}}>
                                     <Pagination
                                         onChange={(e, value) => {
@@ -397,6 +408,7 @@ export default function Feedbacks({deleteToken, token}) {
                                 </Box>
                             </TabPanel>
                             <TabPanel value={tab} index={1}>
+                                {loading ? <Skeleton variant={"rectangular"} width={1200} height={400}/> :
                                 <Grid container spacing={2} sx={{ height: 540}}>
                                     {sentFeedbacks.length > 0 ? sentFeedbacks
                                         .sort((a, b) => (new Date(a.receivedDate).getTime() < new Date(b.receivedDate).getTime()) ? 1 : -1)
@@ -411,7 +423,7 @@ export default function Feedbacks({deleteToken, token}) {
                                                 }} >
                                                     <CardContent>
                                                         <Typography sx={{ fontSize: 17 }} color="text.secondary" component="div">
-                                                            To: <Typography sx={{textDecoration: 'underline', fontSize: 17}} display="inline" color="text.primary">{feedback.receiver}</Typography>
+                                                            To: <Typography sx={{textDecoration: 'underline', fontSize: 17}} display="inline" color="text.primary">{feedback.receiver.displayName}</Typography>
                                                             {feedback.appreciated === true ?
                                                                 <ThumbUp sx={{
                                                                     position: 'absolute',
@@ -430,7 +442,7 @@ export default function Feedbacks({deleteToken, token}) {
                                                 </Card>
                                             </Grid>
                                         )) : <Typography> You have no sent feedbacks </Typography>}
-                                </Grid>
+                                </Grid>}
                                 <Box py={1} display="flex" justifyContent="center" sx={{ position: 'relative', left: '-16px', width: 1137}}>
                                     <Pagination
                                         onChange={(e, value) => setPageSentFeedbacks(value)}
@@ -444,7 +456,8 @@ export default function Feedbacks({deleteToken, token}) {
                                 </Box>
                             </TabPanel>
                             <TabPanel value={tab} index={2}>
-                                <Grid container spacing={2} sx={{ height: 540}}>
+                                {loading ? <Skeleton variant={"rectangular"} width={1200} height={400}/> :
+                                    <Grid container spacing={2} sx={{ height: 540}}>
                                     {teamFeedbacks.length > 0 ? teamFeedbacks
                                         .sort((a, b) => (new Date(a.receivedDate).getTime() < new Date(b.receivedDate).getTime()) ? 1 : -1)
                                         .slice((pageTeamFeedbacks - 1) * feedbacksPerPage, pageTeamFeedbacks * feedbacksPerPage)
@@ -463,12 +476,12 @@ export default function Feedbacks({deleteToken, token}) {
                                                             </Typography> :
                                                             <Typography sx={{ fontSize: 16 }} color="text.secondary" component="div"> From:
                                                                 <Typography sx={{textDecoration: 'underline', fontSize: 16}} display="inline" color="text.primary">
-                                                                    {feedback.reporter}
+                                                                    {feedback.reporter.displayName}
                                                                 </Typography>
                                                             </Typography>
                                                         }
                                                         <Typography sx={{ fontSize: 16 }} color="text.secondary" component="div">
-                                                            To: <Typography sx={{textDecoration: 'underline', fontSize: 16}} display="inline" color="text.primary">{feedback.receiver}</Typography>
+                                                            To: <Typography sx={{textDecoration: 'underline', fontSize: 16}} display="inline" color="text.primary">{feedback.receiver.displayName}</Typography>
                                                             {feedback.appreciated === true ?
                                                                 <ThumbUp sx={{
                                                                     position: 'absolute',
@@ -487,7 +500,7 @@ export default function Feedbacks({deleteToken, token}) {
                                                 </Card>
                                             </Grid>
                                         )) : <Typography> Your team has no feedbacks </Typography>}
-                                </Grid>
+                                </Grid>}
                                 <Box py={1} display="flex" justifyContent="center" sx={{ position: 'relative', left: '-16px', width: 1137}}>
                                     <Pagination
                                         onChange={(e, value) => setPageTeamFeedbacks(value)}
@@ -533,12 +546,12 @@ export default function Feedbacks({deleteToken, token}) {
                                 autoComplete={true}
                                 id="combo-box-demo"
                                 options={companyEmployees.sort((a,b) => b.team.localeCompare(a.team))}
-                                getOptionLabel={(option) => option.uid}
+                                getOptionLabel={(option) => option.displayName}
                                 groupBy={(option) => option.team}
                                 sx={{ width: 300 }}
                                 inputValue={selectedEmployee}
                                 onInputChange={handleInputChange}
-                                isOptionEqualToValue={(option, value) => option.uid === value.uid}
+                                isOptionEqualToValue={(option, value) => option.displayName === value.displayName}
                                 onClose={e => {
                                     setTouchedAutocomplete(false)
                                 }}
@@ -572,9 +585,9 @@ export default function Feedbacks({deleteToken, token}) {
                                 helperText={errorMessageField !== '' && errorMessageField}
                             />
                         </DialogContent>
-                        <DialogActions >
-                            <Button variant={"contained"} color='error' onClick={handleCloseForm} sx={{align: 'left'}}>Cancel</Button>
-                            <Button type="submit" variant={"contained"} form="myform">Send</Button>
+                        <DialogActions sx={{display: 'flex'}}>
+                            <Button variant={"contained"} color='error' onClick={handleCloseForm} sx={{marginRight: 'auto'}}>Cancel</Button>
+                            <Button type="submit" variant={"contained"} color={'success'} form="myform">Send</Button>
                         </DialogActions>
                     </form>
                 </Dialog>
@@ -582,19 +595,20 @@ export default function Feedbacks({deleteToken, token}) {
                     <Paper
                         sx={{
                             border: 3,
-                            borderColor: (selectedFeedback.type === 1) ? '#2196f3' : (selectedFeedback.type === 2) ? 'yellow' : 'black',
+                            borderColor: (selectedFeedback.type === 1) ? '#0053A0' : (selectedFeedback.type === 2) ? '#EFA825' : 'black',
                             position: 'relative'
                         }}
                     >
                     <DialogTitle variant="h6">
-                        Feedback from {selectedFeedback.reporter}
+                        Feedback from {selectedFeedback.reporter?.displayName}
                         <ToggleButton
                             value="check"
-                            color="primary"
+                            disabled={selectedFeedback.appreciated === true}
                             selected={selectedFeedback.appreciated === true ? true : selected}
                             onChange={() => {
                                 setSelected(!selected);
                             }}
+                            color={selectedFeedback.type === 1 ? 'good' : 'improve'}
                             sx={{
                                 position: 'absolute',
                                 left: '650px',
@@ -630,13 +644,18 @@ export default function Feedbacks({deleteToken, token}) {
                         />
                     </DialogContent>
                     <DialogActions>
-                        <Button onClick={handleUpdateFeed} variant={"contained"}>Save</Button>
+                        <Button onClick={handleUpdateFeed} disabled={selectedFeedback.appreciated === true} color={'success'} variant={"contained"}>Save</Button>
                     </DialogActions>
                     </Paper>
                 </Dialog>
-                <Snackbar open={openSnackbar} autoHideDuration={6000} onClose={handleCloseSnackbar}>
-                    <Alert onClose={handleCloseSnackbar} severity="success" sx={{ width: '100%' }}>
+                <Snackbar open={openSnackbarSuccess} autoHideDuration={6000} onClose={handleCloseSnackbarSuccess}>
+                    <Alert onClose={handleCloseSnackbarSuccess} severity="success" sx={{ width: '100%' }}>
                         Feedback sent successfully!
+                    </Alert>
+                </Snackbar>
+                <Snackbar open={openSnackbarError} autoHideDuration={6000} onClose={handleCloseSnackbarError}>
+                    <Alert onClose={handleCloseSnackbarError} severity="error" sx={{ width: '100%' }}>
+                        Feedback add failed!
                     </Alert>
                 </Snackbar>
             </Box>
