@@ -110,7 +110,7 @@ export default function Dashboard({deleteToken, token}) {
                                                 </CardActionArea>
                                             </Card>
                                         </Grid>
-                                    )) : <Typography> No last Feedbacks </Typography>}
+                                    )) : <Typography>  </Typography>}
                                 </Grid>
                             </Paper>
                         </Grid>
