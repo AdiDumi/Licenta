@@ -6,6 +6,8 @@ import App from './App';
 import './index.css';
 import {BrowserRouter} from "react-router-dom";
 import {createTheme, ThemeProvider} from "@mui/material";
+import {AdapterDateFns} from "@mui/x-date-pickers/AdapterDateFns";
+import {LocalizationProvider} from "@mui/x-date-pickers/LocalizationProvider"
 
 const theme = createTheme({
     palette: {
@@ -29,7 +31,9 @@ ReactDOM.render(
 
         <BrowserRouter>
             <ThemeProvider theme={theme}>
-                <App />
+                <LocalizationProvider dateAdapter={AdapterDateFns}>
+                    <App />
+                </LocalizationProvider>
             </ThemeProvider>
         </BrowserRouter>
     </React.StrictMode>,

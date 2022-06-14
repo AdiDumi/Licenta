@@ -108,7 +108,7 @@ export default function Feedbacks({deleteToken, token}) {
         setFeedbackType('good');
         setSelectedEmployee('');
         setFeedbackMessage('');
-        setChecked(false);
+        setChecked(true);
         setErrorMessageField('');
         setTouchedAutocomplete(false);
         setErrorMessageAutocomplete('');
@@ -133,6 +133,11 @@ export default function Feedbacks({deleteToken, token}) {
                     }
                 }).then(response => {
                 console.log(response.data);
+            }).catch(error => {
+                if(error.response.data.error === 'Authentification failed. Check secret token.') {
+                    deleteToken();
+                    navigate("/");
+                }
             })
         }
         if(selected || !selectedFeedback.seen)
@@ -153,6 +158,11 @@ export default function Feedbacks({deleteToken, token}) {
                     }
                 }).then(response => {
                 console.log(response.data);
+            }).catch(error => {
+                if(error.response.data.error === 'Authentification failed. Check secret token.') {
+                    deleteToken();
+                    navigate("/");
+                }
             })
         }
         handleCloseFeedback();
@@ -241,7 +251,7 @@ export default function Feedbacks({deleteToken, token}) {
         if (checkboxValue === "on") {
             anonym = true;
         }
-        const receiver = companyEmployees.find((employee) => employee.uid === selectedEmployee);
+        const receiver = companyEmployees.find((employee) => employee.displayName === selectedEmployee);
         if(feedbackMessage !== '' && selectedEmployee !== '') {
             axios.post(process.env.REACT_APP_BACKEND_URL + process.env.REACT_APP_BACKEND_PORT + '/feedback/add',
                 {
@@ -249,7 +259,8 @@ export default function Feedbacks({deleteToken, token}) {
                     receiver: receiver,
                     message: feedbackMessage,
                     type: typeFeed,
-                    anonymous: anonym
+                    anonymous: anonym,
+                    visibleForManager: checked
                 },
                 {
                     headers: {
@@ -259,7 +270,13 @@ export default function Feedbacks({deleteToken, token}) {
                 console.log(response.data);
                 setRender(selectedEmployee);
                 setOpenSnackbarSuccess(true);
-            }).catch(e => setOpenSnackbarError(true));
+            }).catch(error => {
+                if(error.response.data.error === 'Authentification failed. Check secret token.') {
+                    deleteToken();
+                    navigate("/");
+                }
+                setOpenSnackbarError(true)
+            });
             handleCloseForm();
         } else {
             if(feedbackMessage === '') {
