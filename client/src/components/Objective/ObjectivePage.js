@@ -157,19 +157,21 @@ export default function Objectives({deleteToken, token}) {
 
     const handleSubmitSecond = (event) => {
         event.preventDefault();
+        console.log("HELLO");
         if(mainObjectiveTitle !== '' &&
             mainObjectiveDescription !== '' &&
             isNaturalNumber(secondTarget) &&
             secondTargetUnit!== '' &&
-            isNaN(Date.parse(date)) &&
-            new Date(date).getTime() < new Date(new Date().toJSON().slice(0,10).replace(/-/g,'/')).getTime()) {
-            axios.post(process.env.REACT_APP_BACKEND_URL + process.env.REACT_APP_BACKEND_PORT + '/objectives/addSecond',
+            !isNaN(Date.parse(date)) &&
+            new Date(date).getTime() > new Date(new Date().toJSON().slice(0,10).replace(/-/g,'/')).getTime()) {
+            axios.post(process.env.REACT_APP_BACKEND_URL + process.env.REACT_APP_BACKEND_PORT + '/objectives/addSecondary',
                 {
                     title: mainObjectiveTitle,
                     description: mainObjectiveDescription,
                     target: secondTarget,
                     targetUnitMeasure: secondTargetUnit,
-                    mainObjective: mainId
+                    mainObjective: mainId,
+                    deadline: date
                 },
                 {
                     headers: {
@@ -177,6 +179,7 @@ export default function Objectives({deleteToken, token}) {
                     }
                 }).then(response => {
                 console.log(response.data);
+                setOpenSnackbarSuccess(true);
                 setRender(Math.random(100).toString());
             }).catch(error => {
                 if(error.response.data.error === 'Authentification failed. Check secret token.') {
@@ -188,18 +191,27 @@ export default function Objectives({deleteToken, token}) {
             handleCloseFormSecond();
         } else {
             if(mainObjectiveTitle === '') {
+                console.log("here1");
                 setErrorMainObjectiveTitle("Description cannot be empty");
             }
             if(mainObjectiveDescription === '') {
+                console.log("here2");
+
                 setErrorMainObjectiveDescription("Title cannot be empty");
             }
             if(secondTargetUnit === '') {
+                console.log("here3");
+
                 setErrorSecondObjectiveTargetUnit("Target unit cannot be empty");
             }
             if(!isNaturalNumber(secondTarget)) {
+                console.log("here4");
+
                 setErrorSecondObjectiveTarget("Target is not valid");
             }
             if(isNaN(Date.parse(date)) || new Date(date).getTime() < new Date(new Date().toJSON().slice(0,10).replace(/-/g,'/')).getTime()) {
+                console.log("here5");
+
                 setErrorDeadline('Invalid deadline');
             }
         }
@@ -334,7 +346,7 @@ export default function Objectives({deleteToken, token}) {
                                                 }}>
                                                     <CardContent>
                                                         <Box sx={{display: "flex"}}>
-                                                            <Typography sx={{ fontSize: 17, marginRight: 'auto', maxWidth: 700 }} color="text.secondary" component="div">
+                                                            <Typography noWrap sx={{ fontSize: 17, marginRight: 'auto', maxWidth: 700 }} color="text.secondary" component="div">
                                                                 {objective.title}
                                                             </Typography>
                                                             <Typography sx={{
@@ -349,7 +361,7 @@ export default function Objectives({deleteToken, token}) {
                                                             </Typography>
                                                             <Button sx={{
                                                                 color: objective.done === false ? (objective.progress > 0 ? '#C1121F' : 'black') : 'green',
-                                                            }} variant={"contained"} startIcon={<AddTaskTwoTone/>} onClick={handleClickOpenFormSecond} objectid={objective._id}>
+                                                            }} variant={"outlined"} startIcon={<AddTaskTwoTone/>} onClick={handleClickOpenFormSecond} objectid={objective._id}>
                                                                 Secondary
                                                             </Button>
                                                         </Box>

@@ -4,9 +4,8 @@ import axios from 'axios';
 import PropTypes from 'prop-types';
 import { useFormik } from 'formik';
 import * as yup from 'yup';
+import logo from '../../images/CommunityCatalyst.svg';
 import {Container, Avatar, Typography, Button, TextField, Box, CssBaseline} from '@mui/material';
-
-import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 
 const validationSchema = yup.object({
     username: yup
@@ -24,7 +23,7 @@ export default function LogIn({setToken}) {
 
     const formik = useFormik({
         initialValues: {
-            username: 'admin@grow.app',
+            username: 'developer@grow.app',
             password: '',
         },
         validationSchema: validationSchema,
@@ -73,12 +72,7 @@ export default function LogIn({setToken}) {
                     <Typography sx={{fontFamily: 'sans-serif',  fontWeight: 700}} component="h1" variant="h5">
                         COMMUNITY CATALYST
                     </Typography>
-                    <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>
-                        <LockOutlinedIcon />
-                    </Avatar>
-                    <Typography component="h1" variant="h5">
-                        Log In
-                    </Typography>
+                    <Avatar src={logo} sx={{width: 300, height: 300}}/>
                     <form onSubmit={formik.handleSubmit} autoComplete="on">
                         <TextField
                             margin="normal"

@@ -90,6 +90,7 @@ export default function Dashboard({deleteToken, token}) {
                                             .slice(0, 6)
                                             .map(feedback => (
                                                 <Grid item xs={"auto"} sm={6} md={4} key={feedback._id}>
+                                                    {feedback.seen === false ? <Typography sx={{ color: '#E71523' }}>New</Typography> : <Typography> &nbsp; </Typography>}
                                                     <Card sx={{
                                                         minWidth: 250,
                                                         border: 3,
@@ -98,31 +99,31 @@ export default function Dashboard({deleteToken, token}) {
                                                     }}>
                                                         <CardActionArea onClick={handleFeed}>
                                                             <CardContent>
-                                                                {feedback.anonymous === true ?
-                                                                    <Typography sx={{fontSize: 17}}
-                                                                                color="text.secondary" component="div">
-                                                                        Anonymous
-                                                                    </Typography> :
-                                                                    <Typography sx={{fontSize: 17}}
-                                                                                color="text.secondary"
-                                                                                component="div"> From:
-                                                                        <Typography sx={{
-                                                                            textDecoration: 'underline',
-                                                                            fontSize: 18
-                                                                        }} display="inline" color="text.primary">
-                                                                            {feedback.reporter}
+                                                                <Box sx={{display: "flex"}}>
+                                                                    {feedback.anonymous === true ?
+                                                                        <Typography sx={{fontSize: 17, marginRight: 'auto', maxWidth: 700}}
+                                                                                    color="text.secondary" component="div">
+                                                                            Anonymous
+                                                                        </Typography> :
+                                                                        <Typography sx={{fontSize: 17, marginRight: 'auto', maxWidth: 700}}
+                                                                                    color="text.secondary"
+                                                                                    component="div"> From:
+                                                                            <Typography sx={{
+                                                                                textDecoration: 'underline',
+                                                                                fontSize: 18,
+                                                                                marginRight: 'auto', maxWidth: 700
+                                                                            }} display="inline" color="text.primary">
+                                                                                {feedback.reporter.displayName}
+                                                                            </Typography>
                                                                         </Typography>
-                                                                    </Typography>
-                                                                }
-                                                                {feedback.appreciated === true ?
-                                                                    <ThumbUp sx={{
-                                                                        position: 'absolute',
-                                                                        left: '300px',
-                                                                        bottom: '80px',
-                                                                        color: (feedback.type === 1) ? '#0053A0' : (feedback.type === 2) ? '#EFA825' : 'black'
-                                                                    }}/>
-                                                                    : null
-                                                                }
+                                                                    }
+                                                                    {feedback.appreciated === true ?
+                                                                        <ThumbUp sx={{
+                                                                            color: (feedback.type === 1) ? '#0053A0' : (feedback.type === 2) ? '#EFA825' : 'black'
+                                                                        }}/>
+                                                                        : null
+                                                                    }
+                                                                </Box>
                                                                 <Typography sx={{fontSize: 15}} color="text.secondary"
                                                                             gutterBottom>
                                                                     On {new Date(feedback.receivedDate).toDateString()}
