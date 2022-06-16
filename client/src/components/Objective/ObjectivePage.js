@@ -64,8 +64,6 @@ export default function Objectives({deleteToken, token}) {
     const [numberOfPagesTeamObjectives, setNumberOfPagesTeamObjectives] = React.useState(1);
     const [mainPersonalObjectives, setMainPersonalObjectives] = React.useState([]);
     const [mainTeamObjectives, setMainTeamObjectives] = React.useState([]);
-    const [secondaryPersonalObjectives, setSecondaryPersonalObjectives] = React.useState([]);
-    const [secondaryTeamObjectives, setSecondaryTeamObjectives] = React.useState([]);
     const [openSnackbarSuccess, setOpenSnackbarSuccess] = React.useState(false);
     const [openSnackbarError, setOpenSnackbarError] = React.useState(false);
     const [date, setDate] = React.useState(new Date().toJSON().slice(0,10).replace(/-/g,'/'));
@@ -231,7 +229,26 @@ export default function Objectives({deleteToken, token}) {
                 'Authorization': 'Bearer ' + token
             }
         }).then(response => {
-            setMainPersonalObjectives(response.data);
+            const mainPersonalObjectives = response.data;
+            mainPersonalObjectives.forEach(main => {
+                main["secondary"] = [];
+                axios.get(process.env.REACT_APP_BACKEND_URL + process.env.REACT_APP_BACKEND_PORT + '/objectives/secondary', {
+                    params: {
+                        mainObjective: main._id
+                    },
+                    headers: {
+                        'Authorization': 'Bearer ' + token
+                    }
+                }).then(response => {
+                    main["secondary"] = main["secondary"].concat(response.data);
+                }).catch(error => {
+                    if (error.response.data.error === 'Authentification failed. Check secret token.') {
+                        deleteToken();
+                        navigate("/");
+                    }
+                });
+            })
+            setMainPersonalObjectives(mainPersonalObjectives);
             setLoading(false);
         }).catch(error => {
             if (error.response.data.error === 'Authentification failed. Check secret token.') {
@@ -244,8 +261,28 @@ export default function Objectives({deleteToken, token}) {
                 'Authorization': 'Bearer ' + token
             }
         }).then(response => {
-            setIsManager(response.data.isManager);
-            setMainTeamObjectives(response.data.objectives);
+            setIsManager(response.data["isManager"]);
+            const mainTeamObjectives = response.data["objectives"]
+            mainTeamObjectives.forEach(main => {
+                main["secondary"] = [];
+                axios.get(process.env.REACT_APP_BACKEND_URL + process.env.REACT_APP_BACKEND_PORT + '/objectives/team/secondary', {
+                    params: {
+                        mainObjective: main._id
+                    },
+                    headers: {
+                        'Authorization': 'Bearer ' + token
+                    }
+                }).then(response => {
+                    setIsManager(response.data["isManager"]);
+                    main["secondary"] = main["secondary"].concat(response.data["objectives"]);
+                }).catch(error => {
+                    if (error.response.data.error === 'Authentification failed. Check secret token.') {
+                        deleteToken();
+                        navigate("/");
+                    }
+                });
+            });
+            setMainTeamObjectives(mainTeamObjectives);
             setLoading(false);
         }).catch(error => {
             if (error.response.data.error === 'Authentification failed. Check secret token.') {
@@ -268,7 +305,7 @@ export default function Objectives({deleteToken, token}) {
                     <Grid container spacing={1}>
                         {/* Add objective button */}
                         <Grid item sm={12}>
-                            <Button startIcon={<AddTaskTwoTone/>} variant={"contained"} onClick={handleClickOpenForm}> Add an objective</Button>
+                            <Button startIcon={<AddTaskTwoTone/>} variant={"contained"} onClick={handleClickOpenForm}> New objective</Button>
                         </Grid>
                         {/* Objetives tabs */}
                         <Grid item sm={12}>
@@ -288,7 +325,7 @@ export default function Objectives({deleteToken, token}) {
                                             <Card sx={{
                                                 width: 1100,
                                                 border: 2,
-                                                borderColor: objective.done === false ? (objective.progress > 0 ? '#C1121F' : 'black') : 'green',
+                                                borderColor: objective.done === false ? (objective.secondary.length > 0 ? '#C1121F' : 'black') : 'green',
                                                 position: 'relative',
                                             }}>
                                                 <CardContent>
@@ -297,9 +334,9 @@ export default function Objectives({deleteToken, token}) {
                                                             {objective.title}
                                                         </Typography>
                                                         <Typography component="div" sx={{
-                                                            color: objective.done === false ? (objective.progress > 0 ? '#C1121F' : 'black') : 'green',
+                                                            color: objective.done === false ? (objective.secondary.length > 0 ? '#C1121F' : 'black') : 'green',
                                                         }}>
-                                                            {objective.done === false ? (objective.progress > 0 ? 'In progress' : 'Not started') : 'Done'}
+                                                            {objective.done === false ? (objective.secondary.length > 0 ? 'In progress' : 'Not started') : 'Done'}
                                                         </Typography>
                                                     </Box>
                                                     <Box sx={{display: "flex"}}>
@@ -307,9 +344,9 @@ export default function Objectives({deleteToken, token}) {
                                                             {objective.description}
                                                         </Typography>
                                                         <Button sx={{
-                                                            color: objective.done === false ? (objective.progress > 0 ? '#C1121F' : 'black') : 'green',
+                                                            color: 'black'
                                                         }} variant={"outlined"} startIcon={<AddTaskTwoTone/>} onClick={handleClickOpenFormSecond} objectid={objective._id}>
-                                                            Secondary
+                                                            Goals
                                                         </Button>
                                                     </Box>
                                                 </CardContent>
@@ -341,7 +378,7 @@ export default function Objectives({deleteToken, token}) {
                                                 <Card sx={{
                                                     width: 1100,
                                                     border: 2,
-                                                    borderColor: objective.done === false ? (objective.progress > 0 ? '#C1121F' : 'black') : 'green',
+                                                    borderColor: objective.done === false ? (objective.secondary.length > 0 ? '#C1121F' : 'black') : 'green',
                                                     position: 'relative',
                                                 }}>
                                                     <CardContent>
@@ -350,9 +387,9 @@ export default function Objectives({deleteToken, token}) {
                                                                 {objective.title}
                                                             </Typography>
                                                             <Typography sx={{
-                                                                color: objective.done === false ? (objective.progress > 0 ? '#C1121F' : 'black') : 'green',
+                                                                color: objective.done === false ? (objective.secondary.length > 0 ? '#C1121F' : 'black') : 'green',
                                                             }}>
-                                                                {objective.done === false ? (objective.progress > 0 ? 'In progress' : 'Not started') : 'Done'}
+                                                                {objective.done === false ? (objective.secondary.length > 0 ? 'In progress' : 'Not started') : 'Done'}
                                                             </Typography>
                                                         </Box>
                                                         <Box sx={{display: "flex"}}>
@@ -360,9 +397,9 @@ export default function Objectives({deleteToken, token}) {
                                                                 {objective.description}
                                                             </Typography>
                                                             <Button sx={{
-                                                                color: objective.done === false ? (objective.progress > 0 ? '#C1121F' : 'black') : 'green',
+                                                                color: 'primary'
                                                             }} variant={"outlined"} startIcon={<AddTaskTwoTone/>} onClick={handleClickOpenFormSecond} objectid={objective._id}>
-                                                                Secondary
+                                                                Goals
                                                             </Button>
                                                         </Box>
                                                     </CardContent>

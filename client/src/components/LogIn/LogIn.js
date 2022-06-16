@@ -69,9 +69,6 @@ export default function LogIn({setToken}) {
                         alignItems: 'center',
                     }}
                 >
-                    <Typography sx={{fontFamily: 'sans-serif',  fontWeight: 700}} component="h1" variant="h5">
-                        COMMUNITY CATALYST
-                    </Typography>
                     <Avatar src={logo} sx={{width: 300, height: 300}}/>
                     <form onSubmit={formik.handleSubmit} autoComplete="on">
                         <TextField
