@@ -3,12 +3,12 @@ import {useNavigate} from "react-router-dom";
 import {
     Box,
     Button,
-    Card,
-    CardContent,
+    Card, CardActions,
+    CardContent, Collapse,
     Container,
     CssBaseline, Dialog, DialogActions, DialogContent, DialogTitle,
-    Grid, InputAdornment, Pagination,
-    Skeleton, Snackbar,
+    Grid, IconButton, InputAdornment, LinearProgress, List, ListItem, ListItemButton, ListItemText, Pagination,
+    Skeleton, Slider, Snackbar, styled,
     Tab,
     Tabs, TextField,
     Toolbar,
@@ -34,7 +34,7 @@ function TabPanel(props) {
             </Box>
         )
     );
-};
+}
 
 const Alert = React.forwardRef(function Alert(props, ref) {
     return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
@@ -51,6 +51,7 @@ export default function Objectives({deleteToken, token}) {
     const [render, setRender] = React.useState('');
     const [openForm, setOpenForm] = React.useState(false);
     const [openFormSecond, setOpenFormSecond] = React.useState(false);
+    const [openFormThird, setOpenFormThird] = React.useState(false);
     const [mainObjectiveDescription, setMainObjectiveDescription] = React.useState('');
     const [mainObjectiveTitle, setMainObjectiveTitle] = React.useState('');
     const [errorMainObjectiveDescription, setErrorMainObjectiveDescription] = React.useState('');
@@ -68,7 +69,7 @@ export default function Objectives({deleteToken, token}) {
     const [openSnackbarError, setOpenSnackbarError] = React.useState(false);
     const [date, setDate] = React.useState(new Date().toJSON().slice(0,10).replace(/-/g,'/'));
 
-    const objectivesPerPage = 4;
+    const objectivesPerPage = 3;
 
     const handleChangeTab = (event, newValue) => {
         setTab(newValue);
@@ -81,6 +82,10 @@ export default function Objectives({deleteToken, token}) {
     const handleClickOpenFormSecond = (event) => {
         setMainId(event.currentTarget.attributes.objectid.textContent);
         setOpenFormSecond(true);
+    };
+
+    const handleClickOpenFormThird = (event) => {
+        setOpenFormThird(true);
     };
 
     const handleCloseSnackbarSuccess = () => {
@@ -112,6 +117,10 @@ export default function Objectives({deleteToken, token}) {
         setErrorDeadline('');
         setOpenFormSecond(false);
     };
+
+    const handleCloseFormThird = () => {
+        setOpenFormThird(false);
+    }
 
     const handleSubmit = (event) => {
         event.preventDefault();
@@ -157,7 +166,6 @@ export default function Objectives({deleteToken, token}) {
         event.preventDefault();
         console.log("HELLO");
         if(mainObjectiveTitle !== '' &&
-            mainObjectiveDescription !== '' &&
             isNaturalNumber(secondTarget) &&
             secondTargetUnit!== '' &&
             !isNaN(Date.parse(date)) &&
@@ -165,7 +173,6 @@ export default function Objectives({deleteToken, token}) {
             axios.post(process.env.REACT_APP_BACKEND_URL + process.env.REACT_APP_BACKEND_PORT + '/objectives/addSecondary',
                 {
                     title: mainObjectiveTitle,
-                    description: mainObjectiveDescription,
                     target: secondTarget,
                     targetUnitMeasure: secondTargetUnit,
                     mainObjective: mainId,
@@ -189,34 +196,28 @@ export default function Objectives({deleteToken, token}) {
             handleCloseFormSecond();
         } else {
             if(mainObjectiveTitle === '') {
-                console.log("here1");
                 setErrorMainObjectiveTitle("Description cannot be empty");
             }
-            if(mainObjectiveDescription === '') {
-                console.log("here2");
-
-                setErrorMainObjectiveDescription("Title cannot be empty");
-            }
             if(secondTargetUnit === '') {
-                console.log("here3");
-
                 setErrorSecondObjectiveTargetUnit("Target unit cannot be empty");
             }
             if(!isNaturalNumber(secondTarget)) {
-                console.log("here4");
-
                 setErrorSecondObjectiveTarget("Target is not valid");
             }
             if(isNaN(Date.parse(date)) || new Date(date).getTime() < new Date(new Date().toJSON().slice(0,10).replace(/-/g,'/')).getTime()) {
-                console.log("here5");
-
                 setErrorDeadline('Invalid deadline');
             }
         }
     };
 
+    const handleSubmitThird = (event) => {
+        event.preventDefault();
+        handleCloseFormThird();
+    }
+
     useEffect(() => {
         setNumberOfPagesPersonalObjectives(Math.ceil(mainPersonalObjectives.length/objectivesPerPage));
+        setLoading(false);
     }, [mainPersonalObjectives]);
 
     useEffect(() => {
@@ -229,8 +230,8 @@ export default function Objectives({deleteToken, token}) {
                 'Authorization': 'Bearer ' + token
             }
         }).then(response => {
-            const mainPersonalObjectives = response.data;
-            mainPersonalObjectives.forEach(main => {
+            const mainPersObjectives = response.data;
+            mainPersObjectives.forEach(main => {
                 main["secondary"] = [];
                 axios.get(process.env.REACT_APP_BACKEND_URL + process.env.REACT_APP_BACKEND_PORT + '/objectives/secondary', {
                     params: {
@@ -241,6 +242,7 @@ export default function Objectives({deleteToken, token}) {
                     }
                 }).then(response => {
                     main["secondary"] = main["secondary"].concat(response.data);
+                    setMainPersonalObjectives(mainPersObjectives);
                 }).catch(error => {
                     if (error.response.data.error === 'Authentification failed. Check secret token.') {
                         deleteToken();
@@ -248,8 +250,6 @@ export default function Objectives({deleteToken, token}) {
                     }
                 });
             })
-            setMainPersonalObjectives(mainPersonalObjectives);
-            setLoading(false);
         }).catch(error => {
             if (error.response.data.error === 'Authentification failed. Check secret token.') {
                 deleteToken();
@@ -262,8 +262,8 @@ export default function Objectives({deleteToken, token}) {
             }
         }).then(response => {
             setIsManager(response.data["isManager"]);
-            const mainTeamObjectives = response.data["objectives"]
-            mainTeamObjectives.forEach(main => {
+            const teamObjectives = response.data["objectives"]
+            teamObjectives.forEach(main => {
                 main["secondary"] = [];
                 axios.get(process.env.REACT_APP_BACKEND_URL + process.env.REACT_APP_BACKEND_PORT + '/objectives/team/secondary', {
                     params: {
@@ -273,8 +273,8 @@ export default function Objectives({deleteToken, token}) {
                         'Authorization': 'Bearer ' + token
                     }
                 }).then(response => {
-                    setIsManager(response.data["isManager"]);
                     main["secondary"] = main["secondary"].concat(response.data["objectives"]);
+                    setMainTeamObjectives(teamObjectives);
                 }).catch(error => {
                     if (error.response.data.error === 'Authentification failed. Check secret token.') {
                         deleteToken();
@@ -282,8 +282,6 @@ export default function Objectives({deleteToken, token}) {
                     }
                 });
             });
-            setMainTeamObjectives(mainTeamObjectives);
-            setLoading(false);
         }).catch(error => {
             if (error.response.data.error === 'Authentification failed. Check secret token.') {
                 deleteToken();
@@ -350,6 +348,24 @@ export default function Objectives({deleteToken, token}) {
                                                         </Button>
                                                     </Box>
                                                 </CardContent>
+                                                {objective.secondary.length > 0 ?
+                                                <CardActions sx={{ display: 'flex', alignItems: 'center' }}>
+                                                    <Box sx={{ width: '100%' }}>
+                                                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                                            <Box sx={{ width: '100%', mr: 1 }}>
+                                                                <LinearProgress variant="determinate" value={10} sx={{color: objective.done === false ? (objective.secondary.length > 0 ? '#C1121F' : 'black') : 'green'}}/>
+                                                            </Box>
+                                                            <Box sx={{ minWidth: 35 }}>
+                                                                <Typography variant="body2" sx={{
+                                                                    color: objective.done === false ? (objective.secondary.length > 0 ? '#C1121F' : 'black') : 'green',
+                                                                }}>10%</Typography>
+                                                            </Box>
+                                                        </Box>
+                                                    </Box>
+                                                    <Button onClick={handleClickOpenFormThird}>
+                                                        More
+                                                    </Button>
+                                                </CardActions> : null}
                                             </Card>
                                         </Grid>
                                     )) : null}
@@ -499,25 +515,6 @@ export default function Objectives({deleteToken, token}) {
                                 helperText={errorMainObjectiveTitle !== '' && errorMainObjectiveTitle}
                             />
                             <br/>
-                            <TextField
-                                autoFocus
-                                margin="dense"
-                                id="secondDescription"
-                                label="Secondary Objective Description"
-                                type="text"
-                                fullWidth
-                                multiline
-                                rows={3}
-                                variant="outlined"
-                                value={mainObjectiveDescription}
-                                onChange={e => {
-                                    setMainObjectiveDescription(e.target.value)
-                                    setErrorMainObjectiveDescription('');
-                                }}
-                                error={errorMainObjectiveDescription !== ''}
-                                helperText={errorMainObjectiveDescription !== '' && errorMainObjectiveDescription}
-                            />
-                            <br/>
                             <br/>
                             <Box sx={{
                                 display: 'flex',
@@ -578,6 +575,41 @@ export default function Objectives({deleteToken, token}) {
                         <DialogActions sx={{display: 'flex'}}>
                             <Button variant={"contained"} color='error' onClick={handleCloseFormSecond} sx={{marginRight: 'auto'}}>Cancel</Button>
                             <Button type="submit" variant={"contained"} color={'success'} form="myformSecond">Add</Button>
+                        </DialogActions>
+                    </form>
+                </Dialog>
+                <Dialog open={openFormThird} onClose={handleCloseFormThird} fullWidth maxWidth={"lg"}>
+                    <form
+                        id="myformThird"
+                        onSubmit={handleSubmitThird}
+                    >
+                        <DialogTitle variant="h6">Modify targets</DialogTitle>
+                        <DialogContent>
+                            <List dense sx={{ width: '100%', bgcolor: 'background.paper' }}>
+                                {/*{objective.secondary.map(goal => (*/}
+                                {/*    <ListItem*/}
+                                {/*        key={goal._id}*/}
+                                {/*        disablePadding>*/}
+                                {/*        <Box sx={{display: "flex"}}>*/}
+                                {/*            <Typography*/}
+                                {/*                component="div"*/}
+                                {/*                variant="body2"*/}
+                                {/*                color="primary"*/}
+                                {/*                sx={{ fontSize: 17, marginRight: 'auto', maxWidth: 700 }}>*/}
+                                {/*                {goal.title}*/}
+                                {/*            </Typography>*/}
+                                {/*            <Slider valueLabelDisplay={"auto"} marks defaultValue={goal.progress} step={1} max={goal.target}/>*/}
+                                {/*            <Typography noWrap sx={{ fontSize: 17, marginRight: 'auto', maxWidth: 700 }}>*/}
+                                {/*                {goal.targetUnitMeasure}*/}
+                                {/*            </Typography>*/}
+                                {/*        </Box>*/}
+                                {/*    </ListItem>)*/}
+                                {/*)}*/}
+                            </List>
+                        </DialogContent>
+                        <DialogActions sx={{display: 'flex'}}>
+                            <Button variant={"contained"} color='error' onClick={handleCloseFormThird} sx={{marginRight: 'auto'}}>Cancel</Button>
+                            <Button type="submit" variant={"contained"} color={'success'} form="myformThird">Save</Button>
                         </DialogActions>
                     </form>
                 </Dialog>
