@@ -42,7 +42,7 @@ export default function Dashboard({deleteToken, token}) {
                 'Authorization': 'Bearer ' + token
             }
         }).then(response => {
-            setObjectives(response.data.filter(objective => (objective.done === false)));
+            setObjectives(response.data.filter(objective => (objective.status === 1)));
             setLoading(false);
         }).catch(error => {
             if (error.response.data.error === 'Authentification failed. Check secret token.') {
@@ -164,7 +164,7 @@ export default function Dashboard({deleteToken, token}) {
                                                     <Card sx={{
                                                         width: 1100,
                                                         border: 2,
-                                                        borderColor: objective.done === false ? (objective.progress > 0 ? '#C1121F' : 'black') : 'green',
+                                                        borderColor: '#C1121F',
                                                         position: 'relative',
                                                     }}>
                                                         <CardContent>
@@ -173,9 +173,9 @@ export default function Dashboard({deleteToken, token}) {
                                                                     {objective.title}
                                                                 </Typography>
                                                                 <Typography component="div" sx={{
-                                                                    color: objective.done === false ? (objective.progress > 0 ? '#C1121F' : 'black') : 'green',
+                                                                    color: '#C1121F'
                                                                 }}>
-                                                                    {objective.done === false ? (objective.progress > 0 ? 'In progress' : 'Not started') : 'Done'}
+                                                                     In progress
                                                                 </Typography>
                                                             </Box>
                                                             <Box sx={{display: "flex"}}>

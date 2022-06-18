@@ -4,11 +4,11 @@ import {
     Box,
     Button,
     Card, CardActions,
-    CardContent, Collapse,
+    CardContent,
     Container,
     CssBaseline, Dialog, DialogActions, DialogContent, DialogTitle,
-    Grid, IconButton, InputAdornment, LinearProgress, List, ListItem, ListItemButton, ListItemText, Pagination,
-    Skeleton, Slider, Snackbar, styled,
+    Grid, InputAdornment, LinearProgress, List, Pagination, Slider,
+    Skeleton, Snackbar,
     Tab,
     Tabs, TextField,
     Toolbar,
@@ -68,8 +68,13 @@ export default function Objectives({deleteToken, token}) {
     const [openSnackbarSuccess, setOpenSnackbarSuccess] = React.useState(false);
     const [openSnackbarError, setOpenSnackbarError] = React.useState(false);
     const [date, setDate] = React.useState(new Date().toJSON().slice(0,10).replace(/-/g,'/'));
+    const [sliders, setSliders] = React.useState([]);
 
     const objectivesPerPage = 3;
+
+    function getDaysDifference(deadline) {
+        return (new Date(deadline) - new Date())/(1000 * 60 * 60 * 24)
+    }
 
     const handleChangeTab = (event, newValue) => {
         setTab(newValue);
@@ -80,11 +85,14 @@ export default function Objectives({deleteToken, token}) {
     };
 
     const handleClickOpenFormSecond = (event) => {
-        setMainId(event.currentTarget.attributes.objectid.textContent);
+        setMainId(JSON.parse(event.currentTarget.attributes.objectid.textContent));
         setOpenFormSecond(true);
     };
 
     const handleClickOpenFormThird = (event) => {
+        const main = JSON.parse(event.currentTarget.attributes.objectid.textContent);
+        setMainId(main);
+        setSliders(main.secondary);
         setOpenFormThird(true);
     };
 
@@ -119,6 +127,7 @@ export default function Objectives({deleteToken, token}) {
     };
 
     const handleCloseFormThird = () => {
+        setSliders([]);
         setOpenFormThird(false);
     }
 
@@ -323,7 +332,7 @@ export default function Objectives({deleteToken, token}) {
                                             <Card sx={{
                                                 width: 1100,
                                                 border: 2,
-                                                borderColor: objective.done === false ? (objective.secondary.length > 0 ? '#C1121F' : 'black') : 'green',
+                                                borderColor: objective.status === 0 ? 'black' : (objective.status === 1 ? '#C1121F' : 'green'),
                                                 position: 'relative',
                                             }}>
                                                 <CardContent>
@@ -332,9 +341,9 @@ export default function Objectives({deleteToken, token}) {
                                                             {objective.title}
                                                         </Typography>
                                                         <Typography component="div" sx={{
-                                                            color: objective.done === false ? (objective.secondary.length > 0 ? '#C1121F' : 'black') : 'green',
+                                                            color: objective.status === 0 ? 'black' : (objective.status === 1 ? '#C1121F' : 'green'),
                                                         }}>
-                                                            {objective.done === false ? (objective.secondary.length > 0 ? 'In progress' : 'Not started') : 'Done'}
+                                                            {objective.status === 0 ? 'Not Started' : (objective.status === 1 ? 'In progress' : 'Done')}
                                                         </Typography>
                                                     </Box>
                                                     <Box sx={{display: "flex"}}>
@@ -343,7 +352,7 @@ export default function Objectives({deleteToken, token}) {
                                                         </Typography>
                                                         <Button sx={{
                                                             color: 'black'
-                                                        }} variant={"outlined"} startIcon={<AddTaskTwoTone/>} onClick={handleClickOpenFormSecond} objectid={objective._id}>
+                                                        }} variant={"outlined"} startIcon={<AddTaskTwoTone/>} onClick={handleClickOpenFormSecond} objectid={JSON.stringify(objective)}>
                                                             Goals
                                                         </Button>
                                                     </Box>
@@ -357,12 +366,12 @@ export default function Objectives({deleteToken, token}) {
                                                             </Box>
                                                             <Box sx={{ minWidth: 35 }}>
                                                                 <Typography variant="body2" sx={{
-                                                                    color: objective.done === false ? (objective.secondary.length > 0 ? '#C1121F' : 'black') : 'green',
+                                                                    color: objective.status === 0 ? 'black' : (objective.status === 1 ? '#C1121F' : 'green'),
                                                                 }}>10%</Typography>
                                                             </Box>
                                                         </Box>
                                                     </Box>
-                                                    <Button onClick={handleClickOpenFormThird}>
+                                                    <Button onClick={handleClickOpenFormThird} objectid={JSON.stringify(objective)}>
                                                         More
                                                     </Button>
                                                 </CardActions> : null}
@@ -394,7 +403,7 @@ export default function Objectives({deleteToken, token}) {
                                                 <Card sx={{
                                                     width: 1100,
                                                     border: 2,
-                                                    borderColor: objective.done === false ? (objective.secondary.length > 0 ? '#C1121F' : 'black') : 'green',
+                                                    borderColor: objective.status === 0 ? 'black' : (objective.status === 1 ? '#C1121F' : 'green'),
                                                     position: 'relative',
                                                 }}>
                                                     <CardContent>
@@ -403,9 +412,9 @@ export default function Objectives({deleteToken, token}) {
                                                                 {objective.title}
                                                             </Typography>
                                                             <Typography sx={{
-                                                                color: objective.done === false ? (objective.secondary.length > 0 ? '#C1121F' : 'black') : 'green',
+                                                                color: objective.status === 0 ? 'black' : (objective.status === 1 ? '#C1121F' : 'green'),
                                                             }}>
-                                                                {objective.done === false ? (objective.secondary.length > 0 ? 'In progress' : 'Not started') : 'Done'}
+                                                                {objective.status === 0 ? 'Not started' : (objective.status === 1 ? 'In progress' : 'Done')}
                                                             </Typography>
                                                         </Box>
                                                         <Box sx={{display: "flex"}}>
@@ -414,7 +423,7 @@ export default function Objectives({deleteToken, token}) {
                                                             </Typography>
                                                             <Button sx={{
                                                                 color: 'primary'
-                                                            }} variant={"outlined"} startIcon={<AddTaskTwoTone/>} onClick={handleClickOpenFormSecond} objectid={objective._id}>
+                                                            }} variant={"outlined"} startIcon={<AddTaskTwoTone/>} onClick={handleClickOpenFormSecond} objectid={JSON.stringify(objective)}>
                                                                 Goals
                                                             </Button>
                                                         </Box>
@@ -583,28 +592,52 @@ export default function Objectives({deleteToken, token}) {
                         id="myformThird"
                         onSubmit={handleSubmitThird}
                     >
-                        <DialogTitle variant="h6">Modify targets</DialogTitle>
+                        <DialogTitle variant="h6">{mainId.title}</DialogTitle>
                         <DialogContent>
+                            <Typography sx={{fontSize: 25}}>
+                                {mainId.description}
+                            </Typography>
                             <List dense sx={{ width: '100%', bgcolor: 'background.paper' }}>
-                                {/*{objective.secondary.map(goal => (*/}
-                                {/*    <ListItem*/}
-                                {/*        key={goal._id}*/}
-                                {/*        disablePadding>*/}
-                                {/*        <Box sx={{display: "flex"}}>*/}
-                                {/*            <Typography*/}
-                                {/*                component="div"*/}
-                                {/*                variant="body2"*/}
-                                {/*                color="primary"*/}
-                                {/*                sx={{ fontSize: 17, marginRight: 'auto', maxWidth: 700 }}>*/}
-                                {/*                {goal.title}*/}
-                                {/*            </Typography>*/}
-                                {/*            <Slider valueLabelDisplay={"auto"} marks defaultValue={goal.progress} step={1} max={goal.target}/>*/}
-                                {/*            <Typography noWrap sx={{ fontSize: 17, marginRight: 'auto', maxWidth: 700 }}>*/}
-                                {/*                {goal.targetUnitMeasure}*/}
-                                {/*            </Typography>*/}
-                                {/*        </Box>*/}
-                                {/*    </ListItem>)*/}
-                                {/*)}*/}
+                                {mainId.secondary?.map((goal, index) => (
+                                    <Box key={goal._id} sx={{display: "flex", justifyContent: 'space-between'}}>
+                                        <Typography
+                                            component="div"
+                                            color="primary"
+                                            sx={{fontSize: 20}}
+                                        >
+                                            {goal.title}
+                                        </Typography>
+                                        {getDaysDifference(goal.deadline) < 0 ?
+                                            <Typography color='error'>
+                                                Past due days {Math.ceil(Math.abs(getDaysDifference(goal.deadline))) - 1}
+                                            </Typography> :
+                                            <Typography color='succes'>
+                                                Due in {Math.ceil(Math.abs(getDaysDifference(goal.deadline)))} days
+                                            </Typography>
+                                        }
+                                        <Box sx={{display: "flex", justifyContent: 'space-between', width: 500}}>
+                                            <Slider
+                                                disabled={getDaysDifference(goal.deadline) < 0}
+                                                valueLabelDisplay={"auto"}
+                                                value={sliders[index]?.progress}
+                                                onChange={(event, newValue) => setSliders(sliders?.map((slider, index2) =>
+                                                    index2 === index ? {...slider, progress: newValue} : {...slider}
+                                                ))}
+                                                marks
+                                                defaultValue={goal.progress}
+                                                step={1}
+                                                max={goal.target}
+                                                sx={{maxWidth: 400}}
+                                            />
+                                            <Typography>
+                                                {goal.target}
+                                            </Typography>
+                                            <Typography>
+                                                {goal.targetUnitMeasure}
+                                            </Typography>
+                                        </Box>
+                                    </Box>)
+                                )}
                             </List>
                         </DialogContent>
                         <DialogActions sx={{display: 'flex'}}>
