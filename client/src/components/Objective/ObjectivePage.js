@@ -72,6 +72,19 @@ export default function Objectives({deleteToken, token}) {
 
     const objectivesPerPage = 3;
 
+    function getProgress(objective) {
+        var goalProgress = 0;
+        const nrGoals = objective.secondary?.length;
+        objective.secondary?.forEach(goal => {
+            if(goal.status === 2) {
+                goalProgress += 1/nrGoals;
+            } else {
+                goalProgress += ((1/nrGoals)/goal.target) * goal.progress
+            }
+        })
+        return (goalProgress * 100).toFixed(2);
+    }
+
     function getDaysDifference(deadline) {
         return (new Date(deadline) - new Date())/(1000 * 60 * 60 * 24)
     }
@@ -221,6 +234,30 @@ export default function Objectives({deleteToken, token}) {
 
     const handleSubmitThird = (event) => {
         event.preventDefault();
+        sliders?.forEach(slider => {
+            mainId.secondary?.forEach(goal => {
+                if(slider._id === goal._id && slider.progress !== goal.progress) {
+                    axios.post(process.env.REACT_APP_BACKEND_URL + process.env.REACT_APP_BACKEND_PORT + '/objectives/editProgress',
+                        {
+                            objective: goal,
+                            progress: slider.progress
+                        },
+                        {
+                            headers: {
+                                'Authorization': 'Bearer ' + token
+                            }
+                        }).then(response => {
+                        console.log(response.data);
+                        setRender(Math.random(100).toString());
+                    }).catch(error => {
+                        if(error.response.data.error === 'Authentification failed. Check secret token.') {
+                            deleteToken();
+                            navigate("/");
+                        }
+                    });
+                }
+            })
+        })
         handleCloseFormThird();
     }
 
@@ -251,13 +288,14 @@ export default function Objectives({deleteToken, token}) {
                     }
                 }).then(response => {
                     main["secondary"] = main["secondary"].concat(response.data);
-                    setMainPersonalObjectives(mainPersObjectives);
+                    main["progress"] = getProgress(main);
                 }).catch(error => {
                     if (error.response.data.error === 'Authentification failed. Check secret token.') {
                         deleteToken();
                         navigate("/");
                     }
                 });
+                setMainPersonalObjectives(mainPersObjectives);
             })
         }).catch(error => {
             if (error.response.data.error === 'Authentification failed. Check secret token.') {
@@ -357,22 +395,22 @@ export default function Objectives({deleteToken, token}) {
                                                         </Button>
                                                     </Box>
                                                 </CardContent>
-                                                {objective.secondary.length > 0 ?
+                                                {objective.secondary?.length > 0 ?
                                                 <CardActions sx={{ display: 'flex', alignItems: 'center' }}>
                                                     <Box sx={{ width: '100%' }}>
                                                         <Box sx={{ display: 'flex', alignItems: 'center' }}>
                                                             <Box sx={{ width: '100%', mr: 1 }}>
-                                                                <LinearProgress variant="determinate" value={10} sx={{color: objective.done === false ? (objective.secondary.length > 0 ? '#C1121F' : 'black') : 'green'}}/>
+                                                                <LinearProgress variant="determinate" value={parseFloat(objective.progress)} color={objective.status === 1 ? 'progress' : 'success'}/>
                                                             </Box>
                                                             <Box sx={{ minWidth: 35 }}>
                                                                 <Typography variant="body2" sx={{
                                                                     color: objective.status === 0 ? 'black' : (objective.status === 1 ? '#C1121F' : 'green'),
-                                                                }}>10%</Typography>
+                                                                }}>{objective.progress}%</Typography>
                                                             </Box>
                                                         </Box>
                                                     </Box>
                                                     <Button onClick={handleClickOpenFormThird} objectid={JSON.stringify(objective)}>
-                                                        More
+                                                        Progress
                                                     </Button>
                                                 </CardActions> : null}
                                             </Card>
@@ -611,15 +649,15 @@ export default function Objectives({deleteToken, token}) {
                                             <Typography color='error'>
                                                 Past due days {Math.ceil(Math.abs(getDaysDifference(goal.deadline))) - 1}
                                             </Typography> :
-                                            <Typography color='succes'>
+                                            <Typography color='success'>
                                                 Due in {Math.ceil(Math.abs(getDaysDifference(goal.deadline)))} days
                                             </Typography>
                                         }
                                         <Box sx={{display: "flex", justifyContent: 'space-between', width: 500}}>
                                             <Slider
-                                                disabled={getDaysDifference(goal.deadline) < 0}
+                                                disabled={getDaysDifference(goal.deadline) < 0 || goal.status > 1}
                                                 valueLabelDisplay={"auto"}
-                                                value={sliders[index]?.progress}
+                                                value={sliders[index]?.progress || 0}
                                                 onChange={(event, newValue) => setSliders(sliders?.map((slider, index2) =>
                                                     index2 === index ? {...slider, progress: newValue} : {...slider}
                                                 ))}
@@ -636,7 +674,9 @@ export default function Objectives({deleteToken, token}) {
                                                 {goal.targetUnitMeasure}
                                             </Typography>
                                         </Box>
-                                    </Box>)
+                                        <br/>
+                                    </Box>
+                                    )
                                 )}
                             </List>
                         </DialogContent>

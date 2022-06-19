@@ -22,6 +22,9 @@ const theme = createTheme({
         },
         improve: {
             main: "#EFA825",
+        },
+        progress: {
+            main: "#C1121F"
         }
     }
 });
