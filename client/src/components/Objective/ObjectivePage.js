@@ -16,7 +16,7 @@ import {
 } from "@mui/material";
 import AppBarDrawer from "../AppBar/AppBarDrawer";
 import {
-    AddTaskTwoTone, EditTwoTone,
+    AddTaskTwoTone, EditTwoTone, FlagCircleTwoTone,
     GroupWorkTwoTone,
     TrackChangesTwoTone,
 } from "@mui/icons-material";
@@ -48,6 +48,7 @@ export default function Objectives({deleteToken, token}) {
     const [isManager, setIsManager] = React.useState(false);
     const [loading, setLoading] = React.useState(true);
     const [tab, setTab] = React.useState(0);
+    const [editTab, setEditTab] = React.useState(0);
     const [render, setRender] = React.useState('');
     const [openForm, setOpenForm] = React.useState(false);
     const [openFormSecond, setOpenFormSecond] = React.useState(false);
@@ -127,6 +128,10 @@ export default function Objectives({deleteToken, token}) {
         setTab(newValue);
     };
 
+    const handleChangeEditTab = (event, newValue) => {
+        setEditTab(newValue);
+    };
+
     const handleClickOpenForm = () => {
         setOpenForm(true);
     };
@@ -178,12 +183,49 @@ export default function Objectives({deleteToken, token}) {
         setOpenFormThird(false);
     }
 
-    const handleClickOpenEdit = () => {
+    const handleClickOpenEdit = (event) => {
+        const main = JSON.parse(event.currentTarget.attributes.objectid.textContent);
+        setMainId(main);
+        setMainObjectiveTitle(main.title);
+        setMainObjectiveDescription(main.description);
         setOpenFormEdit(true);
     }
 
     const handleClickCloseEdit = () => {
         setOpenFormEdit(false);
+    }
+
+    const handleSubmitEdit = (event) => {
+        event.preventDefault();
+        if(mainObjectiveTitle !== '' && mainObjectiveDescription !== '') {
+            axios.post(process.env.REACT_APP_BACKEND_URL + process.env.REACT_APP_BACKEND_PORT + '/objectives/team/edit',
+                {
+                    objective: mainId,
+                    title: mainObjectiveTitle,
+                    description: mainObjectiveDescription
+                },
+                {
+                    headers: {
+                        'Authorization': 'Bearer ' + token
+                    }
+                }).then(response => {
+                console.log(response.data);
+                setRender(Math.random(100).toString());
+            }).catch(error => {
+                if(error.response.data.error === 'Authentification failed. Check secret token.') {
+                    deleteToken();
+                    navigate("/");
+                }
+            });
+            handleClickCloseEdit();
+        } else {
+            if(mainObjectiveTitle === '') {
+                setErrorMainObjectiveTitle("Description cannot be empty");
+            }
+            if(mainObjectiveDescription === '') {
+                setErrorMainObjectiveDescription("Title cannot be empty");
+            }
+        }
     }
 
     const handleSubmit = (event) => {
@@ -722,9 +764,9 @@ export default function Objectives({deleteToken, token}) {
                             </Typography>
                             <List dense sx={{ width: '100%', bgcolor: 'background.paper' }}>
                                 {mainId.secondary?.map((goal, index) => (
-                                    <div>
+                                    <div key={goal._id}>
                                         <br/>
-                                        <Box key={goal._id} sx={{display: "flex", justifyContent: 'space-between'}}>
+                                        <Box sx={{display: "flex", justifyContent: 'space-between'}}>
                                             <Typography
                                                 component="div"
                                                 color="primary"
@@ -774,6 +816,53 @@ export default function Objectives({deleteToken, token}) {
                             <Button type="submit" variant={"contained"} color={'success'} form="myformThird">Save</Button>
                         </DialogActions>
                     </form>
+                </Dialog>
+                <Dialog open={openFormEdit} onClose={handleClickCloseEdit} fullWidth maxWidth={"lg"}>
+                    <DialogTitle variant="h6">{'Edit ' + mainId.title}</DialogTitle>
+                    <DialogContent>
+                        <TextField
+                            autoFocus
+                            margin="dense"
+                            id="mainTitle"
+                            label="Objective Title"
+                            type="text"
+                            fullWidth
+                            multiline
+                            rows={2}
+                            variant="outlined"
+                            value={mainObjectiveTitle}
+                            onChange={e => {
+                                setMainObjectiveTitle(e.target.value)
+                                setErrorMainObjectiveTitle('');
+                            }}
+                            error={errorMainObjectiveTitle !== ''}
+                            helperText={errorMainObjectiveTitle !== '' && errorMainObjectiveTitle}
+                        />
+                        <br/>
+                        <br/>
+                        <TextField
+                            autoFocus
+                            margin="dense"
+                            id="mainDescription"
+                            label="Objective Description"
+                            type="text"
+                            fullWidth
+                            multiline
+                            rows={5}
+                            variant="outlined"
+                            value={mainObjectiveDescription}
+                            onChange={e => {
+                                setMainObjectiveDescription(e.target.value)
+                                setErrorMainObjectiveDescription('');
+                            }}
+                            error={errorMainObjectiveDescription !== ''}
+                            helperText={errorMainObjectiveDescription !== '' && errorMainObjectiveDescription}
+                        />
+                        </DialogContent>
+                    <DialogActions sx={{display: 'flex'}}>
+                        <Button variant={"contained"} color='error' onClick={handleClickCloseEdit} sx={{marginRight: 'auto'}}>Cancel</Button>
+                        <Button onClick={handleSubmitEdit} variant={"contained"} color={'success'}>Save</Button>
+                    </DialogActions>
                 </Dialog>
                 <Snackbar open={openSnackbarSuccess} autoHideDuration={6000} onClose={handleCloseSnackbarSuccess}>
                     <Alert onClose={handleCloseSnackbarSuccess} severity="success" sx={{ width: '100%' }}>
