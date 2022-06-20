@@ -554,8 +554,8 @@ export default function Feedbacks({deleteToken, token}) {
                                 value={feedbackType}
                                 onChange={handleChangeRadio}
                             >
-                                <FormControlLabel value="good" control={<Radio />} label="Good" />
-                                <FormControlLabel value="improve" control={<Radio />} label="Improve" />
+                                <FormControlLabel value="good" control={<Radio color='good'/>} label="Good"/>
+                                <FormControlLabel value="improve" control={<Radio color='improve'/>} label="Improve"/>
                             </RadioGroup>
                             <Autocomplete
                                 disablePortal
@@ -624,7 +624,7 @@ export default function Feedbacks({deleteToken, token}) {
                             onChange={() => {
                                 setSelected(!selected);
                             }}
-                            color={selectedFeedback.type === 1 ? 'good' : 'improve'}
+                            color={(selectedFeedback.type === 1) ? 'good' : 'improve'}
                             sx={{
                                 position: 'absolute',
                                 left: '650px',
@@ -644,20 +644,10 @@ export default function Feedbacks({deleteToken, token}) {
                         <DialogContentText>
                             On {new Date(selectedFeedback.receivedDate).toDateString()}
                         </DialogContentText>
-                        <TextField
-                            autoFocus
-                            margin="dense"
-                            id="name"
-                            label="Feedback Message"
-                            type="text"
-                            fullWidth
-                            multiline
-                            InputProps={{
-                                readOnly: true,
-                            }}
-                            variant="outlined"
-                            value={selectedFeedback.message}
-                        />
+                        <br/>
+                        <Typography>
+                            {selectedFeedback.message}
+                        </Typography>
                     </DialogContent>
                     <DialogActions>
                         <Button onClick={handleUpdateFeed} disabled={selectedFeedback.appreciated === true} color={'success'} variant={"contained"}>Save</Button>

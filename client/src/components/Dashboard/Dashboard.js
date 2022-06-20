@@ -93,7 +93,7 @@ export default function Dashboard({deleteToken, token}) {
                                                         borderColor: (feedback.type === 1) ? '#0053A0' : (feedback.type === 2) ? '#EFA825' : 'black',
                                                         position: 'relative'
                                                     }}>
-                                                        <CardActionArea onClick={() => navigate("/feedback")}>
+                                                        <CardActionArea onClick={() => navigate("/feedbacks")}>
                                                             <CardContent>
                                                                 <Box sx={{display: "flex"}}>
                                                                     {feedback.anonymous === true ?

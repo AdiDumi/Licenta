@@ -16,7 +16,7 @@ import {
 } from "@mui/material";
 import AppBarDrawer from "../AppBar/AppBarDrawer";
 import {
-    AddTaskTwoTone,
+    AddTaskTwoTone, EditTwoTone,
     GroupWorkTwoTone,
     TrackChangesTwoTone,
 } from "@mui/icons-material";
@@ -52,6 +52,7 @@ export default function Objectives({deleteToken, token}) {
     const [openForm, setOpenForm] = React.useState(false);
     const [openFormSecond, setOpenFormSecond] = React.useState(false);
     const [openFormThird, setOpenFormThird] = React.useState(false);
+    const [openFormEdit, setOpenFormEdit] = React.useState(false);
     const [mainObjectiveDescription, setMainObjectiveDescription] = React.useState('');
     const [mainObjectiveTitle, setMainObjectiveTitle] = React.useState('');
     const [errorMainObjectiveDescription, setErrorMainObjectiveDescription] = React.useState('');
@@ -175,6 +176,14 @@ export default function Objectives({deleteToken, token}) {
     const handleCloseFormThird = () => {
         setSliders([]);
         setOpenFormThird(false);
+    }
+
+    const handleClickOpenEdit = () => {
+        setOpenFormEdit(true);
+    }
+
+    const handleClickCloseEdit = () => {
+        setOpenFormEdit(false);
     }
 
     const handleSubmit = (event) => {
@@ -352,8 +361,10 @@ export default function Objectives({deleteToken, token}) {
                     headers: {
                         'Authorization': 'Bearer ' + token
                     }
-                }).then(response => {
+                }).then(async response => {
                     main["secondary"] = main["secondary"].concat(response.data["objectives"]);
+                    main["progress"] = getProgress(main);
+                    await new Promise(r => setTimeout(r, 600));
                     setMainTeamObjectives(teamObjectives);
                 }).catch(error => {
                     if (error.response.data.error === 'Authentification failed. Check secret token.') {
@@ -517,13 +528,28 @@ export default function Objectives({deleteToken, token}) {
                                                             <Typography noWrap sx={{ fontSize: 20, marginRight: 'auto', maxWidth: 900 }} component="div">
                                                                 {objective.description}
                                                             </Typography>
-                                                            <Button sx={{
+                                                            {objective.status === 1 ? <Button sx={{
                                                                 color: 'primary'
-                                                            }} variant={"outlined"} startIcon={<AddTaskTwoTone/>} onClick={handleClickOpenFormSecond} objectid={JSON.stringify(objective)}>
-                                                                Goals
-                                                            </Button>
+                                                            }} variant={"outlined"} startIcon={<EditTwoTone/>} onClick={handleClickOpenEdit} objectid={JSON.stringify(objective)}>
+                                                                Edit
+                                                            </Button> : null}
                                                         </Box>
                                                     </CardContent>
+                                                    {objective.secondary.length > 0 ?
+                                                        <CardActions sx={{ display: 'flex', alignItems: 'center' }}>
+                                                            <Box sx={{ width: '100%' }}>
+                                                                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                                                    <Box sx={{ width: '100%', mr: 1 }}>
+                                                                        <LinearProgress variant="determinate" value={parseFloat(objective.progress)} color={objective.status === 1 ? 'progress' : 'success'}/>
+                                                                    </Box>
+                                                                    <Box sx={{ minWidth: 35 }}>
+                                                                        <Typography variant="body2" sx={{
+                                                                            color: objective.status === 0 ? 'black' : (objective.status === 1 ? '#C1121F' : 'green'),
+                                                                        }}>{objective.progress}%</Typography>
+                                                                    </Box>
+                                                                </Box>
+                                                            </Box>
+                                                        </CardActions> : null}
                                                 </Card>
                                             </Grid>
                                         )) : null}
