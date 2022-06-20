@@ -12,7 +12,7 @@ import {
     Tab,
     Tabs, TextField,
     Toolbar,
-    Typography
+    Typography, Divider
 } from "@mui/material";
 import AppBarDrawer from "../AppBar/AppBarDrawer";
 import {
@@ -73,7 +73,7 @@ export default function Objectives({deleteToken, token}) {
     const objectivesPerPage = 3;
 
     function getProgress(objective) {
-        var goalProgress = 0;
+        let goalProgress = 0;
         const nrGoals = objective.secondary?.length;
         objective.secondary?.forEach(goal => {
             if(goal.status === 2) {
@@ -87,6 +87,39 @@ export default function Objectives({deleteToken, token}) {
 
     function getDaysDifference(deadline) {
         return (new Date(deadline) - new Date())/(1000 * 60 * 60 * 24)
+    }
+
+    function getMarkDone(objective) {
+        if(objective.progress === "100.00") {
+            return true
+        }
+        let pastGoal = true
+        objective.secondary?.forEach(goal => {
+            if(getDaysDifference(goal.deadline) > 0) {
+                pastGoal = false;
+            }
+        })
+        return pastGoal
+    }
+
+    function handleMarkDone(objective) {
+        axios.post(process.env.REACT_APP_BACKEND_URL + process.env.REACT_APP_BACKEND_PORT + '/objectives/markAsDone',
+            {
+                objective: objective,
+            },
+            {
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                }
+            }).then(response => {
+            console.log(response.data);
+            setRender(Math.random(100).toString());
+        }).catch(error => {
+            if(error.response.data.error === 'Authentification failed. Check secret token.') {
+                deleteToken();
+                navigate("/");
+            }
+        });
     }
 
     const handleChangeTab = (event, newValue) => {
@@ -186,7 +219,6 @@ export default function Objectives({deleteToken, token}) {
 
     const handleSubmitSecond = (event) => {
         event.preventDefault();
-        console.log("HELLO");
         if(mainObjectiveTitle !== '' &&
             isNaturalNumber(secondTarget) &&
             secondTargetUnit!== '' &&
@@ -286,16 +318,17 @@ export default function Objectives({deleteToken, token}) {
                     headers: {
                         'Authorization': 'Bearer ' + token
                     }
-                }).then(response => {
+                }).then(async response => {
                     main["secondary"] = main["secondary"].concat(response.data);
                     main["progress"] = getProgress(main);
+                    await new Promise(r => setTimeout(r, 600));
+                    setMainPersonalObjectives(mainPersObjectives);
                 }).catch(error => {
                     if (error.response.data.error === 'Authentification failed. Check secret token.') {
                         deleteToken();
                         navigate("/");
                     }
                 });
-                setMainPersonalObjectives(mainPersObjectives);
             })
         }).catch(error => {
             if (error.response.data.error === 'Authentification failed. Check secret token.') {
@@ -359,11 +392,11 @@ export default function Objectives({deleteToken, token}) {
                                 {isManager === true ? <Tab sx={{ fontSize: 18 }} icon={<GroupWorkTwoTone />} iconPosition="start" label="Team Objectives"/> : null}
                             </Tabs>
                         </Grid>
-                        <TabPanel value={tab} index={0}>
+                        <TabPanel value={tab} index={0} sx={{ display: 'flex', alignItems: 'center' }}>
                             {loading ? <Skeleton variant={"rectangular"} width={1200} height={400}/> :
-                                <Grid container spacing={2} sx={{height: 550}}>
+                                <Grid container spacing={2} sx={{height: 600}}>
                                     {mainPersonalObjectives.length > 0 ? mainPersonalObjectives
-                                        .sort((a, b) => (a.done === b.done)? 0 : a.done? 1 : -1)
+                                        .sort((a, b) => (a.status === 1 && b.status !== 1) ? -1 : ((a.status < b.status) ? -1 : 1))
                                         .slice((pagePersonalObjectives - 1) * objectivesPerPage, pagePersonalObjectives * objectivesPerPage)
                                         .map((objective) =>(
                                         <Grid item sm={12} key={objective._id}>
@@ -388,15 +421,33 @@ export default function Objectives({deleteToken, token}) {
                                                         <Typography noWrap sx={{ fontSize: 20, marginRight: 'auto', maxWidth: 900 }} component="div">
                                                             {objective.description}
                                                         </Typography>
-                                                        <Button sx={{
-                                                            color: 'black'
-                                                        }} variant={"outlined"} startIcon={<AddTaskTwoTone/>} onClick={handleClickOpenFormSecond} objectid={JSON.stringify(objective)}>
+                                                        <Button
+                                                            sx={{
+                                                                color: 'black',
+                                                                display: (objective.status > 1) ? 'none' : 'flex'
+                                                            }}
+                                                            variant={"outlined"}
+                                                            startIcon={<AddTaskTwoTone/>}
+                                                            onClick={handleClickOpenFormSecond}
+                                                            objectid={JSON.stringify(objective)}
+                                                        >
                                                             Goals
                                                         </Button>
                                                     </Box>
                                                 </CardContent>
-                                                {objective.secondary?.length > 0 ?
+                                                {objective.secondary.length > 0 ?
                                                 <CardActions sx={{ display: 'flex', alignItems: 'center' }}>
+                                                    <Button
+                                                        disabled={!getMarkDone(objective)}
+                                                        color='success'
+                                                        objectid={JSON.stringify(objective)}
+                                                        onClick={() => handleMarkDone(objective)}
+                                                        sx={{
+                                                            display: (objective.status === 1) ? 'flex' : 'none'
+                                                        }}
+                                                    >
+                                                        Mark Done
+                                                    </Button>
                                                     <Box sx={{ width: '100%' }}>
                                                         <Box sx={{ display: 'flex', alignItems: 'center' }}>
                                                             <Box sx={{ width: '100%', mr: 1 }}>
@@ -409,7 +460,14 @@ export default function Objectives({deleteToken, token}) {
                                                             </Box>
                                                         </Box>
                                                     </Box>
-                                                    <Button onClick={handleClickOpenFormThird} objectid={JSON.stringify(objective)}>
+                                                    <Button
+                                                        variant="outlined"
+                                                        onClick={handleClickOpenFormThird}
+                                                        objectid={JSON.stringify(objective)}
+                                                        sx={{
+                                                            display: (objective.status === 1) ? 'flex' : 'none'
+                                                        }}
+                                                    >
                                                         Progress
                                                     </Button>
                                                 </CardActions> : null}
@@ -418,7 +476,7 @@ export default function Objectives({deleteToken, token}) {
                                     )) : null}
                                 </Grid>
                             }
-                            <Box py={1} display="flex" justifyContent="center" sx={{ position: 'relative', left: '-16px', width: 1137}}>
+                            <Box py={1} display="flex" justifyContent="center">
                                 <Pagination
                                     onChange={(e, value) => setPagePersonalObjectives(value)}
                                     style={{
@@ -432,9 +490,9 @@ export default function Objectives({deleteToken, token}) {
                         </TabPanel>
                         <TabPanel value={tab} index={1}>
                             {loading ? <Skeleton variant={"rectangular"} width={1200} height={400}/> :
-                                <Grid container spacing={2} sx={{height: 550}}>
+                                <Grid container spacing={2} sx={{height: 600}}>
                                     {mainTeamObjectives.length > 0 ? mainTeamObjectives
-                                        .sort((a, b) => (a.done === b.done)? 0 : a.done? 1 : -1)
+                                        .sort((a, b) => (a.status === 1 && b.status !== 1) ? -1 : ((a.status < b.status) ? -1 : 1))
                                         .slice((pageTeamObjectives - 1) * objectivesPerPage, pageTeamObjectives * objectivesPerPage)
                                         .map((objective) =>(
                                             <Grid item sm={12} key={objective._id}>
@@ -471,7 +529,7 @@ export default function Objectives({deleteToken, token}) {
                                         )) : null}
                                 </Grid>
                             }
-                            <Box py={1} display="flex" justifyContent="center" sx={{ position: 'relative', left: '-16px', width: 1137}}>
+                            <Box py={1} display="flex" justifyContent="center">
                                 <Pagination
                                     onChange={(e, value) => setPageTeamObjectives(value)}
                                     style={{
@@ -552,6 +610,7 @@ export default function Objectives({deleteToken, token}) {
                                 type="text"
                                 fullWidth
                                 multiline
+                                maxRows={4}
                                 variant="outlined"
                                 value={mainObjectiveTitle}
                                 onChange={e => {
@@ -637,45 +696,49 @@ export default function Objectives({deleteToken, token}) {
                             </Typography>
                             <List dense sx={{ width: '100%', bgcolor: 'background.paper' }}>
                                 {mainId.secondary?.map((goal, index) => (
-                                    <Box key={goal._id} sx={{display: "flex", justifyContent: 'space-between'}}>
-                                        <Typography
-                                            component="div"
-                                            color="primary"
-                                            sx={{fontSize: 20}}
-                                        >
-                                            {goal.title}
-                                        </Typography>
-                                        {getDaysDifference(goal.deadline) < 0 ?
-                                            <Typography color='error'>
-                                                Past due days {Math.ceil(Math.abs(getDaysDifference(goal.deadline))) - 1}
-                                            </Typography> :
-                                            <Typography color='success'>
-                                                Due in {Math.ceil(Math.abs(getDaysDifference(goal.deadline)))} days
+                                    <div>
+                                        <br/>
+                                        <Box key={goal._id} sx={{display: "flex", justifyContent: 'space-between'}}>
+                                            <Typography
+                                                component="div"
+                                                color="primary"
+                                                sx={{fontSize: 20, maxWidth: 600}}
+                                            >
+                                                {goal.title}
                                             </Typography>
-                                        }
-                                        <Box sx={{display: "flex", justifyContent: 'space-between', width: 500}}>
-                                            <Slider
-                                                disabled={getDaysDifference(goal.deadline) < 0 || goal.status > 1}
-                                                valueLabelDisplay={"auto"}
-                                                value={sliders[index]?.progress || 0}
-                                                onChange={(event, newValue) => setSliders(sliders?.map((slider, index2) =>
-                                                    index2 === index ? {...slider, progress: newValue} : {...slider}
-                                                ))}
-                                                marks
-                                                defaultValue={goal.progress}
-                                                step={1}
-                                                max={goal.target}
-                                                sx={{maxWidth: 400}}
-                                            />
-                                            <Typography>
-                                                {goal.target}
-                                            </Typography>
-                                            <Typography>
-                                                {goal.targetUnitMeasure}
-                                            </Typography>
+                                            {getDaysDifference(goal.deadline) < 0 ?
+                                                <Typography color='error'>
+                                                    Past due days {Math.ceil(Math.abs(getDaysDifference(goal.deadline))) - 1}
+                                                </Typography> :
+                                                <Typography color='success'>
+                                                    Due in {Math.ceil(Math.abs(getDaysDifference(goal.deadline)))} days
+                                                </Typography>
+                                            }
+                                            <Box sx={{display: "flex", justifyContent: 'space-between', width: 500}}>
+                                                <Slider
+                                                    disabled={getDaysDifference(goal.deadline) < 0 || goal.status > 1}
+                                                    valueLabelDisplay={"auto"}
+                                                    value={sliders[index]?.progress || 0}
+                                                    onChange={(event, newValue) => setSliders(sliders?.map((slider, index2) =>
+                                                        index2 === index ? {...slider, progress: newValue} : {...slider}
+                                                    ))}
+                                                    marks
+                                                    defaultValue={goal.progress}
+                                                    step={1}
+                                                    max={goal.target}
+                                                    sx={{maxWidth: 400}}
+                                                />
+                                                <Typography>
+                                                    {goal.target}
+                                                </Typography>
+                                                <Typography>
+                                                    {goal.targetUnitMeasure}
+                                                </Typography>
+                                            </Box>
                                         </Box>
                                         <br/>
-                                    </Box>
+                                        <Divider/>
+                                    </div>
                                     )
                                 )}
                             </List>

@@ -1,18 +1,18 @@
 import React, {useEffect} from 'react';
 import {
-    Box, Button,
+    Box,
     Card,
     CardActionArea,
     CardContent,
     Container,
     CssBaseline,
-    Grid,
+    Grid, LinearProgress,
     Paper, Skeleton,
     Toolbar,
     Typography,
 } from "@mui/material";
 import axios from "axios";
-import {AddTaskTwoTone, ThumbUp} from "@mui/icons-material";
+import {ThumbUp} from "@mui/icons-material";
 import AppBarDrawer from "../AppBar/AppBarDrawer";
 import {useNavigate} from "react-router-dom";
 
@@ -51,10 +51,6 @@ export default function Dashboard({deleteToken, token}) {
             }
         });
     }, []);
-
-    const handleFeed = () => {
-        navigate("/feedbacks")
-    }
 
     return(
         <Box sx={{ display: 'flex' }}>
@@ -97,7 +93,7 @@ export default function Dashboard({deleteToken, token}) {
                                                         borderColor: (feedback.type === 1) ? '#0053A0' : (feedback.type === 2) ? '#EFA825' : 'black',
                                                         position: 'relative'
                                                     }}>
-                                                        <CardActionArea onClick={handleFeed}>
+                                                        <CardActionArea onClick={() => navigate("/feedback")}>
                                                             <CardContent>
                                                                 <Box sx={{display: "flex"}}>
                                                                     {feedback.anonymous === true ?
@@ -167,23 +163,30 @@ export default function Dashboard({deleteToken, token}) {
                                                         borderColor: '#C1121F',
                                                         position: 'relative',
                                                     }}>
-                                                        <CardContent>
-                                                            <Box sx={{display: "flex"}}>
-                                                                <Typography noWrap sx={{ fontSize: 15, marginRight: 'auto', maxWidth: 700 }} color="text.secondary" component="div">
-                                                                    {objective.title}
-                                                                </Typography>
-                                                                <Typography component="div" sx={{
-                                                                    color: '#C1121F'
-                                                                }}>
-                                                                     In progress
-                                                                </Typography>
-                                                            </Box>
-                                                            <Box sx={{display: "flex"}}>
-                                                                <Typography noWrap sx={{ fontSize: 18, marginRight: 'auto', maxWidth: 900 }} component="div">
-                                                                    {objective.description}
-                                                                </Typography>
-                                                            </Box>
-                                                        </CardContent>
+                                                        <CardActionArea onClick={() => navigate("/objectives")}>
+                                                            <CardContent>
+                                                                <Box sx={{display: "flex"}}>
+                                                                    <Typography noWrap sx={{ fontSize: 20, marginRight: 'auto', maxWidth: 700 }} color="text.primary" component="div">
+                                                                        {objective.title}
+                                                                    </Typography>
+                                                                    <Typography component="div" sx={{
+                                                                        color: '#C1121F'
+                                                                    }}>
+                                                                         In progress
+                                                                    </Typography>
+                                                                </Box>
+                                                                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                                                    <Box sx={{ width: '100%', mr: 1 }}>
+                                                                        <LinearProgress variant="determinate" value={parseFloat(objective.progress)} color='progress'/>
+                                                                    </Box>
+                                                                    <Box sx={{ minWidth: 35 }}>
+                                                                        <Typography variant="body2" sx={{ color: '#C1121F'}}>
+                                                                            {objective.progress}%
+                                                                        </Typography>
+                                                                    </Box>
+                                                                </Box>
+                                                            </CardContent>
+                                                        </CardActionArea>
                                                     </Card>
                                                 </Grid>
                                             )) : null}
