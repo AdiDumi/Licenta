@@ -73,13 +73,13 @@ export default function Dashboard({deleteToken, token}) {
                                     flexDirection: 'column',
                                     alignItems: 'center',
                                     border: 1,
-                                    borderColor: 'blue',
+                                    borderColor: '#14213D',
+                                    backgroundColor: '#E5E5E5',
                                     height: 380,
-                                    backgroundColor: '#669BBC'
                                 }}
                             >
-                                <Typography> Your last feedbacks </Typography>
-                                {loading ? <Skeleton variant={"rectangular"} width={1200} height={400}/> :
+                                <Typography sx={{ fontFamily: 'Roboto',  fontWeight: 500}}> Your last received feedbacks </Typography>
+                                {loading ? <Skeleton variant={"rectangular"} width={1100} height={400}/> :
                                     <Grid container spacing={4}>
                                         {feedbacks.length > 0 ? feedbacks
                                             .sort((a, b) => (a.seen > b.seen) ? 1 : (a.seen === b.seen) ? ((new Date(a.receivedDate).getTime() < new Date(b.receivedDate).getTime()) ? 1 : -1) : -1)
@@ -147,11 +147,11 @@ export default function Dashboard({deleteToken, token}) {
                                     border: 1,
                                     borderColor: 'red',
                                     height: 380,
-                                    backgroundColor: '#4A4E69'
+                                    backgroundColor: '#E5E5E5'
                                 }}
                             >
-                                <Typography>Your last objectives</Typography>
-                                {loading ? <Skeleton variant={"rectangular"} width={1200} height={400}/> :
+                                <Typography sx={{ fontFamily: 'Roboto',  fontWeight: 500}}>Your last objectives in progress</Typography>
+                                {loading ? <Skeleton variant={"rectangular"} width={1100} height={400}/> :
                                     <Grid container spacing={2} sx={{height: 550}}>
                                         {objectives.length > 0 ? objectives
                                             .slice(0, 3)

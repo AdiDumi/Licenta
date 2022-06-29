@@ -4,8 +4,8 @@ import axios from 'axios';
 import PropTypes from 'prop-types';
 import { useFormik } from 'formik';
 import * as yup from 'yup';
-import logo from '../../images/CommunityCatalyst.svg';
-import {Container, Avatar, Typography, Button, TextField, Box, CssBaseline} from '@mui/material';
+import logo from '../../images/CommunityCatalystLogo.png';
+import {Container, Avatar, Button, TextField, Box, CssBaseline} from '@mui/material';
 
 const validationSchema = yup.object({
     username: yup

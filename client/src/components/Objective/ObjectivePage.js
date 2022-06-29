@@ -12,11 +12,11 @@ import {
     Tab,
     Tabs, TextField,
     Toolbar,
-    Typography, Divider
+    Typography, Divider, DialogContentText
 } from "@mui/material";
 import AppBarDrawer from "../AppBar/AppBarDrawer";
 import {
-    AddTaskTwoTone, EditTwoTone, FlagCircleTwoTone,
+    AddTaskTwoTone, EditTwoTone,
     GroupWorkTwoTone,
     TrackChangesTwoTone,
 } from "@mui/icons-material";
@@ -220,10 +220,10 @@ export default function Objectives({deleteToken, token}) {
             handleClickCloseEdit();
         } else {
             if(mainObjectiveTitle === '') {
-                setErrorMainObjectiveTitle("Description cannot be empty");
+                setErrorMainObjectiveTitle("Title cannot be empty");
             }
             if(mainObjectiveDescription === '') {
-                setErrorMainObjectiveDescription("Title cannot be empty");
+                setErrorMainObjectiveDescription("Description cannot be empty");
             }
         }
     }
@@ -254,16 +254,16 @@ export default function Objectives({deleteToken, token}) {
             handleCloseForm();
         } else {
             if(mainObjectiveTitle === '') {
-                setErrorMainObjectiveTitle("Description cannot be empty");
+                setErrorMainObjectiveTitle("Title cannot be empty");
             }
             if(mainObjectiveDescription === '') {
-                setErrorMainObjectiveDescription("Title cannot be empty");
+                setErrorMainObjectiveDescription("Description cannot be empty");
             }
         }
     };
 
     function isNaturalNumber(n) {
-        n = n.toString(); // force the value incase it is not
+        n = n.toString();
         let n1 = Math.abs(n), n2 = parseInt(n, 10);
         return !isNaN(n1) && n2 === n1 && n1.toString() === n && n1 !== 0;
     }
@@ -309,7 +309,7 @@ export default function Objectives({deleteToken, token}) {
             if(!isNaturalNumber(secondTarget)) {
                 setErrorSecondObjectiveTarget("Target is not valid");
             }
-            if(isNaN(Date.parse(date)) || new Date(date).getTime() < new Date(new Date().toJSON().slice(0,10).replace(/-/g,'/')).getTime()) {
+            if(isNaN(Date.parse(date)) || new Date(date).getTime() <= new Date(new Date().toJSON().slice(0,10).replace(/-/g,'/')).getTime()) {
                 setErrorDeadline('Invalid deadline');
             }
         }
@@ -358,7 +358,7 @@ export default function Objectives({deleteToken, token}) {
             headers: {
                 'Authorization': 'Bearer ' + token
             }
-        }).then(response => {
+        }).then(async response => {
             const mainPersObjectives = response.data;
             mainPersObjectives.forEach(main => {
                 main["secondary"] = [];
@@ -369,11 +369,9 @@ export default function Objectives({deleteToken, token}) {
                     headers: {
                         'Authorization': 'Bearer ' + token
                     }
-                }).then(async response => {
+                }).then(response => {
                     main["secondary"] = main["secondary"].concat(response.data);
                     main["progress"] = getProgress(main);
-                    await new Promise(r => setTimeout(r, 600));
-                    setMainPersonalObjectives(mainPersObjectives);
                 }).catch(error => {
                     if (error.response.data.error === 'Authentification failed. Check secret token.') {
                         deleteToken();
@@ -381,6 +379,8 @@ export default function Objectives({deleteToken, token}) {
                     }
                 });
             })
+            await new Promise(r => setTimeout(r, 600));
+            setMainPersonalObjectives(mainPersObjectives);
         }).catch(error => {
             if (error.response.data.error === 'Authentification failed. Check secret token.') {
                 deleteToken();
@@ -449,7 +449,7 @@ export default function Objectives({deleteToken, token}) {
                             {loading ? <Skeleton variant={"rectangular"} width={1200} height={400}/> :
                                 <Grid container spacing={2} sx={{height: 600}}>
                                     {mainPersonalObjectives.length > 0 ? mainPersonalObjectives
-                                        .sort((a, b) => (a.status === 1 && b.status !== 1) ? -1 : ((a.status < b.status) ? -1 : 1))
+                                        .sort((a, b) => (a.status === 1 && b.status !== 1) ? -1 : 1)
                                         .slice((pagePersonalObjectives - 1) * objectivesPerPage, pagePersonalObjectives * objectivesPerPage)
                                         .map((objective) =>(
                                         <Grid item sm={12} key={objective._id}>
@@ -558,7 +558,7 @@ export default function Objectives({deleteToken, token}) {
                                                     <CardContent>
                                                         <Box sx={{display: "flex"}}>
                                                             <Typography noWrap sx={{ fontSize: 17, marginRight: 'auto', maxWidth: 700 }} color="text.secondary" component="div">
-                                                                {objective.title}
+                                                                {objective.title +  ' of ' + objective.user.displayName}
                                                             </Typography>
                                                             <Typography sx={{
                                                                 color: objective.status === 0 ? 'black' : (objective.status === 1 ? '#C1121F' : 'green'),
@@ -618,6 +618,10 @@ export default function Objectives({deleteToken, token}) {
                     >
                         <DialogTitle variant="h6">Add a main objective</DialogTitle>
                         <DialogContent>
+                            <DialogContentText>
+                                Please write the title and a detailed description of the main Objective
+                            </DialogContentText>
+                            <br/>
                             <TextField
                                 autoFocus
                                 margin="dense"
@@ -639,7 +643,6 @@ export default function Objectives({deleteToken, token}) {
                             <br/>
                             <br/>
                             <TextField
-                                autoFocus
                                 margin="dense"
                                 id="mainDescription"
                                 label="Objective Description"
@@ -670,6 +673,10 @@ export default function Objectives({deleteToken, token}) {
                     >
                         <DialogTitle variant="h6">Add a secondary objective</DialogTitle>
                         <DialogContent>
+                            <DialogContentText>
+                                Please write the title of the goal. Choose a unit measure with its target and deadline.
+                            </DialogContentText>
+                            <br/>
                             <TextField
                                 autoFocus
                                 margin="dense"
@@ -695,9 +702,8 @@ export default function Objectives({deleteToken, token}) {
                                 justifyContent: 'space-between'
                             }}>
                                 <TextField
-                                    autoFocus
                                     margin="dense"
-                                    label="Target Units"
+                                    label="Target Measure Units"
                                     id="targetUnits"
                                     variant="outlined"
                                     type="text"
@@ -711,7 +717,6 @@ export default function Objectives({deleteToken, token}) {
                                     helperText={errorSecondObjectiveTargetUnit !== '' && errorSecondObjectiveTargetUnit}
                                 />
                                 <TextField
-                                    autoFocus
                                     margin="dense"
                                     label="Target"
                                     id="target"
@@ -782,7 +787,7 @@ export default function Objectives({deleteToken, token}) {
                                                     Due in {Math.ceil(Math.abs(getDaysDifference(goal.deadline)))} days
                                                 </Typography>
                                             }
-                                            <Box sx={{display: "flex", justifyContent: 'space-between', width: 500}}>
+                                            <Box sx={{display: "flex", justifyContent: 'space-between', width: 600}}>
                                                 <Slider
                                                     disabled={getDaysDifference(goal.deadline) < 0 || goal.status > 1}
                                                     valueLabelDisplay={"auto"}
@@ -794,13 +799,10 @@ export default function Objectives({deleteToken, token}) {
                                                     defaultValue={goal.progress}
                                                     step={1}
                                                     max={goal.target}
-                                                    sx={{maxWidth: 400}}
+                                                    sx={{maxWidth: 400, m: 1}}
                                                 />
                                                 <Typography>
-                                                    {goal.target}
-                                                </Typography>
-                                                <Typography>
-                                                    {goal.targetUnitMeasure}
+                                                    {goal.target + ' ' + goal.targetUnitMeasure}
                                                 </Typography>
                                             </Box>
                                         </Box>
@@ -818,7 +820,7 @@ export default function Objectives({deleteToken, token}) {
                     </form>
                 </Dialog>
                 <Dialog open={openFormEdit} onClose={handleClickCloseEdit} fullWidth maxWidth={"lg"}>
-                    <DialogTitle variant="h6">{'Edit ' + mainId.title}</DialogTitle>
+                    <DialogTitle variant="h6">{'Edit ' + mainId.title + ' of ' + mainId.user?.displayName}</DialogTitle>
                     <DialogContent>
                         <TextField
                             autoFocus
@@ -866,12 +868,12 @@ export default function Objectives({deleteToken, token}) {
                 </Dialog>
                 <Snackbar open={openSnackbarSuccess} autoHideDuration={6000} onClose={handleCloseSnackbarSuccess}>
                     <Alert onClose={handleCloseSnackbarSuccess} severity="success" sx={{ width: '100%' }}>
-                        Feedback sent successfully!
+                        Objective added successfully!
                     </Alert>
                 </Snackbar>
                 <Snackbar open={openSnackbarError} autoHideDuration={6000} onClose={handleCloseSnackbarError}>
                     <Alert onClose={handleCloseSnackbarError} severity="error" sx={{ width: '100%' }}>
-                        Feedback add failed!
+                        Objective add failed!
                     </Alert>
                 </Snackbar>
             </Box>

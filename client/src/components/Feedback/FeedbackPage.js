@@ -95,14 +95,6 @@ export default function Feedbacks({deleteToken, token}) {
     const [selectedEmployee, setSelectedEmployee] = React.useState("");
     const [feedbackMessage, setFeedbackMessage] = React.useState("");
 
-    const handleChangeTab = (event, newValue) => {
-        setTab(newValue);
-    };
-
-    const handleClickOpenForm = () => {
-        setOpenForm(true);
-    };
-
     const handleCloseForm = () => {
         setCheckboxValue("off");
         setFeedbackType('good');
@@ -166,10 +158,6 @@ export default function Feedbacks({deleteToken, token}) {
             })
         }
         handleCloseFeedback();
-    };
-
-    const handleChangeRadio = (event) => {
-        setFeedbackType(event.target.value);
     };
 
     const handleCloseSnackbarSuccess = () => {
@@ -244,7 +232,7 @@ export default function Feedbacks({deleteToken, token}) {
 
     const handleSubmit = (event) => {
         event.preventDefault();
-        var typeFeed = 2, anonym = false;
+        let typeFeed = 2, anonym = false;
         if (feedbackType === 'good') {
             typeFeed = 1;
         }
@@ -354,11 +342,11 @@ export default function Feedbacks({deleteToken, token}) {
                     <Grid container spacing={1}>
                         {/* Feedbacks button */}
                         <Grid item sm={12}>
-                            <Button startIcon={<AddComment/>} variant={"contained"} onClick={handleClickOpenForm}> Give Feedback</Button>
+                            <Button startIcon={<AddComment/>} variant={"contained"} onClick={event => setOpenForm(true)}> Give Feedback</Button>
                         </Grid>
                         {/* Feedbacks tabs */}
                         <Grid item sm={12}>
-                            <Tabs value={tab} textColor='primary' variant="fullWidth" centered selectionFollowsFocus onChange={handleChangeTab} aria-label="basic tabs example">
+                            <Tabs value={tab} textColor='primary' variant="fullWidth" centered selectionFollowsFocus onChange={(event, newTab) => setTab(newTab)} aria-label="basic tabs example">
                                 <Tab sx={{ fontSize: 18 }} icon={<MoveToInboxTwoTone />} iconPosition="start" label="Received Feedbacks"/>
                                 <Tab sx={{ fontSize: 18 }} icon={<OutboxTwoTone />} iconPosition="start" label="Sent Feedbacks"/>
                                 {isManager === true ? <Tab sx={{ fontSize: 18 }} icon={<GroupTwoTone />} iconPosition="start" label="Team Feedbacks"/> : null }
@@ -409,7 +397,7 @@ export default function Feedbacks({deleteToken, token}) {
                                         </Grid>
                                     )) : <Typography> You have no received feedbacks </Typography>}
                                 </Grid>}
-                                <Box py={1} display="flex" justifyContent="center" sx={{ position: 'relative', left: '-16px', width: 1137}}>
+                                <Box py={1} display="flex" justifyContent="center">
                                     <Pagination
                                         onChange={(e, value) => {
                                             setPageReceivedFeedbacks(value)
@@ -532,7 +520,7 @@ export default function Feedbacks({deleteToken, token}) {
                         </Grid>
                     </Grid>
                 </Container>
-                <Dialog open={openForm} onClose={handleCloseForm} fullWidth maxWidth={"md"}>
+                <Dialog open={openForm} fullWidth maxWidth={"md"}>
                     <form
                         onSubmit={handleSubmit}
                         id="myform"
@@ -540,23 +528,25 @@ export default function Feedbacks({deleteToken, token}) {
                         <DialogTitle variant="h6">Give Feedback</DialogTitle>
                         <DialogContent>
                             <DialogContentText>
-                                Please write a constructive feedback
+                                Please write a constructive feedback. You can choose if you want to be anonymous, if you want to be seen by the recipient's manager and the type of it
                             </DialogContentText>
                             <FormGroup>
                                 <FormControlLabel control={<Checkbox onClick={e => setCheckboxValue(e.target.value)}/>} label="Anonymous" />
-                                <FormControlLabel control={<Switch icon={<VisibilityOff/>} checkedIcon={<Visibility/>} checked={checked} onChange={e => setChecked(e.target.checked)}/>} label={checked ? "visible for team lead" : "not visible for team lead"}/>
+                                <FormControlLabel control={<Switch icon={<VisibilityOff/>} checkedIcon={<Visibility/>} checked={checked} onChange={e => setChecked(e.target.checked)}/>} label={checked ? "visible for recipient's manager" : "not visible for recipient's manager"}/>
                             </FormGroup>
+                            <br/>
                             <Typography>Feedback type:</Typography>
                             <RadioGroup
                                 row
                                 aria-labelledby="demo-row-radio-buttons-group-label"
                                 name="row-radio-buttons-group"
                                 value={feedbackType}
-                                onChange={handleChangeRadio}
+                                onChange={event => setFeedbackType(event.target.value)}
                             >
                                 <FormControlLabel value="good" control={<Radio color='good'/>} label="Good"/>
                                 <FormControlLabel value="improve" control={<Radio color='improve'/>} label="Improve"/>
                             </RadioGroup>
+                            <br/>
                             <Autocomplete
                                 disablePortal
                                 autoComplete={true}
@@ -571,6 +561,7 @@ export default function Feedbacks({deleteToken, token}) {
                                 onClose={e => {
                                     setTouchedAutocomplete(false)
                                 }}
+                                onOpen={e => handleInputChange(e, selectedEmployee)}
                                 renderInput={(params) =>
                                     <TextField
                                         {...params}
@@ -582,6 +573,7 @@ export default function Feedbacks({deleteToken, token}) {
                                         label="Recipient"
                                     />}
                             />
+                            <br/>
                             <TextField
                                 autoFocus
                                 margin="dense"
@@ -607,7 +599,7 @@ export default function Feedbacks({deleteToken, token}) {
                         </DialogActions>
                     </form>
                 </Dialog>
-                <Dialog open={openDialogFeedback} onClose={handleCloseFeedback}  fullWidth maxWidth={"md"}>
+                <Dialog open={openDialogFeedback} fullWidth maxWidth={"md"}>
                     <Paper
                         sx={{
                             border: 3,
@@ -616,8 +608,9 @@ export default function Feedbacks({deleteToken, token}) {
                         }}
                     >
                     <DialogTitle variant="h6">
-                        Feedback from {selectedFeedback.reporter?.displayName}
+                        Feedback from {selectedFeedback.anonymous ? 'Anonymous' : selectedFeedback.reporter?.displayName}
                         <ToggleButton
+                            autoFocus
                             value="check"
                             disabled={selectedFeedback.appreciated === true}
                             selected={selectedFeedback.appreciated === true ? true : selected}
@@ -630,14 +623,14 @@ export default function Feedbacks({deleteToken, token}) {
                                 left: '650px',
                             }}
                         >
-                            <div style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                flexWrap: 'wrap',
-                            }}>
-                                <span>Appreciate feedback </span>
-                                <ThumbUp/>
-                            </div>
+                            <Grid container alignItems="center">
+                                <Grid item>
+                                    Appreciate feedback
+                                </Grid>
+                                <Grid item>
+                                    <ThumbUp/>
+                                </Grid>
+                            </Grid>
                         </ToggleButton>
                     </DialogTitle>
                     <DialogContent>
@@ -650,7 +643,7 @@ export default function Feedbacks({deleteToken, token}) {
                         </Typography>
                     </DialogContent>
                     <DialogActions>
-                        <Button onClick={handleUpdateFeed} disabled={selectedFeedback.appreciated === true} color={'success'} variant={"contained"}>Save</Button>
+                        <Button onClick={handleUpdateFeed} disabled={selectedFeedback.appreciated === true} color={'error'} variant={"contained"}>Close</Button>
                     </DialogActions>
                     </Paper>
                 </Dialog>
