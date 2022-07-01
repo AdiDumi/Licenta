@@ -5,8 +5,7 @@ import {
     Button,
     Card, CardActions,
     CardContent,
-    Container,
-    CssBaseline, Dialog, DialogActions, DialogContent, DialogTitle,
+    Container, Dialog, DialogActions, DialogContent, DialogTitle,
     Grid, InputAdornment, LinearProgress, List, Pagination, Slider,
     Skeleton, Snackbar,
     Tab,
@@ -14,7 +13,6 @@ import {
     Toolbar,
     Typography, Divider, DialogContentText
 } from "@mui/material";
-import AppBarDrawer from "../AppBar/AppBarDrawer";
 import {
     AddTaskTwoTone, EditTwoTone,
     GroupWorkTwoTone,
@@ -40,7 +38,7 @@ const Alert = React.forwardRef(function Alert(props, ref) {
     return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
 });
 
-export default function Objectives({deleteToken, token}) {
+export default function Objectives({deleteToken, token, setPage}) {
     const navigate = useNavigate();
     const [mainId, setMainId] = React.useState('');
     const [secondTargetUnit, setSecondTargetUnit] = React.useState('');
@@ -423,35 +421,36 @@ export default function Objectives({deleteToken, token}) {
         });
     }, [render]);
 
+    useEffect(() => {
+        setPage('Objectives');
+    });
+
     return(
-        <Box sx={{ display: 'flex' }}>
-            <CssBaseline/>
-            <AppBarDrawer deleteToken={deleteToken} currentPage={"Feedbacks"}/>
-            <Box component="main" sx={{
-                flexGrow: 1,
-                p: 3
-            }}>
-                <Toolbar/>
-                <Container maxWidth="lg">
-                    <Grid container spacing={1}>
-                        {/* Add objective button */}
-                        <Grid item sm={12}>
-                            <Button startIcon={<AddTaskTwoTone/>} variant={"contained"} onClick={handleClickOpenForm}> New objective</Button>
-                        </Grid>
-                        {/* Objetives tabs */}
-                        <Grid item sm={12}>
-                            <Tabs value={tab} textColor='primary' variant="fullWidth" centered selectionFollowsFocus onChange={handleChangeTab} aria-label="basic tabs example">
-                                <Tab sx={{ fontSize: 18 }} icon={<TrackChangesTwoTone />} iconPosition="start" label="My Objectives"/>
-                                {isManager === true ? <Tab sx={{ fontSize: 18 }} icon={<GroupWorkTwoTone />} iconPosition="start" label="Team Objectives"/> : null}
-                            </Tabs>
-                        </Grid>
-                        <TabPanel value={tab} index={0} sx={{ display: 'flex', alignItems: 'center' }}>
-                            {loading ? <Skeleton variant={"rectangular"} width={1200} height={400}/> :
-                                <Grid container spacing={2} sx={{height: 600}}>
-                                    {mainPersonalObjectives.length > 0 ? mainPersonalObjectives
-                                        .sort((a, b) => (a.status === 1 && b.status !== 1) ? -1 : 1)
-                                        .slice((pagePersonalObjectives - 1) * objectivesPerPage, pagePersonalObjectives * objectivesPerPage)
-                                        .map((objective) =>(
+        <Box component="main" sx={{
+            flexGrow: 1,
+            p: 3
+        }}>
+            <Toolbar/>
+            <Container maxWidth="lg">
+                <Grid container spacing={1}>
+                    {/* Add objective button */}
+                    <Grid item sm={12}>
+                        <Button startIcon={<AddTaskTwoTone/>} variant={"contained"} onClick={handleClickOpenForm}> New objective</Button>
+                    </Grid>
+                    {/* Objetives tabs */}
+                    <Grid item sm={12}>
+                        <Tabs value={tab} textColor='primary' variant="fullWidth" centered selectionFollowsFocus onChange={handleChangeTab} aria-label="basic tabs example">
+                            <Tab sx={{ fontSize: 18 }} icon={<TrackChangesTwoTone />} iconPosition="start" label="My Objectives"/>
+                            {isManager === true ? <Tab sx={{ fontSize: 18 }} icon={<GroupWorkTwoTone />} iconPosition="start" label="Team Objectives"/> : null}
+                        </Tabs>
+                    </Grid>
+                    <TabPanel value={tab} index={0} sx={{ display: 'flex', alignItems: 'center' }}>
+                        {loading ? <Skeleton variant={"rectangular"} width={1200} height={400}/> :
+                            <Grid container spacing={2} sx={{height: 600}}>
+                                {mainPersonalObjectives.length > 0 ? mainPersonalObjectives
+                                    .sort((a, b) => (a.status === 1 && b.status !== 1) ? -1 : 1)
+                                    .slice((pagePersonalObjectives - 1) * objectivesPerPage, pagePersonalObjectives * objectivesPerPage)
+                                    .map((objective) =>(
                                         <Grid item sm={12} key={objective._id}>
                                             <Card sx={{
                                                 width: 1100,
@@ -489,286 +488,286 @@ export default function Objectives({deleteToken, token}) {
                                                     </Box>
                                                 </CardContent>
                                                 {objective.secondary.length > 0 ?
-                                                <CardActions sx={{ display: 'flex', alignItems: 'center' }}>
-                                                    <Button
-                                                        disabled={!getMarkDone(objective)}
-                                                        color='success'
-                                                        objectid={JSON.stringify(objective)}
-                                                        onClick={() => handleMarkDone(objective)}
-                                                        sx={{
-                                                            display: (objective.status === 1) ? 'flex' : 'none'
-                                                        }}
-                                                    >
-                                                        Mark Done
-                                                    </Button>
-                                                    <Box sx={{ width: '100%' }}>
-                                                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                                            <Box sx={{ width: '100%', mr: 1 }}>
-                                                                <LinearProgress variant="determinate" value={parseFloat(objective.progress)} color={objective.status === 1 ? 'progress' : 'success'}/>
-                                                            </Box>
-                                                            <Box sx={{ minWidth: 35 }}>
-                                                                <Typography variant="body2" sx={{
-                                                                    color: objective.status === 0 ? 'black' : (objective.status === 1 ? '#C1121F' : 'green'),
-                                                                }}>{objective.progress}%</Typography>
+                                                    <CardActions sx={{ display: 'flex', alignItems: 'center' }}>
+                                                        <Button
+                                                            disabled={!getMarkDone(objective)}
+                                                            color='success'
+                                                            objectid={JSON.stringify(objective)}
+                                                            onClick={() => handleMarkDone(objective)}
+                                                            sx={{
+                                                                display: (objective.status === 1) ? 'flex' : 'none'
+                                                            }}
+                                                        >
+                                                            Mark Done
+                                                        </Button>
+                                                        <Box sx={{ width: '100%' }}>
+                                                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                                                <Box sx={{ width: '100%', mr: 1 }}>
+                                                                    <LinearProgress variant="determinate" value={parseFloat(objective.progress)} color={objective.status === 1 ? 'progress' : 'success'}/>
+                                                                </Box>
+                                                                <Box sx={{ minWidth: 35 }}>
+                                                                    <Typography variant="body2" sx={{
+                                                                        color: objective.status === 0 ? 'black' : (objective.status === 1 ? '#C1121F' : 'green'),
+                                                                    }}>{objective.progress}%</Typography>
+                                                                </Box>
                                                             </Box>
                                                         </Box>
-                                                    </Box>
-                                                    <Button
-                                                        variant="outlined"
-                                                        onClick={handleClickOpenFormThird}
-                                                        objectid={JSON.stringify(objective)}
-                                                        sx={{
-                                                            display: (objective.status === 1) ? 'flex' : 'none'
-                                                        }}
-                                                    >
-                                                        Progress
-                                                    </Button>
-                                                </CardActions> : null}
+                                                        <Button
+                                                            variant="outlined"
+                                                            onClick={handleClickOpenFormThird}
+                                                            objectid={JSON.stringify(objective)}
+                                                            sx={{
+                                                                display: (objective.status === 1) ? 'flex' : 'none'
+                                                            }}
+                                                        >
+                                                            Progress
+                                                        </Button>
+                                                    </CardActions> : null}
                                             </Card>
                                         </Grid>
                                     )) : null}
-                                </Grid>
-                            }
-                            <Box py={1} display="flex" justifyContent="center">
-                                <Pagination
-                                    onChange={(e, value) => setPagePersonalObjectives(value)}
-                                    style={{
-                                        display: mainPersonalObjectives.length > 0 ? "flex" : "none",
-                                        justifyContent: "center",
-                                    }}
-                                    page={pagePersonalObjectives}
-                                    color="primary"
-                                    count={numberOfPagesPersonalObjectives}/>
-                            </Box>
-                        </TabPanel>
-                        <TabPanel value={tab} index={1}>
-                            {loading ? <Skeleton variant={"rectangular"} width={1200} height={400}/> :
-                                <Grid container spacing={2} sx={{height: 600}}>
-                                    {mainTeamObjectives.length > 0 ? mainTeamObjectives
-                                        .sort((a, b) => (a.status === 1 && b.status !== 1) ? -1 : ((a.status < b.status) ? -1 : 1))
-                                        .slice((pageTeamObjectives - 1) * objectivesPerPage, pageTeamObjectives * objectivesPerPage)
-                                        .map((objective) =>(
-                                            <Grid item sm={12} key={objective._id}>
-                                                <Card sx={{
-                                                    width: 1100,
-                                                    border: 2,
-                                                    borderColor: objective.status === 0 ? 'black' : (objective.status === 1 ? '#C1121F' : 'green'),
-                                                    position: 'relative',
-                                                }}>
-                                                    <CardContent>
-                                                        <Box sx={{display: "flex"}}>
-                                                            <Typography noWrap sx={{ fontSize: 17, marginRight: 'auto', maxWidth: 700 }} color="text.secondary" component="div">
-                                                                {objective.title +  ' of ' + objective.user.displayName}
-                                                            </Typography>
-                                                            <Typography sx={{
-                                                                color: objective.status === 0 ? 'black' : (objective.status === 1 ? '#C1121F' : 'green'),
-                                                            }}>
-                                                                {objective.status === 0 ? 'Not started' : (objective.status === 1 ? 'In progress' : 'Done')}
-                                                            </Typography>
-                                                        </Box>
-                                                        <Box sx={{display: "flex"}}>
-                                                            <Typography noWrap sx={{ fontSize: 20, marginRight: 'auto', maxWidth: 900 }} component="div">
-                                                                {objective.description}
-                                                            </Typography>
-                                                            {objective.status === 1 ? <Button sx={{
-                                                                color: 'primary'
-                                                            }} variant={"outlined"} startIcon={<EditTwoTone/>} onClick={handleClickOpenEdit} objectid={JSON.stringify(objective)}>
-                                                                Edit
-                                                            </Button> : null}
-                                                        </Box>
-                                                    </CardContent>
-                                                    {objective.secondary.length > 0 ?
-                                                        <CardActions sx={{ display: 'flex', alignItems: 'center' }}>
-                                                            <Box sx={{ width: '100%' }}>
-                                                                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                                                    <Box sx={{ width: '100%', mr: 1 }}>
-                                                                        <LinearProgress variant="determinate" value={parseFloat(objective.progress)} color={objective.status === 1 ? 'progress' : 'success'}/>
-                                                                    </Box>
-                                                                    <Box sx={{ minWidth: 35 }}>
-                                                                        <Typography variant="body2" sx={{
-                                                                            color: objective.status === 0 ? 'black' : (objective.status === 1 ? '#C1121F' : 'green'),
-                                                                        }}>{objective.progress}%</Typography>
-                                                                    </Box>
+                            </Grid>
+                        }
+                        <Box py={1} display="flex" justifyContent="center">
+                            <Pagination
+                                onChange={(e, value) => setPagePersonalObjectives(value)}
+                                style={{
+                                    display: mainPersonalObjectives.length > 0 ? "flex" : "none",
+                                    justifyContent: "center",
+                                }}
+                                page={pagePersonalObjectives}
+                                color="primary"
+                                count={numberOfPagesPersonalObjectives}/>
+                        </Box>
+                    </TabPanel>
+                    <TabPanel value={tab} index={1}>
+                        {loading ? <Skeleton variant={"rectangular"} width={1200} height={400}/> :
+                            <Grid container spacing={2} sx={{height: 600}}>
+                                {mainTeamObjectives.length > 0 ? mainTeamObjectives
+                                    .sort((a, b) => (a.status === 1 && b.status !== 1) ? -1 : ((a.status < b.status) ? -1 : 1))
+                                    .slice((pageTeamObjectives - 1) * objectivesPerPage, pageTeamObjectives * objectivesPerPage)
+                                    .map((objective) =>(
+                                        <Grid item sm={12} key={objective._id}>
+                                            <Card sx={{
+                                                width: 1100,
+                                                border: 2,
+                                                borderColor: objective.status === 0 ? 'black' : (objective.status === 1 ? '#C1121F' : 'green'),
+                                                position: 'relative',
+                                            }}>
+                                                <CardContent>
+                                                    <Box sx={{display: "flex"}}>
+                                                        <Typography noWrap sx={{ fontSize: 17, marginRight: 'auto', maxWidth: 700 }} color="text.secondary" component="div">
+                                                            {objective.title +  ' of ' + objective.user.displayName}
+                                                        </Typography>
+                                                        <Typography sx={{
+                                                            color: objective.status === 0 ? 'black' : (objective.status === 1 ? '#C1121F' : 'green'),
+                                                        }}>
+                                                            {objective.status === 0 ? 'Not started' : (objective.status === 1 ? 'In progress' : 'Done')}
+                                                        </Typography>
+                                                    </Box>
+                                                    <Box sx={{display: "flex"}}>
+                                                        <Typography noWrap sx={{ fontSize: 20, marginRight: 'auto', maxWidth: 900 }} component="div">
+                                                            {objective.description}
+                                                        </Typography>
+                                                        {objective.status === 1 ? <Button sx={{
+                                                            color: 'primary'
+                                                        }} variant={"outlined"} startIcon={<EditTwoTone/>} onClick={handleClickOpenEdit} objectid={JSON.stringify(objective)}>
+                                                            Edit
+                                                        </Button> : null}
+                                                    </Box>
+                                                </CardContent>
+                                                {objective.secondary.length > 0 ?
+                                                    <CardActions sx={{ display: 'flex', alignItems: 'center' }}>
+                                                        <Box sx={{ width: '100%' }}>
+                                                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                                                <Box sx={{ width: '100%', mr: 1 }}>
+                                                                    <LinearProgress variant="determinate" value={parseFloat(objective.progress)} color={objective.status === 1 ? 'progress' : 'success'}/>
+                                                                </Box>
+                                                                <Box sx={{ minWidth: 35 }}>
+                                                                    <Typography variant="body2" sx={{
+                                                                        color: objective.status === 0 ? 'black' : (objective.status === 1 ? '#C1121F' : 'green'),
+                                                                    }}>{objective.progress}%</Typography>
                                                                 </Box>
                                                             </Box>
-                                                        </CardActions> : null}
-                                                </Card>
-                                            </Grid>
-                                        )) : null}
-                                </Grid>
-                            }
-                            <Box py={1} display="flex" justifyContent="center">
-                                <Pagination
-                                    onChange={(e, value) => setPageTeamObjectives(value)}
-                                    style={{
-                                        display: mainTeamObjectives.length > 0 ? "flex" : "none",
-                                        justifyContent: "center",
-                                    }}
-                                    page={pageTeamObjectives}
-                                    color="primary"
-                                    count={numberOfPagesTeamObjectives}/>
-                            </Box>
-                        </TabPanel>
-                    </Grid>
-                </Container>
-                <Dialog open={openForm} onClose={handleCloseForm} fullWidth maxWidth={"md"}>
-                    <form
-                        id="myform"
-                        onSubmit={handleSubmit}
-                    >
-                        <DialogTitle variant="h6">Add a main objective</DialogTitle>
-                        <DialogContent>
-                            <DialogContentText>
-                                Please write the title and a detailed description of the main Objective
-                            </DialogContentText>
-                            <br/>
-                            <TextField
-                                autoFocus
-                                margin="dense"
-                                id="mainTitle"
-                                label="Objective Title"
-                                type="text"
-                                fullWidth
-                                multiline
-                                rows={2}
-                                variant="outlined"
-                                value={mainObjectiveTitle}
-                                onChange={e => {
-                                    setMainObjectiveTitle(e.target.value)
-                                    setErrorMainObjectiveTitle('');
+                                                        </Box>
+                                                    </CardActions> : null}
+                                            </Card>
+                                        </Grid>
+                                    )) : null}
+                            </Grid>
+                        }
+                        <Box py={1} display="flex" justifyContent="center">
+                            <Pagination
+                                onChange={(e, value) => setPageTeamObjectives(value)}
+                                style={{
+                                    display: mainTeamObjectives.length > 0 ? "flex" : "none",
+                                    justifyContent: "center",
                                 }}
-                                error={errorMainObjectiveTitle !== ''}
-                                helperText={errorMainObjectiveTitle !== '' && errorMainObjectiveTitle}
-                            />
-                            <br/>
-                            <br/>
+                                page={pageTeamObjectives}
+                                color="primary"
+                                count={numberOfPagesTeamObjectives}/>
+                        </Box>
+                    </TabPanel>
+                </Grid>
+            </Container>
+            <Dialog open={openForm} onClose={handleCloseForm} fullWidth maxWidth={"md"}>
+                <form
+                    id="myform"
+                    onSubmit={handleSubmit}
+                >
+                    <DialogTitle variant="h6">Add a main objective</DialogTitle>
+                    <DialogContent>
+                        <DialogContentText>
+                            Please write the title and a detailed description of the main Objective
+                        </DialogContentText>
+                        <br/>
+                        <TextField
+                            autoFocus
+                            margin="dense"
+                            id="mainTitle"
+                            label="Objective Title"
+                            type="text"
+                            fullWidth
+                            multiline
+                            rows={2}
+                            variant="outlined"
+                            value={mainObjectiveTitle}
+                            onChange={e => {
+                                setMainObjectiveTitle(e.target.value)
+                                setErrorMainObjectiveTitle('');
+                            }}
+                            error={errorMainObjectiveTitle !== ''}
+                            helperText={errorMainObjectiveTitle !== '' && errorMainObjectiveTitle}
+                        />
+                        <br/>
+                        <br/>
+                        <TextField
+                            margin="dense"
+                            id="mainDescription"
+                            label="Objective Description"
+                            type="text"
+                            fullWidth
+                            multiline
+                            rows={5}
+                            variant="outlined"
+                            value={mainObjectiveDescription}
+                            onChange={e => {
+                                setMainObjectiveDescription(e.target.value)
+                                setErrorMainObjectiveDescription('');
+                            }}
+                            error={errorMainObjectiveDescription !== ''}
+                            helperText={errorMainObjectiveDescription !== '' && errorMainObjectiveDescription}
+                        />
+                    </DialogContent>
+                    <DialogActions sx={{display: 'flex'}}>
+                        <Button variant={"contained"} color='error' onClick={handleCloseForm} sx={{marginRight: 'auto'}}>Cancel</Button>
+                        <Button type="submit" variant={"contained"} color={'success'} form="myform">Send</Button>
+                    </DialogActions>
+                </form>
+            </Dialog>
+            <Dialog open={openFormSecond} onClose={handleCloseFormSecond} fullWidth maxWidth={"lg"}>
+                <form
+                    id="myformSecond"
+                    onSubmit={handleSubmitSecond}
+                >
+                    <DialogTitle variant="h6">Add a secondary objective</DialogTitle>
+                    <DialogContent>
+                        <DialogContentText>
+                            Please write the title of the goal. Choose a unit measure with its target and deadline.
+                        </DialogContentText>
+                        <br/>
+                        <TextField
+                            autoFocus
+                            margin="dense"
+                            id="secondTitle"
+                            label="Secondary Objective Title"
+                            type="text"
+                            fullWidth
+                            multiline
+                            maxRows={4}
+                            variant="outlined"
+                            value={mainObjectiveTitle}
+                            onChange={e => {
+                                setMainObjectiveTitle(e.target.value)
+                                setErrorMainObjectiveTitle('');
+                            }}
+                            error={errorMainObjectiveTitle !== ''}
+                            helperText={errorMainObjectiveTitle !== '' && errorMainObjectiveTitle}
+                        />
+                        <br/>
+                        <br/>
+                        <Box sx={{
+                            display: 'flex',
+                            justifyContent: 'space-between'
+                        }}>
                             <TextField
                                 margin="dense"
-                                id="mainDescription"
-                                label="Objective Description"
-                                type="text"
-                                fullWidth
-                                multiline
-                                rows={5}
+                                label="Target Measure Units"
+                                id="targetUnits"
                                 variant="outlined"
-                                value={mainObjectiveDescription}
+                                type="text"
+                                multiline
+                                value={secondTargetUnit}
                                 onChange={e => {
-                                    setMainObjectiveDescription(e.target.value)
-                                    setErrorMainObjectiveDescription('');
+                                    setSecondTargetUnit(e.target.value)
+                                    setErrorSecondObjectiveTargetUnit('');
                                 }}
-                                error={errorMainObjectiveDescription !== ''}
-                                helperText={errorMainObjectiveDescription !== '' && errorMainObjectiveDescription}
+                                error={errorSecondObjectiveTargetUnit !== ''}
+                                helperText={errorSecondObjectiveTargetUnit !== '' && errorSecondObjectiveTargetUnit}
                             />
-                        </DialogContent>
-                        <DialogActions sx={{display: 'flex'}}>
-                            <Button variant={"contained"} color='error' onClick={handleCloseForm} sx={{marginRight: 'auto'}}>Cancel</Button>
-                            <Button type="submit" variant={"contained"} color={'success'} form="myform">Send</Button>
-                        </DialogActions>
-                    </form>
-                </Dialog>
-                <Dialog open={openFormSecond} onClose={handleCloseFormSecond} fullWidth maxWidth={"lg"}>
-                    <form
-                        id="myformSecond"
-                        onSubmit={handleSubmitSecond}
-                    >
-                        <DialogTitle variant="h6">Add a secondary objective</DialogTitle>
-                        <DialogContent>
-                            <DialogContentText>
-                                Please write the title of the goal. Choose a unit measure with its target and deadline.
-                            </DialogContentText>
-                            <br/>
                             <TextField
-                                autoFocus
                                 margin="dense"
-                                id="secondTitle"
-                                label="Secondary Objective Title"
-                                type="text"
-                                fullWidth
-                                multiline
-                                maxRows={4}
+                                label="Target"
+                                id="target"
                                 variant="outlined"
-                                value={mainObjectiveTitle}
+                                type="number"
+                                value={secondTarget}
                                 onChange={e => {
-                                    setMainObjectiveTitle(e.target.value)
-                                    setErrorMainObjectiveTitle('');
+                                    setSecondTarget(e.target.value)
+                                    setErrorSecondObjectiveTarget('');
                                 }}
-                                error={errorMainObjectiveTitle !== ''}
-                                helperText={errorMainObjectiveTitle !== '' && errorMainObjectiveTitle}
+                                InputProps={{
+                                    startAdornment: <InputAdornment position={"start"}>{secondTargetUnit}</InputAdornment>
+                                }}
+                                error={errorSecondObjectiveTarget !== ''}
+                                helperText={errorSecondObjectiveTarget !== '' && errorSecondObjectiveTarget}
                             />
-                            <br/>
-                            <br/>
-                            <Box sx={{
-                                display: 'flex',
-                                justifyContent: 'space-between'
-                            }}>
-                                <TextField
-                                    margin="dense"
-                                    label="Target Measure Units"
-                                    id="targetUnits"
-                                    variant="outlined"
-                                    type="text"
-                                    multiline
-                                    value={secondTargetUnit}
-                                    onChange={e => {
-                                        setSecondTargetUnit(e.target.value)
-                                        setErrorSecondObjectiveTargetUnit('');
-                                    }}
-                                    error={errorSecondObjectiveTargetUnit !== ''}
-                                    helperText={errorSecondObjectiveTargetUnit !== '' && errorSecondObjectiveTargetUnit}
-                                />
-                                <TextField
-                                    margin="dense"
-                                    label="Target"
-                                    id="target"
-                                    variant="outlined"
-                                    type="number"
-                                    value={secondTarget}
-                                    onChange={e => {
-                                        setSecondTarget(e.target.value)
-                                        setErrorSecondObjectiveTarget('');
-                                    }}
-                                    InputProps={{
-                                        startAdornment: <InputAdornment position={"start"}>{secondTargetUnit}</InputAdornment>
-                                    }}
-                                    error={errorSecondObjectiveTarget !== ''}
-                                    helperText={errorSecondObjectiveTarget !== '' && errorSecondObjectiveTarget}
-                                />
-                                <DesktopDatePicker
-                                    label="Deadline"
-                                    inputFormat="MM/dd/yyyy"
-                                    value={date}
-                                    onChange={(newDate) => {
-                                        setDate(newDate);
-                                        setErrorDeadline('');
-                                    }}
-                                    minDate={new Date()}
-                                    renderInput={(params) =>
-                                        <TextField margin="dense"
-                                        error={errorDeadline !== ''}
-                                        helperText={errorDeadline !== '' && errorDeadline}
-                                        {...params}
+                            <DesktopDatePicker
+                                label="Deadline"
+                                inputFormat="MM/dd/yyyy"
+                                value={date}
+                                onChange={(newDate) => {
+                                    setDate(newDate);
+                                    setErrorDeadline('');
+                                }}
+                                minDate={new Date()}
+                                renderInput={(params) =>
+                                    <TextField margin="dense"
+                                               error={errorDeadline !== ''}
+                                               helperText={errorDeadline !== '' && errorDeadline}
+                                               {...params}
                                     />}
-                                />
-                            </Box>
-                        </DialogContent>
-                        <DialogActions sx={{display: 'flex'}}>
-                            <Button variant={"contained"} color='error' onClick={handleCloseFormSecond} sx={{marginRight: 'auto'}}>Cancel</Button>
-                            <Button type="submit" variant={"contained"} color={'success'} form="myformSecond">Add</Button>
-                        </DialogActions>
-                    </form>
-                </Dialog>
-                <Dialog open={openFormThird} onClose={handleCloseFormThird} fullWidth maxWidth={"lg"}>
-                    <form
-                        id="myformThird"
-                        onSubmit={handleSubmitThird}
-                    >
-                        <DialogTitle variant="h6">{mainId.title}</DialogTitle>
-                        <DialogContent>
-                            <Typography sx={{fontSize: 25}}>
-                                {mainId.description}
-                            </Typography>
-                            <List dense sx={{ width: '100%', bgcolor: 'background.paper' }}>
-                                {mainId.secondary?.map((goal, index) => (
+                            />
+                        </Box>
+                    </DialogContent>
+                    <DialogActions sx={{display: 'flex'}}>
+                        <Button variant={"contained"} color='error' onClick={handleCloseFormSecond} sx={{marginRight: 'auto'}}>Cancel</Button>
+                        <Button type="submit" variant={"contained"} color={'success'} form="myformSecond">Add</Button>
+                    </DialogActions>
+                </form>
+            </Dialog>
+            <Dialog open={openFormThird} onClose={handleCloseFormThird} fullWidth maxWidth={"lg"}>
+                <form
+                    id="myformThird"
+                    onSubmit={handleSubmitThird}
+                >
+                    <DialogTitle variant="h6">{mainId.title}</DialogTitle>
+                    <DialogContent>
+                        <Typography sx={{fontSize: 25}}>
+                            {mainId.description}
+                        </Typography>
+                        <List dense sx={{ width: '100%', bgcolor: 'background.paper' }}>
+                            {mainId.secondary?.map((goal, index) => (
                                     <div key={goal._id}>
                                         <br/>
                                         <Box sx={{display: "flex", justifyContent: 'space-between'}}>
@@ -809,74 +808,73 @@ export default function Objectives({deleteToken, token}) {
                                         <br/>
                                         <Divider/>
                                     </div>
-                                    )
-                                )}
-                            </List>
-                        </DialogContent>
-                        <DialogActions sx={{display: 'flex'}}>
-                            <Button variant={"contained"} color='error' onClick={handleCloseFormThird} sx={{marginRight: 'auto'}}>Cancel</Button>
-                            <Button type="submit" variant={"contained"} color={'success'} form="myformThird">Save</Button>
-                        </DialogActions>
-                    </form>
-                </Dialog>
-                <Dialog open={openFormEdit} onClose={handleClickCloseEdit} fullWidth maxWidth={"lg"}>
-                    <DialogTitle variant="h6">{'Edit ' + mainId.title + ' of ' + mainId.user?.displayName}</DialogTitle>
-                    <DialogContent>
-                        <TextField
-                            autoFocus
-                            margin="dense"
-                            id="mainTitle"
-                            label="Objective Title"
-                            type="text"
-                            fullWidth
-                            multiline
-                            rows={2}
-                            variant="outlined"
-                            value={mainObjectiveTitle}
-                            onChange={e => {
-                                setMainObjectiveTitle(e.target.value)
-                                setErrorMainObjectiveTitle('');
-                            }}
-                            error={errorMainObjectiveTitle !== ''}
-                            helperText={errorMainObjectiveTitle !== '' && errorMainObjectiveTitle}
-                        />
-                        <br/>
-                        <br/>
-                        <TextField
-                            autoFocus
-                            margin="dense"
-                            id="mainDescription"
-                            label="Objective Description"
-                            type="text"
-                            fullWidth
-                            multiline
-                            rows={5}
-                            variant="outlined"
-                            value={mainObjectiveDescription}
-                            onChange={e => {
-                                setMainObjectiveDescription(e.target.value)
-                                setErrorMainObjectiveDescription('');
-                            }}
-                            error={errorMainObjectiveDescription !== ''}
-                            helperText={errorMainObjectiveDescription !== '' && errorMainObjectiveDescription}
-                        />
-                        </DialogContent>
+                                )
+                            )}
+                        </List>
+                    </DialogContent>
                     <DialogActions sx={{display: 'flex'}}>
-                        <Button variant={"contained"} color='error' onClick={handleClickCloseEdit} sx={{marginRight: 'auto'}}>Cancel</Button>
-                        <Button onClick={handleSubmitEdit} variant={"contained"} color={'success'}>Save</Button>
+                        <Button variant={"contained"} color='error' onClick={handleCloseFormThird} sx={{marginRight: 'auto'}}>Cancel</Button>
+                        <Button type="submit" variant={"contained"} color={'success'} form="myformThird">Save</Button>
                     </DialogActions>
-                </Dialog>
-                <Snackbar open={openSnackbarSuccess} autoHideDuration={6000} onClose={handleCloseSnackbarSuccess}>
-                    <Alert onClose={handleCloseSnackbarSuccess} severity="success" sx={{ width: '100%' }}>
-                        Objective added successfully!
-                    </Alert>
-                </Snackbar>
-                <Snackbar open={openSnackbarError} autoHideDuration={6000} onClose={handleCloseSnackbarError}>
-                    <Alert onClose={handleCloseSnackbarError} severity="error" sx={{ width: '100%' }}>
-                        Objective add failed!
-                    </Alert>
-                </Snackbar>
-            </Box>
+                </form>
+            </Dialog>
+            <Dialog open={openFormEdit} onClose={handleClickCloseEdit} fullWidth maxWidth={"lg"}>
+                <DialogTitle variant="h6">{'Edit ' + mainId.title + ' of ' + mainId.user?.displayName}</DialogTitle>
+                <DialogContent>
+                    <TextField
+                        autoFocus
+                        margin="dense"
+                        id="mainTitle"
+                        label="Objective Title"
+                        type="text"
+                        fullWidth
+                        multiline
+                        rows={2}
+                        variant="outlined"
+                        value={mainObjectiveTitle}
+                        onChange={e => {
+                            setMainObjectiveTitle(e.target.value)
+                            setErrorMainObjectiveTitle('');
+                        }}
+                        error={errorMainObjectiveTitle !== ''}
+                        helperText={errorMainObjectiveTitle !== '' && errorMainObjectiveTitle}
+                    />
+                    <br/>
+                    <br/>
+                    <TextField
+                        autoFocus
+                        margin="dense"
+                        id="mainDescription"
+                        label="Objective Description"
+                        type="text"
+                        fullWidth
+                        multiline
+                        rows={5}
+                        variant="outlined"
+                        value={mainObjectiveDescription}
+                        onChange={e => {
+                            setMainObjectiveDescription(e.target.value)
+                            setErrorMainObjectiveDescription('');
+                        }}
+                        error={errorMainObjectiveDescription !== ''}
+                        helperText={errorMainObjectiveDescription !== '' && errorMainObjectiveDescription}
+                    />
+                </DialogContent>
+                <DialogActions sx={{display: 'flex'}}>
+                    <Button variant={"contained"} color='error' onClick={handleClickCloseEdit} sx={{marginRight: 'auto'}}>Cancel</Button>
+                    <Button onClick={handleSubmitEdit} variant={"contained"} color={'success'}>Save</Button>
+                </DialogActions>
+            </Dialog>
+            <Snackbar open={openSnackbarSuccess} autoHideDuration={6000} onClose={handleCloseSnackbarSuccess}>
+                <Alert onClose={handleCloseSnackbarSuccess} severity="success" sx={{ width: '100%' }}>
+                    Objective added successfully!
+                </Alert>
+            </Snackbar>
+            <Snackbar open={openSnackbarError} autoHideDuration={6000} onClose={handleCloseSnackbarError}>
+                <Alert onClose={handleCloseSnackbarError} severity="error" sx={{ width: '100%' }}>
+                    Objective add failed!
+                </Alert>
+            </Snackbar>
         </Box>
-    );
+    )
 }

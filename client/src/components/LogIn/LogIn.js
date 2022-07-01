@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import PropTypes from 'prop-types';
@@ -17,7 +17,7 @@ const validationSchema = yup.object({
         .required('Password is required'),
 });
 
-export default function LogIn({setToken}) {
+export default function LogIn({setToken, token}) {
     const navigate = useNavigate();
     const [loginError, setLoginError] = React.useState("");
 
@@ -44,6 +44,12 @@ export default function LogIn({setToken}) {
                         setLoginError(error.response.data.error.lde_message);
                     });
         },
+    });
+
+    useEffect(() => {
+        if(token) {
+            navigate("/dashboard");
+        }
     });
 
     return (

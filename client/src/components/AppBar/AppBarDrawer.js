@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import {
     Button,
     Divider,
@@ -20,6 +20,7 @@ import FlagIcon from '@mui/icons-material/FlagTwoTone';
 import DashboardIcon from '@mui/icons-material/DashboardTwoTone';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import {useNavigate} from "react-router-dom";
+import axios from "axios";
 
 const drawerWidth = 200;
 
@@ -88,9 +89,10 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' 
     }),
 );
 
-export default function AppBarDrawer({deleteToken, currentPage}) {
+export default function AppBarDrawer({token, deleteToken, currentPage}) {
     const navigate = useNavigate();
     const [open, setOpen] = React.useState(false);
+    const [user, setUser] = React.useState('');
 
     const handleDrawerOpen = () => {
         setOpen(true);
@@ -115,6 +117,21 @@ export default function AppBarDrawer({deleteToken, currentPage}) {
     const handleDashboard = () => {
         navigate("/dashboard");
     }
+
+    useEffect(() => {
+        axios.get(process.env.REACT_APP_BACKEND_URL + process.env.REACT_APP_BACKEND_PORT + '/user', {
+            headers: {
+                'Authorization': 'Bearer ' + token
+            }
+        }).then(response => {
+            setUser(response.data);
+        }).catch(error => {
+            if(error.response.data.error === 'Authentification failed. Check secret token.') {
+                deleteToken();
+                navigate("/");
+            }
+        });
+    });
 
     return(
         <div>
@@ -148,7 +165,7 @@ export default function AppBarDrawer({deleteToken, currentPage}) {
                         }}
                         endIcon={<AccountCircleIcon/>}
                         onClick={handleLogout}>
-                        Log Out
+                        Log Out as {user.displayName}
                     </Button>
                 </Toolbar>
             </AppBar>

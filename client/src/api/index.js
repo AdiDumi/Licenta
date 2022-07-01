@@ -1,20 +1,21 @@
 import axios from 'axios';
+import {useToken} from '../useToken';
+import {useNavigate} from "react-router-dom";
 
-const API = axios.create({ baseURL: 'http://localhost:5000' });
-
-API.interceptors.request.use((req) => {
-  if (localStorage.getItem('profile')) {
-    req.headers.Authorization = `Bearer ${JSON.parse(localStorage.getItem('profile')).token}`;
-  }
-
-  return req;
-});
-
-export const fetchPosts = () => API.get('/posts');
-export const createPost = (newPost) => API.post('/posts', newPost);
-export const likePost = (id) => API.patch(`/posts/${id}/likePost`);
-export const updatePost = (id, updatedPost) => API.patch(`/posts/${id}`, updatedPost);
-export const deletePost = (id) => API.delete(`/posts/${id}`);
-
-export const signIn = (formData) => API.post('/user/signin', formData);
-export const signUp = (formData) => API.post('/user/signup', formData);
+export function GetFeedbacks(setFeedbacks, setLoading) {
+    const { token, setToken, deleteToken } = useToken();
+    const navigate = useNavigate();
+    axios.get(process.env.REACT_APP_BACKEND_URL + process.env.REACT_APP_BACKEND_PORT + '/feedback/recv', {
+        headers: {
+            'Authorization': 'Bearer ' + token
+        }
+    }).then(response => {
+        setFeedbacks(response.data);
+        setLoading(false);
+    }).catch(error => {
+        if(error.response.data.error === 'Authentification failed. Check secret token.') {
+            deleteToken();
+            navigate("/");
+        }
+    });
+}

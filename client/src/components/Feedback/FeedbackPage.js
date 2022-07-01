@@ -6,7 +6,6 @@ import {
     Card, CardActionArea,
     CardContent, Checkbox,
     Container,
-    CssBaseline,
     Dialog,
     DialogContentText, DialogTitle, FormControlLabel,
     FormGroup,
@@ -15,7 +14,6 @@ import {
     Toolbar,
     Typography
 } from "@mui/material";
-import AppBarDrawer from "../AppBar/AppBarDrawer";
 import MuiAlert from '@mui/material/Alert';
 import MuiDialogContent from '@mui/material/DialogContent';
 import MuiDialogActions from '@mui/material/DialogActions';
@@ -60,7 +58,7 @@ function TabPanel(props) {
     );
 }
 
-export default function Feedbacks({deleteToken, token}) {
+export default function Feedbacks({deleteToken, token, setPage}) {
     const navigate = useNavigate();
     const [loading, setLoading] = React.useState(true);
     const [errorMessageAutocomplete, setErrorMessageAutocomplete] = React.useState('');
@@ -329,90 +327,91 @@ export default function Feedbacks({deleteToken, token}) {
         setLoading(false);
     }, [render]);
 
+    useEffect(() => {
+        setPage('Feedbacks');
+    });
+
     return(
-        <Box sx={{ display: 'flex' }}>
-            <CssBaseline/>
-            <AppBarDrawer deleteToken={deleteToken} currentPage={"Feedbacks"}/>
-            <Box component="main" sx={{
-                flexGrow: 1,
-                p: 3
-            }}>
-                <Toolbar/>
-                <Container maxWidth="lg">
-                    <Grid container spacing={1}>
-                        {/* Feedbacks button */}
-                        <Grid item sm={12}>
-                            <Button startIcon={<AddComment/>} variant={"contained"} onClick={event => setOpenForm(true)}> Give Feedback</Button>
-                        </Grid>
-                        {/* Feedbacks tabs */}
-                        <Grid item sm={12}>
-                            <Tabs value={tab} textColor='primary' variant="fullWidth" centered selectionFollowsFocus onChange={(event, newTab) => setTab(newTab)} aria-label="basic tabs example">
-                                <Tab sx={{ fontSize: 18 }} icon={<MoveToInboxTwoTone />} iconPosition="start" label="Received Feedbacks"/>
-                                <Tab sx={{ fontSize: 18 }} icon={<OutboxTwoTone />} iconPosition="start" label="Sent Feedbacks"/>
-                                {isManager === true ? <Tab sx={{ fontSize: 18 }} icon={<GroupTwoTone />} iconPosition="start" label="Team Feedbacks"/> : null }
-                            </Tabs>
-                            <TabPanel value={tab} index={0}>
-                                {loading ? <Skeleton variant={"rectangular"} width={1200} height={400}/> :
+        <Box component="main" sx={{
+            flexGrow: 1,
+            p: 3
+        }}>
+            <Toolbar/>
+            <Container maxWidth="lg">
+                <Grid container spacing={1}>
+                    {/* Feedbacks button */}
+                    <Grid item sm={12}>
+                        <Button startIcon={<AddComment/>} variant={"contained"} onClick={event => setOpenForm(true)}> Give Feedback</Button>
+                    </Grid>
+                    {/* Feedbacks tabs */}
+                    <Grid item sm={12}>
+                        <Tabs value={tab} textColor='primary' variant="fullWidth" centered selectionFollowsFocus onChange={(event, newTab) => setTab(newTab)} aria-label="basic tabs example">
+                            <Tab sx={{ fontSize: 18 }} icon={<MoveToInboxTwoTone />} iconPosition="start" label="Received Feedbacks"/>
+                            <Tab sx={{ fontSize: 18 }} icon={<OutboxTwoTone />} iconPosition="start" label="Sent Feedbacks"/>
+                            {isManager === true ? <Tab sx={{ fontSize: 18 }} icon={<GroupTwoTone />} iconPosition="start" label="Team Feedbacks"/> : null }
+                        </Tabs>
+                        <TabPanel value={tab} index={0}>
+                            {loading ? <Skeleton variant={"rectangular"} width={1200} height={400}/> :
                                 <Grid container spacing={2} sx={{height: 540}}>
                                     {receivedFeedbacks.length > 0 ? receivedFeedbacks
                                         .sort((a, b) => (a.seen > b.seen) ? 1 : (a.seen === b.seen) ? ((new Date(a.receivedDate).getTime() < new Date(b.receivedDate).getTime()) ? 1 : -1) : -1)
                                         .slice((pageReceivedFeedbacks - 1) * feedbacksPerPage, pageReceivedFeedbacks * feedbacksPerPage)
                                         .map(feedback => (
-                                        <Grid item xs={"auto"} sm={6} md={4} key={feedback._id}>
-                                            {feedback.seen === false ? <Typography sx={{ color: '#E71523' }}>New</Typography> : <Typography> &nbsp; </Typography>}
-                                            <Card sx={{
-                                                border: 3,
-                                                borderColor: (feedback.type === 1) ? '#0053A0' : (feedback.type === 2) ? '#EFA825' : 'black',
-                                                position: 'relative',
-                                            }} >
-                                                <CardActionArea onClick={handleClickOpenFeedback} feedbackid={JSON.stringify(feedback)}>
-                                                    <CardContent>
-                                                        <Box sx={{display: "flex"}}>
-                                                            {feedback.anonymous === true ?
-                                                                <Typography sx={{ fontSize: 17, marginRight: 'auto', maxWidth: 700 }} color="text.secondary" component="div">
-                                                                    Anonymous
-                                                                </Typography> :
-                                                                <Typography sx={{ fontSize: 17, marginRight: 'auto', maxWidth: 700 }} color="text.secondary" component="div"> From:
-                                                                    <Typography sx={{textDecoration: 'underline', fontSize: 18, marginRight: 'auto', maxWidth: 700}} display="inline" color="text.primary">
-                                                                        {feedback.reporter.displayName}
+                                            <Grid item xs={"auto"} sm={6} md={4} key={feedback._id}>
+                                                {feedback.seen === false ? <Typography sx={{ color: '#E71523' }}>New</Typography> : <Typography> &nbsp; </Typography>}
+                                                <Card sx={{
+                                                    border: 3,
+                                                    borderColor: (feedback.type === 1) ? '#0053A0' : (feedback.type === 2) ? '#EFA825' : 'black',
+                                                    position: 'relative',
+                                                }} >
+                                                    <CardActionArea onClick={handleClickOpenFeedback} feedbackid={JSON.stringify(feedback)}>
+                                                        <CardContent>
+                                                            <Box sx={{display: "flex"}}>
+                                                                {feedback.anonymous === true ?
+                                                                    <Typography sx={{ fontSize: 17, marginRight: 'auto', maxWidth: 700 }} color="text.secondary" component="div">
+                                                                        Anonymous
+                                                                    </Typography> :
+                                                                    <Typography sx={{ fontSize: 17, marginRight: 'auto', maxWidth: 700 }} color="text.secondary" component="div"> From:
+                                                                        <Typography sx={{textDecoration: 'underline', fontSize: 18, marginRight: 'auto', maxWidth: 700}} display="inline" color="text.primary">
+                                                                            {feedback.reporter.displayName}
+                                                                        </Typography>
                                                                     </Typography>
-                                                                </Typography>
-                                                            }
-                                                            {feedback.appreciated === true ?
-                                                                <ThumbUp sx={{
-                                                                    color: (feedback.type === 1) ? '#0053A0' : (feedback.type === 2) ? '#EFA825' : 'black'
-                                                                }}/>
-                                                                : null
-                                                            }
-                                                        </Box>
-                                                        <Typography sx={{ fontSize: 15 }} variant="subtitle2" color="text.secondary" gutterBottom>
-                                                            On {new Date(feedback.receivedDate).toDateString()}
-                                                        </Typography>
-                                                        <Typography noWrap sx={{ fontSize: 30 }} component="div">
-                                                            {feedback.message}
-                                                        </Typography>
-                                                    </CardContent>
-                                                </CardActionArea>
-                                            </Card>
-                                        </Grid>
-                                    )) : <Typography> You have no received feedbacks </Typography>}
+                                                                }
+                                                                {feedback.appreciated === true ?
+                                                                    <ThumbUp sx={{
+                                                                        color: (feedback.type === 1) ? '#0053A0' : (feedback.type === 2) ? '#EFA825' : 'black'
+                                                                    }}/>
+                                                                    : null
+                                                                }
+                                                            </Box>
+                                                            <Typography sx={{ fontSize: 15 }} variant="subtitle2" color="text.secondary" gutterBottom>
+                                                                On {new Date(feedback.receivedDate).toDateString()}
+                                                            </Typography>
+                                                            <Typography noWrap sx={{ fontSize: 30 }} component="div">
+                                                                {feedback.message}
+                                                            </Typography>
+                                                        </CardContent>
+                                                    </CardActionArea>
+                                                </Card>
+                                            </Grid>
+                                        )) : <Typography> You have no received feedbacks </Typography>}
                                 </Grid>}
-                                <Box py={1} display="flex" justifyContent="center">
-                                    <Pagination
-                                        onChange={(e, value) => {
-                                            setPageReceivedFeedbacks(value)
-                                        }}
-                                        style={{
-                                            justifyContent: "center",
-                                            display: receivedFeedbacks.length > 0 ? "flex" : "none"
-                                        }}
-                                        page={pageReceivedFeedbacks}
-                                        color="primary"
-                                        count={numberOfPagesReceivedFeedbacks}/>
-                                </Box>
-                            </TabPanel>
-                            <TabPanel value={tab} index={1}>
-                                {loading ? <Skeleton variant={"rectangular"} width={1200} height={400}/> :
+                            <Box py={1} display="flex" justifyContent="center">
+                                <Pagination
+                                    onChange={(e, value) => {
+                                        setPageReceivedFeedbacks(value)
+                                    }}
+                                    style={{
+                                        justifyContent: "center",
+                                        display: receivedFeedbacks.length > 0 ? "flex" : "none"
+                                    }}
+                                    page={pageReceivedFeedbacks}
+                                    color="primary"
+                                    count={numberOfPagesReceivedFeedbacks}/>
+                            </Box>
+                        </TabPanel>
+                        <TabPanel value={tab} index={1}>
+                            {loading ? <Skeleton variant={"rectangular"} width={1200} height={400}/> :
                                 <Grid container spacing={2} sx={{ height: 540}}>
                                     {sentFeedbacks.length > 0 ? sentFeedbacks
                                         .sort((a, b) => (new Date(a.receivedDate).getTime() < new Date(b.receivedDate).getTime()) ? 1 : -1)
@@ -447,21 +446,21 @@ export default function Feedbacks({deleteToken, token}) {
                                             </Grid>
                                         )) : <Typography> You have no sent feedbacks </Typography>}
                                 </Grid>}
-                                <Box py={1} display="flex" justifyContent="center" sx={{ position: 'relative', left: '-16px', width: 1137}}>
-                                    <Pagination
-                                        onChange={(e, value) => setPageSentFeedbacks(value)}
-                                        style={{
-                                            display: sentFeedbacks.length > 0 ? "flex" : "none",
-                                            justifyContent: "center",
-                                        }}
-                                        page={pageSentFeedbacks}
-                                        color="primary"
-                                        count={numberOfPagesSentFeedbacks}/>
-                                </Box>
-                            </TabPanel>
-                            <TabPanel value={tab} index={2}>
-                                {loading ? <Skeleton variant={"rectangular"} width={1200} height={400}/> :
-                                    <Grid container spacing={2} sx={{ height: 540}}>
+                            <Box py={1} display="flex" justifyContent="center" sx={{ position: 'relative', left: '-16px', width: 1137}}>
+                                <Pagination
+                                    onChange={(e, value) => setPageSentFeedbacks(value)}
+                                    style={{
+                                        display: sentFeedbacks.length > 0 ? "flex" : "none",
+                                        justifyContent: "center",
+                                    }}
+                                    page={pageSentFeedbacks}
+                                    color="primary"
+                                    count={numberOfPagesSentFeedbacks}/>
+                            </Box>
+                        </TabPanel>
+                        <TabPanel value={tab} index={2}>
+                            {loading ? <Skeleton variant={"rectangular"} width={1200} height={400}/> :
+                                <Grid container spacing={2} sx={{ height: 540}}>
                                     {teamFeedbacks.length > 0 ? teamFeedbacks
                                         .sort((a, b) => (new Date(a.receivedDate).getTime() < new Date(b.receivedDate).getTime()) ? 1 : -1)
                                         .slice((pageTeamFeedbacks - 1) * feedbacksPerPage, pageTeamFeedbacks * feedbacksPerPage)
@@ -505,108 +504,108 @@ export default function Feedbacks({deleteToken, token}) {
                                             </Grid>
                                         )) : <Typography> Your team has no feedbacks </Typography>}
                                 </Grid>}
-                                <Box py={1} display="flex" justifyContent="center" sx={{ position: 'relative', left: '-16px', width: 1137}}>
-                                    <Pagination
-                                        onChange={(e, value) => setPageTeamFeedbacks(value)}
-                                        style={{
-                                            display: teamFeedbacks.length > 0 ? "flex" : "none",
-                                            justifyContent: "center",
-                                        }}
-                                        page={pageTeamFeedbacks}
-                                        color="primary"
-                                        count={numberOfPagesTeamFeedbacks}/>
-                                </Box>
-                            </TabPanel>
-                        </Grid>
+                            <Box py={1} display="flex" justifyContent="center" sx={{ position: 'relative', left: '-16px', width: 1137}}>
+                                <Pagination
+                                    onChange={(e, value) => setPageTeamFeedbacks(value)}
+                                    style={{
+                                        display: teamFeedbacks.length > 0 ? "flex" : "none",
+                                        justifyContent: "center",
+                                    }}
+                                    page={pageTeamFeedbacks}
+                                    color="primary"
+                                    count={numberOfPagesTeamFeedbacks}/>
+                            </Box>
+                        </TabPanel>
                     </Grid>
-                </Container>
-                <Dialog open={openForm} fullWidth maxWidth={"md"}>
-                    <form
-                        onSubmit={handleSubmit}
-                        id="myform"
-                    >
-                        <DialogTitle variant="h6">Give Feedback</DialogTitle>
-                        <DialogContent>
-                            <DialogContentText>
-                                Please write a constructive feedback. You can choose if you want to be anonymous, if you want to be seen by the recipient's manager and the type of it
-                            </DialogContentText>
-                            <FormGroup>
-                                <FormControlLabel control={<Checkbox onClick={e => setCheckboxValue(e.target.value)}/>} label="Anonymous" />
-                                <FormControlLabel control={<Switch icon={<VisibilityOff/>} checkedIcon={<Visibility/>} checked={checked} onChange={e => setChecked(e.target.checked)}/>} label={checked ? "visible for recipient's manager" : "not visible for recipient's manager"}/>
-                            </FormGroup>
-                            <br/>
-                            <Typography>Feedback type:</Typography>
-                            <RadioGroup
-                                row
-                                aria-labelledby="demo-row-radio-buttons-group-label"
-                                name="row-radio-buttons-group"
-                                value={feedbackType}
-                                onChange={event => setFeedbackType(event.target.value)}
-                            >
-                                <FormControlLabel value="good" control={<Radio color='good'/>} label="Good"/>
-                                <FormControlLabel value="improve" control={<Radio color='improve'/>} label="Improve"/>
-                            </RadioGroup>
-                            <br/>
-                            <Autocomplete
-                                disablePortal
-                                autoComplete={true}
-                                id="combo-box-demo"
-                                options={companyEmployees.sort((a,b) => b.team.localeCompare(a.team))}
-                                getOptionLabel={(option) => option.displayName}
-                                groupBy={(option) => option.team}
-                                sx={{ width: 300 }}
-                                inputValue={selectedEmployee}
-                                onInputChange={handleInputChange}
-                                isOptionEqualToValue={(option, value) => option.displayName === value.displayName}
-                                onClose={e => {
-                                    setTouchedAutocomplete(false)
-                                }}
-                                onOpen={e => handleInputChange(e, selectedEmployee)}
-                                renderInput={(params) =>
-                                    <TextField
-                                        {...params}
-                                        onChange={e => {
-                                            setErrorMessageAutocomplete(e.target.value)
-                                        }}
-                                        error={!touchedAutocomplete && errorMessageAutocomplete !== ''}
-                                        helperText={!touchedAutocomplete && (errorMessageAutocomplete !== '' && errorMessageAutocomplete)}
-                                        label="Recipient"
-                                    />}
-                            />
-                            <br/>
-                            <TextField
-                                autoFocus
-                                margin="dense"
-                                id="name"
-                                label="Feedback Message"
-                                type="text"
-                                fullWidth
-                                multiline
-                                rows={4}
-                                variant="outlined"
-                                value={feedbackMessage}
-                                onChange={e => {
-                                    setFeedbackMessage(e.target.value)
-                                    setErrorMessageField('');
-                                }}
-                                error={errorMessageField !== ''}
-                                helperText={errorMessageField !== '' && errorMessageField}
-                            />
-                        </DialogContent>
-                        <DialogActions sx={{display: 'flex'}}>
-                            <Button variant={"contained"} color='error' onClick={handleCloseForm} sx={{marginRight: 'auto'}}>Cancel</Button>
-                            <Button type="submit" variant={"contained"} color={'success'} form="myform">Send</Button>
-                        </DialogActions>
-                    </form>
-                </Dialog>
-                <Dialog open={openDialogFeedback} fullWidth maxWidth={"md"}>
-                    <Paper
-                        sx={{
-                            border: 3,
-                            borderColor: (selectedFeedback.type === 1) ? '#0053A0' : (selectedFeedback.type === 2) ? '#EFA825' : 'black',
-                            position: 'relative'
-                        }}
-                    >
+                </Grid>
+            </Container>
+            <Dialog open={openForm} fullWidth maxWidth={"md"}>
+                <form
+                    onSubmit={handleSubmit}
+                    id="myform"
+                >
+                    <DialogTitle variant="h6">Give Feedback</DialogTitle>
+                    <DialogContent>
+                        <DialogContentText>
+                            Please write a constructive feedback. You can choose if you want to be anonymous, if you want to be seen by the recipient's manager and the type of it
+                        </DialogContentText>
+                        <FormGroup>
+                            <FormControlLabel control={<Checkbox onClick={e => setCheckboxValue(e.target.value)}/>} label="Anonymous" />
+                            <FormControlLabel control={<Switch icon={<VisibilityOff/>} checkedIcon={<Visibility/>} checked={checked} onChange={e => setChecked(e.target.checked)}/>} label={checked ? "visible for recipient's manager" : "not visible for recipient's manager"}/>
+                        </FormGroup>
+                        <br/>
+                        <Typography>Feedback type:</Typography>
+                        <RadioGroup
+                            row
+                            aria-labelledby="demo-row-radio-buttons-group-label"
+                            name="row-radio-buttons-group"
+                            value={feedbackType}
+                            onChange={event => setFeedbackType(event.target.value)}
+                        >
+                            <FormControlLabel value="good" control={<Radio color='good'/>} label="Good"/>
+                            <FormControlLabel value="improve" control={<Radio color='improve'/>} label="Improve"/>
+                        </RadioGroup>
+                        <br/>
+                        <Autocomplete
+                            disablePortal
+                            autoComplete={true}
+                            id="combo-box-demo"
+                            options={companyEmployees.sort((a,b) => b.team.localeCompare(a.team))}
+                            getOptionLabel={(option) => option.displayName}
+                            groupBy={(option) => option.team}
+                            sx={{ width: 300 }}
+                            inputValue={selectedEmployee}
+                            onInputChange={handleInputChange}
+                            isOptionEqualToValue={(option, value) => option.displayName === value.displayName}
+                            onClose={e => {
+                                setTouchedAutocomplete(false)
+                            }}
+                            onOpen={e => handleInputChange(e, selectedEmployee)}
+                            renderInput={(params) =>
+                                <TextField
+                                    {...params}
+                                    onChange={e => {
+                                        setErrorMessageAutocomplete(e.target.value)
+                                    }}
+                                    error={!touchedAutocomplete && errorMessageAutocomplete !== ''}
+                                    helperText={!touchedAutocomplete && (errorMessageAutocomplete !== '' && errorMessageAutocomplete)}
+                                    label="Recipient"
+                                />}
+                        />
+                        <br/>
+                        <TextField
+                            autoFocus
+                            margin="dense"
+                            id="name"
+                            label="Feedback Message"
+                            type="text"
+                            fullWidth
+                            multiline
+                            rows={4}
+                            variant="outlined"
+                            value={feedbackMessage}
+                            onChange={e => {
+                                setFeedbackMessage(e.target.value)
+                                setErrorMessageField('');
+                            }}
+                            error={errorMessageField !== ''}
+                            helperText={errorMessageField !== '' && errorMessageField}
+                        />
+                    </DialogContent>
+                    <DialogActions sx={{display: 'flex'}}>
+                        <Button variant={"contained"} color='error' onClick={handleCloseForm} sx={{marginRight: 'auto'}}>Cancel</Button>
+                        <Button type="submit" variant={"contained"} color={'success'} form="myform">Send</Button>
+                    </DialogActions>
+                </form>
+            </Dialog>
+            <Dialog open={openDialogFeedback} fullWidth maxWidth={"md"}>
+                <Paper
+                    sx={{
+                        border: 3,
+                        borderColor: (selectedFeedback.type === 1) ? '#0053A0' : (selectedFeedback.type === 2) ? '#EFA825' : 'black',
+                        position: 'relative'
+                    }}
+                >
                     <DialogTitle variant="h6">
                         Feedback from {selectedFeedback.anonymous ? 'Anonymous' : selectedFeedback.reporter?.displayName}
                         <ToggleButton
@@ -645,19 +644,18 @@ export default function Feedbacks({deleteToken, token}) {
                     <DialogActions>
                         <Button onClick={handleUpdateFeed} disabled={selectedFeedback.appreciated === true} color={'error'} variant={"contained"}>Close</Button>
                     </DialogActions>
-                    </Paper>
-                </Dialog>
-                <Snackbar open={openSnackbarSuccess} autoHideDuration={6000} onClose={handleCloseSnackbarSuccess}>
-                    <Alert onClose={handleCloseSnackbarSuccess} severity="success" sx={{ width: '100%' }}>
-                        Feedback sent successfully!
-                    </Alert>
-                </Snackbar>
-                <Snackbar open={openSnackbarError} autoHideDuration={6000} onClose={handleCloseSnackbarError}>
-                    <Alert onClose={handleCloseSnackbarError} severity="error" sx={{ width: '100%' }}>
-                        Feedback add failed!
-                    </Alert>
-                </Snackbar>
-            </Box>
+                </Paper>
+            </Dialog>
+            <Snackbar open={openSnackbarSuccess} autoHideDuration={6000} onClose={handleCloseSnackbarSuccess}>
+                <Alert onClose={handleCloseSnackbarSuccess} severity="success" sx={{ width: '100%' }}>
+                    Feedback sent successfully!
+                </Alert>
+            </Snackbar>
+            <Snackbar open={openSnackbarError} autoHideDuration={6000} onClose={handleCloseSnackbarError}>
+                <Alert onClose={handleCloseSnackbarError} severity="error" sx={{ width: '100%' }}>
+                    Feedback add failed!
+                </Alert>
+            </Snackbar>
         </Box>
-    );
+    )
 }
