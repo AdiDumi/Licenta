@@ -10,10 +10,11 @@ import {
     Toolbar,
     Typography,
 } from "@mui/material";
-import axios from "axios";
 import {ThumbUp} from "@mui/icons-material";
 import {useNavigate} from "react-router-dom";
-import {GetFeedbacks} from '../../api/index';
+import {getFeedbacks} from '../../api/feedbacksApi';
+import {getMainObjectives} from '../../api/objectivesApi';
+
 
 
 export default function Dashboard({deleteToken, token, setPage}) {
@@ -24,16 +25,14 @@ export default function Dashboard({deleteToken, token, setPage}) {
 
     useEffect(() => {
         setPage('Dashboard');
-        GetFeedbacks(setFeedbacks, setLoading);
-        axios.get(process.env.REACT_APP_BACKEND_URL + process.env.REACT_APP_BACKEND_PORT + '/objectives/main', {
-            headers: {
-                'Authorization': 'Bearer ' + token
+        getFeedbacks(setFeedbacks, setLoading, token, deleteToken, (error) => {
+            if(error.response.data.error === 'Authentification failed. Check secret token.') {
+                deleteToken();
+                navigate("/");
             }
-        }).then(response => {
-            setObjectives(response.data.filter(objective => (objective.status === 1)));
-            setLoading(false);
-        }).catch(error => {
-            if (error.response.data.error === 'Authentification failed. Check secret token.') {
+        });
+        getMainObjectives(setObjectives, setLoading, token, deleteToken, (error) => {
+            if(error.response.data.error === 'Authentification failed. Check secret token.') {
                 deleteToken();
                 navigate("/");
             }
