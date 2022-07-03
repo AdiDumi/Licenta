@@ -29,6 +29,7 @@ import {withStyles} from "tss-react/mui";
 import {useNavigate} from "react-router-dom";
 import {addFeedback, getTeamFeedbacks, getReceivedFeedbacks, getSentFeedbacks, markFeedbackAsLiked, markFeedbackAsSeen} from "../../api/feedbacksApi";
 import {getManager, getOthers, getTeam} from '../../api/userApi'
+import {FEEDBACKS_PER_PAGE} from "../../constants/Constants";
 
 const Alert = React.forwardRef(function Alert(props, ref) {
     return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
@@ -85,7 +86,6 @@ export default function Feedbacks({deleteToken, token, setPage}) {
     const [receivedFeedbacks, setReceivedFeedbacks] = React.useState([]);
     const [sentFeedbacks, setSentFeedbacks] = React.useState([]);
     const [teamFeedbacks, setTeamFeedbacks] = React.useState([]);
-    const feedbacksPerPage = 9;
     const [companyEmployees, setCompanyEmployees] = React.useState([]);
     const [checkboxValue, setCheckboxValue] = React.useState("off");
     const [selectedEmployee, setSelectedEmployee] = React.useState("");
@@ -224,15 +224,15 @@ export default function Feedbacks({deleteToken, token, setPage}) {
     };
 
     useEffect(() => {
-        setNumberOfPagesReceivedFeedbacks(Math.ceil(receivedFeedbacks.length/feedbacksPerPage));
+        setNumberOfPagesReceivedFeedbacks(Math.ceil(receivedFeedbacks.length/FEEDBACKS_PER_PAGE));
     }, [receivedFeedbacks]);
 
     useEffect(() => {
-        setNumberOfPagesSentFeedbacks(Math.ceil(sentFeedbacks.length/feedbacksPerPage));
+        setNumberOfPagesSentFeedbacks(Math.ceil(sentFeedbacks.length/FEEDBACKS_PER_PAGE));
     }, [sentFeedbacks]);
 
     useEffect(() => {
-        setNumberOfPagesTeamFeedbacks(Math.ceil(teamFeedbacks.length/feedbacksPerPage));
+        setNumberOfPagesTeamFeedbacks(Math.ceil(teamFeedbacks.length/FEEDBACKS_PER_PAGE));
     }, [teamFeedbacks]);
 
     useEffect(() => {
@@ -275,7 +275,7 @@ export default function Feedbacks({deleteToken, token, setPage}) {
                 <Grid container spacing={1}>
                     {/* Feedbacks button */}
                     <Grid item sm={12}>
-                        <Button startIcon={<AddComment/>} variant={"contained"} onClick={event => setOpenForm(true)}> Give Feedback</Button>
+                        <Button startIcon={<AddComment/>} variant={"contained"} onClick={() => setOpenForm(true)}> Give Feedback</Button>
                     </Grid>
                     {/* Feedbacks tabs */}
                     <Grid item sm={12}>
@@ -289,7 +289,7 @@ export default function Feedbacks({deleteToken, token, setPage}) {
                                 <Grid container spacing={2} sx={{height: 540}}>
                                     {receivedFeedbacks.length > 0 ? receivedFeedbacks
                                         .sort((a, b) => (a.seen > b.seen) ? 1 : (a.seen === b.seen) ? ((new Date(a.receivedDate).getTime() < new Date(b.receivedDate).getTime()) ? 1 : -1) : -1)
-                                        .slice((pageReceivedFeedbacks - 1) * feedbacksPerPage, pageReceivedFeedbacks * feedbacksPerPage)
+                                        .slice((pageReceivedFeedbacks - 1) * FEEDBACKS_PER_PAGE, pageReceivedFeedbacks * FEEDBACKS_PER_PAGE)
                                         .map(feedback => (
                                             <Grid item xs={"auto"} sm={6} md={4} key={feedback._id}>
                                                 {feedback.seen === false ? <Typography sx={{ color: '#E71523' }}>New</Typography> : <Typography> &nbsp; </Typography>}
@@ -349,7 +349,7 @@ export default function Feedbacks({deleteToken, token, setPage}) {
                                 <Grid container spacing={2} sx={{ height: 540}}>
                                     {sentFeedbacks.length > 0 ? sentFeedbacks
                                         .sort((a, b) => (new Date(a.receivedDate).getTime() < new Date(b.receivedDate).getTime()) ? 1 : -1)
-                                        .slice((pageSentFeedbacks - 1) * feedbacksPerPage, pageSentFeedbacks * feedbacksPerPage)
+                                        .slice((pageSentFeedbacks - 1) * FEEDBACKS_PER_PAGE, pageSentFeedbacks * FEEDBACKS_PER_PAGE)
                                         .map(feedback => (
                                             <Grid item xs={"auto"} sm={6} md={4} key={feedback._id}>
                                                 <Card sx={{
@@ -397,7 +397,7 @@ export default function Feedbacks({deleteToken, token, setPage}) {
                                 <Grid container spacing={2} sx={{ height: 540}}>
                                     {teamFeedbacks.length > 0 ? teamFeedbacks
                                         .sort((a, b) => (new Date(a.receivedDate).getTime() < new Date(b.receivedDate).getTime()) ? 1 : -1)
-                                        .slice((pageTeamFeedbacks - 1) * feedbacksPerPage, pageTeamFeedbacks * feedbacksPerPage)
+                                        .slice((pageTeamFeedbacks - 1) * FEEDBACKS_PER_PAGE, pageTeamFeedbacks * FEEDBACKS_PER_PAGE)
                                         .map(feedback => (
                                             <Grid item xs={"auto"} sm={6} md={4} key={feedback._id}>
                                                 <Card sx={{

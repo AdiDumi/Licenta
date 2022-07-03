@@ -14,6 +14,7 @@ import {ThumbUp} from "@mui/icons-material";
 import {useNavigate} from "react-router-dom";
 import {getReceivedFeedbacks} from '../../api/feedbacksApi';
 import {getMainObjectives} from '../../api/objectivesApi';
+import {FEEDBACKS_DASHBOARD, OBJECTIVES_DASHBOARD} from "../../constants/Constants";
 
 
 export default function Dashboard({deleteToken, token, setPage}) {
@@ -40,7 +41,7 @@ export default function Dashboard({deleteToken, token, setPage}) {
         );
         getMainObjectives(
             (response) => {
-                setObjectives(response.data);
+                setObjectives(response.data.filter(objective => objective.status === 1));
                 setLoading(false);
             },
             token,
@@ -76,7 +77,7 @@ export default function Dashboard({deleteToken, token, setPage}) {
                                 <Grid container spacing={4}>
                                     {feedbacks.length > 0 ? feedbacks
                                         .sort((a, b) => (a.seen > b.seen) ? 1 : (a.seen === b.seen) ? ((new Date(a.receivedDate).getTime() < new Date(b.receivedDate).getTime()) ? 1 : -1) : -1)
-                                        .slice(0, 6)
+                                        .slice(0, FEEDBACKS_DASHBOARD)
                                         .map(feedback => (
                                             <Grid item xs={"auto"} sm={6} md={4} key={feedback._id}>
                                                 {feedback.seen === false ? <Typography sx={{ color: '#E71523' }}>New</Typography> : <Typography> &nbsp; </Typography>}
@@ -147,7 +148,7 @@ export default function Dashboard({deleteToken, token, setPage}) {
                             {loading ? <Skeleton variant={"rectangular"} width={1100} height={400}/> :
                                 <Grid container spacing={2} sx={{height: 550}}>
                                     {objectives.length > 0 ? objectives
-                                        .slice(0, 3)
+                                        .slice(0, OBJECTIVES_DASHBOARD)
                                         .map((objective) =>(
                                             <Grid item sm={12} key={objective._id}>
                                                 <Card sx={{

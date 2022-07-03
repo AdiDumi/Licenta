@@ -75,7 +75,7 @@ export default function LogIn({setToken, token}) {
                         alignItems: 'center',
                     }}
                 >
-                    <Avatar src={logo} sx={{width: 300, height: 300}}/>
+                    <Avatar src={logo} sx={{width: 350, height: 350}}/>
                     <form onSubmit={formik.handleSubmit} autoComplete="on">
                         <TextField
                             margin="normal"

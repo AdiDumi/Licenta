@@ -42,10 +42,10 @@ export function getTeamSecondaryObjectives(data, responseFunction, token, errorF
     ).catch(error => errorFunction(error));
 }
 
-export function markAsDone(responseFunction, token, errorFunction) {
+export function markAsDone(objective, responseFunction, token, errorFunction) {
     axios.post(process.env.REACT_APP_BACKEND_URL + process.env.REACT_APP_BACKEND_PORT + '/objectives/markAsDone',
         {
-
+            objective: objective
         },
         {
             headers: {

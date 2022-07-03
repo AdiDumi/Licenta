@@ -18,10 +18,10 @@ import {
     GroupWorkTwoTone,
     TrackChangesTwoTone,
 } from "@mui/icons-material";
-import axios from "axios";
 import MuiAlert from "@mui/material/Alert";
 import {DesktopDatePicker} from "@mui/x-date-pickers";
 import {markAsDone, getMainObjectives, editTeam, addMain, addSecondary, editProgress, getSecondaryObjectives, getTeamSecondaryObjectives, getTeamMainObjectives} from "../../api/objectivesApi";
+import {OBJECTIVES_PER_PAGE} from "../../constants/Constants";
 
 function TabPanel(props) {
     const { children, value, index } = props;
@@ -69,7 +69,6 @@ export default function Objectives({deleteToken, token, setPage}) {
     const [openSnackbarError, setOpenSnackbarError] = React.useState(false);
     const [date, setDate] = React.useState(new Date().toJSON().slice(0,10).replace(/-/g,'/'));
     const [sliders, setSliders] = React.useState([]);
-    const objectivesPerPage = 3;
     const errorFunction = (error) => {
         if (typeof error.response !== 'undefined') {
             if (error.response.data.error === 'Authentification failed. Check secret token.') {
@@ -113,7 +112,7 @@ export default function Objectives({deleteToken, token, setPage}) {
 
     function handleMarkDone(objective) {
         markAsDone(objective,
-            (response) => {
+            () => {
                 setRender(render + 1);
             },
             token,
@@ -300,11 +299,11 @@ export default function Objectives({deleteToken, token, setPage}) {
     }
 
     useEffect(() => {
-        setNumberOfPagesPersonalObjectives(Math.ceil(mainPersonalObjectives.length/objectivesPerPage));
+        setNumberOfPagesPersonalObjectives(Math.ceil(mainPersonalObjectives.length/OBJECTIVES_PER_PAGE));
     }, [mainPersonalObjectives]);
 
     useEffect(() => {
-        setNumberOfPagesTeamObjectives(Math.ceil(mainTeamObjectives.length/objectivesPerPage));
+        setNumberOfPagesTeamObjectives(Math.ceil(mainTeamObjectives.length/OBJECTIVES_PER_PAGE));
     }, [mainTeamObjectives]);
 
     useEffect(() => {
@@ -380,7 +379,7 @@ export default function Objectives({deleteToken, token, setPage}) {
                             <Grid container spacing={2} sx={{height: 600}}>
                                 {mainPersonalObjectives.length > 0 ? mainPersonalObjectives
                                     .sort((a, b) => (a.status === 1 && b.status !== 1) ? -1 : 1)
-                                    .slice((pagePersonalObjectives - 1) * objectivesPerPage, pagePersonalObjectives * objectivesPerPage)
+                                    .slice((pagePersonalObjectives - 1) * OBJECTIVES_PER_PAGE, pagePersonalObjectives * OBJECTIVES_PER_PAGE)
                                     .map((objective) =>(
                                         <Grid item sm={12} key={objective._id}>
                                             <Card sx={{
@@ -476,7 +475,7 @@ export default function Objectives({deleteToken, token, setPage}) {
                             <Grid container spacing={2} sx={{height: 600}}>
                                 {mainTeamObjectives.length > 0 ? mainTeamObjectives
                                     .sort((a, b) => (a.status === 1 && b.status !== 1) ? -1 : ((a.status < b.status) ? -1 : 1))
-                                    .slice((pageTeamObjectives - 1) * objectivesPerPage, pageTeamObjectives * objectivesPerPage)
+                                    .slice((pageTeamObjectives - 1) * OBJECTIVES_PER_PAGE, pageTeamObjectives * OBJECTIVES_PER_PAGE)
                                     .map((objective) =>(
                                         <Grid item sm={12} key={objective._id}>
                                             <Card sx={{
@@ -720,7 +719,7 @@ export default function Objectives({deleteToken, token, setPage}) {
                                             <Box sx={{display: "flex", justifyContent: 'space-between', width: 600}}>
                                                 <Slider
                                                     disabled={getDaysDifference(goal.deadline) < 0 || goal.status > 1}
-                                                    valueLabelDisplay={"auto"}
+                                                    valueLabelDisplay={"on"}
                                                     value={sliders[index]?.progress || 0}
                                                     onChange={(event, newValue) => setSliders(sliders?.map((slider, index2) =>
                                                         index2 === index ? {...slider, progress: newValue} : {...slider}
