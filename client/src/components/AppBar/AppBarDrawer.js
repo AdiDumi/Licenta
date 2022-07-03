@@ -20,7 +20,7 @@ import FlagIcon from '@mui/icons-material/FlagTwoTone';
 import DashboardIcon from '@mui/icons-material/DashboardTwoTone';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import {useNavigate} from "react-router-dom";
-import axios from "axios";
+import {getUserInfo} from "../../api/userApi";
 
 const drawerWidth = 200;
 
@@ -119,19 +119,18 @@ export default function AppBarDrawer({token, deleteToken, currentPage}) {
     }
 
     useEffect(() => {
-        axios.get(process.env.REACT_APP_BACKEND_URL + process.env.REACT_APP_BACKEND_PORT + '/user', {
-            headers: {
-                'Authorization': 'Bearer ' + token
-            }
-        }).then(response => {
-            setUser(response.data);
-        }).catch(error => {
-            if(error.response.data.error === 'Authentification failed. Check secret token.') {
-                deleteToken();
-                navigate("/");
-            }
-        });
-    });
+        getUserInfo(
+            (response) => {
+                setUser(response.data);
+            },
+            token,
+            (error) => {
+                if (error.response.data.error === 'Authentification failed. Check secret token.') {
+                    deleteToken();
+                    navigate("/");
+                }
+            })
+    }, []);
 
     return(
         <div>

@@ -25,9 +25,10 @@ import {
     Visibility,
     VisibilityOff
 } from "@mui/icons-material";
-import axios from "axios";
 import {withStyles} from "tss-react/mui";
 import {useNavigate} from "react-router-dom";
+import {addFeedback, getTeamFeedbacks, getReceivedFeedbacks, getSentFeedbacks, markFeedbackAsLiked, markFeedbackAsSeen} from "../../api/feedbacksApi";
+import {getManager, getOthers, getTeam} from '../../api/userApi'
 
 const Alert = React.forwardRef(function Alert(props, ref) {
     return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
@@ -66,7 +67,7 @@ export default function Feedbacks({deleteToken, token, setPage}) {
     const [errorMessageField, setErrorMessageField] = React.useState('');
     const [isManager, setIsManager] = React.useState(false);
     const [checked, setChecked] = React.useState(true);
-    const [render, setRender] = React.useState('');
+    const [render, setRender] = React.useState(0);
     const [selected, setSelected] = React.useState(false);
     const [openForm, setOpenForm] = React.useState(false);
     const [selectedFeedback, setSelectedFeedback] = React.useState('');
@@ -84,14 +85,21 @@ export default function Feedbacks({deleteToken, token, setPage}) {
     const [receivedFeedbacks, setReceivedFeedbacks] = React.useState([]);
     const [sentFeedbacks, setSentFeedbacks] = React.useState([]);
     const [teamFeedbacks, setTeamFeedbacks] = React.useState([]);
-
     const feedbacksPerPage = 9;
-
     const [companyEmployees, setCompanyEmployees] = React.useState([]);
-
     const [checkboxValue, setCheckboxValue] = React.useState("off");
     const [selectedEmployee, setSelectedEmployee] = React.useState("");
     const [feedbackMessage, setFeedbackMessage] = React.useState("");
+    const errorFunction = (error) => {
+        if (typeof error.response !== 'undefined') {
+            if (error.response.data.error === 'Authentification failed. Check secret token.') {
+                deleteToken();
+                navigate("/");
+            }
+        } else {
+            console.log(error);
+        }
+    }
 
     const handleCloseForm = () => {
         setCheckboxValue("off");
@@ -111,51 +119,19 @@ export default function Feedbacks({deleteToken, token, setPage}) {
     };
 
     const handleCloseFeedback = () => {
-        setOpenDialogFeedback(false);
-        if(!selectedFeedback.seen) {
-            axios.post(process.env.REACT_APP_BACKEND_URL + process.env.REACT_APP_BACKEND_PORT + '/feedback/markAsSeen',
-                {
-                    _id: selectedFeedback._id
-                },
-                {
-                    headers: {
-                        'Authorization': 'Bearer ' + token
-                    }
-                }).then(response => {
-                console.log(response.data);
-            }).catch(error => {
-                if(error.response.data.error === 'Authentification failed. Check secret token.') {
-                    deleteToken();
-                    navigate("/");
-                }
-            })
+        if(typeof selectedFeedback !== 'undefined') {
+            if (selected) {
+                markFeedbackAsLiked(selectedFeedback._id, null, token, (error) => errorFunction(error));
+            }
+            if (!selectedFeedback.seen) {
+                markFeedbackAsSeen(selectedFeedback._id, null, token, (error) => errorFunction(error));
+            }
+            if (selected || !selectedFeedback.seen)
+                setRender(render + 1);
         }
-        if(selected || !selectedFeedback.seen)
-            setRender(selectedFeedback._id + Math.random(50));
+        setOpenDialogFeedback(false);
         setSelected(false);
         setSelectedFeedback('');
-    };
-
-    const handleUpdateFeed = () => {
-        if(selected) {
-            axios.post(process.env.REACT_APP_BACKEND_URL + process.env.REACT_APP_BACKEND_PORT + '/feedback/markAsLiked',
-                {
-                    _id: selectedFeedback._id
-                },
-                {
-                    headers: {
-                        'Authorization': 'Bearer ' + token
-                    }
-                }).then(response => {
-                console.log(response.data);
-            }).catch(error => {
-                if(error.response.data.error === 'Authentification failed. Check secret token.') {
-                    deleteToken();
-                    navigate("/");
-                }
-            })
-        }
-        handleCloseFeedback();
     };
 
     const handleCloseSnackbarSuccess = () => {
@@ -170,62 +146,41 @@ export default function Feedbacks({deleteToken, token, setPage}) {
         setSelectedEmployee(newSelectedEmployee);
         setErrorMessageAutocomplete('');
         setTouchedAutocomplete(true);
-        axios.get(process.env.REACT_APP_BACKEND_URL + process.env.REACT_APP_BACKEND_PORT + '/teamUsers', {
-            params: {
-                username: newSelectedEmployee
+        getTeam(newSelectedEmployee,
+            (response) => {
+                let team = response.data;
+                if (team.length > 0)
+                    team.forEach(teammate => teammate["team"] = "Team");
+                getOthers(newSelectedEmployee,
+                    (response) => {
+                        let others = response.data;
+                        if (others.length > 0)
+                            others.forEach(user => user["team"] = "Others");
+                        getManager(
+                            (response) => {
+                                let manager = response.data;
+                                if (manager !== 'OK') {
+                                    manager["team"] = "Manager"
+                                } else {
+                                    manager = [];
+                                }
+                                if (team.length > 3)
+                                    team = team.slice(0, 3);
+                                if (others.length > 3)
+                                    others = others.slice(0, 3);
+                                setCompanyEmployees(team.concat(others).concat(manager));
+                            },
+                            token,
+                            (error) => errorFunction(error)
+                        )
+                    },
+                    token,
+                    (error) => errorFunction(error)
+                )
             },
-            headers: {
-                'Authorization': 'Bearer ' + token
-            }
-        }).then(response => {
-            let team = response.data;
-            if(team.length > 0)
-                team.forEach(teammate => teammate["team"]="Team");
-            axios.get(process.env.REACT_APP_BACKEND_URL + process.env.REACT_APP_BACKEND_PORT + '/otherUsers', {
-                params: {
-                    username: newSelectedEmployee
-                },
-                headers: {
-                    'Authorization': 'Bearer ' + token
-                }
-            }).then(response => {
-                let others = response.data;
-                if(others.length > 0)
-                    others.forEach(user => user["team"]="Others");
-                axios.get(process.env.REACT_APP_BACKEND_URL + process.env.REACT_APP_BACKEND_PORT + '/manager', {
-                    headers: {
-                        'Authorization': 'Bearer ' + token
-                    }
-                }).then(response => {
-                    let manager = response.data;
-                    if(manager !== 'OK') {
-                        manager["team"] = "Manager"
-                    } else {
-                        manager=[];
-                    }
-                    if(team.length > 3)
-                        team = team.slice(0,3);
-                    if(others.length > 3)
-                        others = others.slice(0,3);
-                    setCompanyEmployees(team.concat(others).concat(manager));
-                }).catch(error => {
-                    if(error.response.data.error === 'Authentification failed. Check secret token.') {
-                        deleteToken();
-                        navigate("/");
-                    }
-                })
-            }).catch(error => {
-                if(error.response.data.error === 'Authentification failed. Check secret token.') {
-                    deleteToken();
-                    navigate("/");
-                }
-            })
-        }).catch(error => {
-            if(error.response.data.error === 'Authentification failed. Check secret token.') {
-                deleteToken();
-                navigate("/");
-            }
-        })
+            token,
+            (error) => errorFunction(error)
+        )
     }
 
     const handleSubmit = (event) => {
@@ -239,7 +194,7 @@ export default function Feedbacks({deleteToken, token, setPage}) {
         }
         const receiver = companyEmployees.find((employee) => employee.displayName === selectedEmployee);
         if(feedbackMessage !== '' && selectedEmployee !== '') {
-            axios.post(process.env.REACT_APP_BACKEND_URL + process.env.REACT_APP_BACKEND_PORT + '/feedback/add',
+            addFeedback(
                 {
                     manager: selectedEmployee,
                     receiver: receiver,
@@ -248,21 +203,15 @@ export default function Feedbacks({deleteToken, token, setPage}) {
                     anonymous: anonym,
                     visibleForManager: checked
                 },
-                {
-                    headers: {
-                        'Authorization': 'Bearer ' + token
-                    }
-                }).then(response => {
-                console.log(response.data);
-                setRender(selectedEmployee);
-                setOpenSnackbarSuccess(true);
-            }).catch(error => {
-                if(error.response.data.error === 'Authentification failed. Check secret token.') {
-                    deleteToken();
-                    navigate("/");
-                }
-                setOpenSnackbarError(true)
-            });
+                (response) => {
+                    setRender(render - 1);
+                    setOpenSnackbarSuccess(true);
+                },
+                token,
+                (error) => {
+                    errorFunction(error);
+                    setOpenSnackbarError(true);
+                });
             handleCloseForm();
         } else {
             if(feedbackMessage === '') {
@@ -287,49 +236,34 @@ export default function Feedbacks({deleteToken, token, setPage}) {
     }, [teamFeedbacks]);
 
     useEffect(() => {
-        axios.get(process.env.REACT_APP_BACKEND_URL + process.env.REACT_APP_BACKEND_PORT + '/feedback/team', {
-            headers: {
-                'Authorization': 'Bearer ' + token
-            }
-        }).then(response => {
-            setIsManager(response.data['isManager'])
-            setTeamFeedbacks(response.data['teamFeedback']);
-        }).catch(error => {
-            if(error.response.data.error === 'Authentification failed. Check secret token.') {
-                deleteToken();
-                navigate("/");
-            }
-        })
-        axios.get(process.env.REACT_APP_BACKEND_URL + process.env.REACT_APP_BACKEND_PORT + '/feedback/recv', {
-            headers: {
-                'Authorization': 'Bearer ' + token
-            }
-        }).then(response => {
-            setReceivedFeedbacks(response.data);
-        }).catch(error => {
-            if(error.response.data.error === 'Authentification failed. Check secret token.') {
-                deleteToken();
-                navigate("/");
-            }
-        })
-        axios.get(process.env.REACT_APP_BACKEND_URL + process.env.REACT_APP_BACKEND_PORT + '/feedback/sent', {
-            headers: {
-                'Authorization': 'Bearer ' + token
-            }
-        }).then(response => {
-            setSentFeedbacks(response.data);
-        }).catch(error => {
-            if(error.response.data.error === 'Authentification failed. Check secret token.') {
-                deleteToken();
-                navigate("/");
-            }
-        })
+        getTeamFeedbacks(
+            (response) => {
+                setIsManager(response.data['isManager'])
+                setTeamFeedbacks(response.data['teamFeedback']);
+            },
+            token,
+            (error) => errorFunction(error)
+        );
+        getReceivedFeedbacks(
+            (response) => {
+                setReceivedFeedbacks(response.data);
+            },
+            token,
+            (error) => errorFunction(error)
+        );
+        getSentFeedbacks(
+            (response) => {
+                setSentFeedbacks(response.data);
+            },
+            token,
+            (error) => errorFunction(error)
+        );
         setLoading(false);
     }, [render]);
 
     useEffect(() => {
         setPage('Feedbacks');
-    });
+    }, []);
 
     return(
         <Box component="main" sx={{
@@ -642,7 +576,7 @@ export default function Feedbacks({deleteToken, token, setPage}) {
                         </Typography>
                     </DialogContent>
                     <DialogActions>
-                        <Button onClick={handleUpdateFeed} disabled={selectedFeedback.appreciated === true} color={'error'} variant={"contained"}>Close</Button>
+                        <Button onClick={handleCloseFeedback} color={'error'} variant={"contained"}>Close</Button>
                     </DialogActions>
                 </Paper>
             </Dialog>

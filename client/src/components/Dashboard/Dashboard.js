@@ -12,9 +12,8 @@ import {
 } from "@mui/material";
 import {ThumbUp} from "@mui/icons-material";
 import {useNavigate} from "react-router-dom";
-import {getFeedbacks} from '../../api/feedbacksApi';
+import {getReceivedFeedbacks} from '../../api/feedbacksApi';
 import {getMainObjectives} from '../../api/objectivesApi';
-
 
 
 export default function Dashboard({deleteToken, token, setPage}) {
@@ -22,21 +21,31 @@ export default function Dashboard({deleteToken, token, setPage}) {
     const [objectives, setObjectives] = React.useState([]);
     const [loading, setLoading] = React.useState(true);
     const navigate = useNavigate();
+    const errorFunction = (error) => {
+        if (error.response.data.error === 'Authentification failed. Check secret token.') {
+            deleteToken();
+            navigate("/");
+        }
+    }
 
     useEffect(() => {
         setPage('Dashboard');
-        getFeedbacks(setFeedbacks, setLoading, token, deleteToken, (error) => {
-            if(error.response.data.error === 'Authentification failed. Check secret token.') {
-                deleteToken();
-                navigate("/");
-            }
-        });
-        getMainObjectives(setObjectives, setLoading, token, deleteToken, (error) => {
-            if(error.response.data.error === 'Authentification failed. Check secret token.') {
-                deleteToken();
-                navigate("/");
-            }
-        });
+        getReceivedFeedbacks(
+            (response) => {
+                setFeedbacks(response.data);
+                setLoading(false);
+            },
+            token,
+            (error) => errorFunction(error)
+        );
+        getMainObjectives(
+            (response) => {
+                setObjectives(response.data);
+                setLoading(false);
+            },
+            token,
+            (error) => errorFunction(error)
+        );
     }, []);
 
     return(

@@ -21,6 +21,7 @@ import {
 import axios from "axios";
 import MuiAlert from "@mui/material/Alert";
 import {DesktopDatePicker} from "@mui/x-date-pickers";
+import {markAsDone, getMainObjectives, editTeam, addMain, addSecondary, editProgress, getSecondaryObjectives, getTeamSecondaryObjectives, getTeamMainObjectives} from "../../api/objectivesApi";
 
 function TabPanel(props) {
     const { children, value, index } = props;
@@ -46,8 +47,7 @@ export default function Objectives({deleteToken, token, setPage}) {
     const [isManager, setIsManager] = React.useState(false);
     const [loading, setLoading] = React.useState(true);
     const [tab, setTab] = React.useState(0);
-    const [editTab, setEditTab] = React.useState(0);
-    const [render, setRender] = React.useState('');
+    const [render, setRender] = React.useState(0);
     const [openForm, setOpenForm] = React.useState(false);
     const [openFormSecond, setOpenFormSecond] = React.useState(false);
     const [openFormThird, setOpenFormThird] = React.useState(false);
@@ -69,8 +69,17 @@ export default function Objectives({deleteToken, token, setPage}) {
     const [openSnackbarError, setOpenSnackbarError] = React.useState(false);
     const [date, setDate] = React.useState(new Date().toJSON().slice(0,10).replace(/-/g,'/'));
     const [sliders, setSliders] = React.useState([]);
-
     const objectivesPerPage = 3;
+    const errorFunction = (error) => {
+        if (typeof error.response !== 'undefined') {
+            if (error.response.data.error === 'Authentification failed. Check secret token.') {
+                deleteToken();
+                navigate("/");
+            }
+        } else {
+            console.log(error);
+        }
+    }
 
     function getProgress(objective) {
         let goalProgress = 0;
@@ -103,36 +112,14 @@ export default function Objectives({deleteToken, token, setPage}) {
     }
 
     function handleMarkDone(objective) {
-        axios.post(process.env.REACT_APP_BACKEND_URL + process.env.REACT_APP_BACKEND_PORT + '/objectives/markAsDone',
-            {
-                objective: objective,
+        markAsDone(objective,
+            (response) => {
+                setRender(render + 1);
             },
-            {
-                headers: {
-                    'Authorization': 'Bearer ' + token
-                }
-            }).then(response => {
-            console.log(response.data);
-            setRender(Math.random(100).toString());
-        }).catch(error => {
-            if(error.response.data.error === 'Authentification failed. Check secret token.') {
-                deleteToken();
-                navigate("/");
-            }
-        });
+            token,
+            (error) => errorFunction(error)
+        );
     }
-
-    const handleChangeTab = (event, newValue) => {
-        setTab(newValue);
-    };
-
-    const handleChangeEditTab = (event, newValue) => {
-        setEditTab(newValue);
-    };
-
-    const handleClickOpenForm = () => {
-        setOpenForm(true);
-    };
 
     const handleClickOpenFormSecond = (event) => {
         setMainId(JSON.parse(event.currentTarget.attributes.objectid.textContent));
@@ -189,33 +176,22 @@ export default function Objectives({deleteToken, token, setPage}) {
         setOpenFormEdit(true);
     }
 
-    const handleClickCloseEdit = () => {
-        setOpenFormEdit(false);
-    }
-
     const handleSubmitEdit = (event) => {
         event.preventDefault();
         if(mainObjectiveTitle !== '' && mainObjectiveDescription !== '') {
-            axios.post(process.env.REACT_APP_BACKEND_URL + process.env.REACT_APP_BACKEND_PORT + '/objectives/team/edit',
+            editTeam(
                 {
                     objective: mainId,
                     title: mainObjectiveTitle,
                     description: mainObjectiveDescription
                 },
-                {
-                    headers: {
-                        'Authorization': 'Bearer ' + token
-                    }
-                }).then(response => {
-                console.log(response.data);
-                setRender(Math.random(100).toString());
-            }).catch(error => {
-                if(error.response.data.error === 'Authentification failed. Check secret token.') {
-                    deleteToken();
-                    navigate("/");
-                }
-            });
-            handleClickCloseEdit();
+                (response) => {
+                    setRender(render - 1);
+                },
+                token,
+                (error) => errorFunction(error)
+            );
+            setOpenFormEdit(false);
         } else {
             if(mainObjectiveTitle === '') {
                 setErrorMainObjectiveTitle("Title cannot be empty");
@@ -229,26 +205,20 @@ export default function Objectives({deleteToken, token, setPage}) {
     const handleSubmit = (event) => {
         event.preventDefault();
         if(mainObjectiveTitle !== '' && mainObjectiveDescription !== '') {
-            axios.post(process.env.REACT_APP_BACKEND_URL + process.env.REACT_APP_BACKEND_PORT + '/objectives/addMain',
+            addMain(
                 {
                     title: mainObjectiveTitle,
                     description: mainObjectiveDescription
                 },
-                {
-                    headers: {
-                        'Authorization': 'Bearer ' + token
-                    }
-                }).then(response => {
-                console.log(response.data);
-                setOpenSnackbarSuccess(true);
-                setRender(Math.random(100).toString());
-            }).catch(error => {
-                if(error.response.data.error === 'Authentification failed. Check secret token.') {
-                    deleteToken();
-                    navigate("/");
-                }
-                setOpenSnackbarError(true)
-            });
+                () => {
+                    setOpenSnackbarSuccess(true);
+                    setRender(render - 1);
+                },
+                token,
+                (error) => {
+                    errorFunction(error);
+                    setOpenSnackbarError(true)
+                });
             handleCloseForm();
         } else {
             if(mainObjectiveTitle === '') {
@@ -273,7 +243,7 @@ export default function Objectives({deleteToken, token, setPage}) {
             secondTargetUnit!== '' &&
             !isNaN(Date.parse(date)) &&
             new Date(date).getTime() > new Date(new Date().toJSON().slice(0,10).replace(/-/g,'/')).getTime()) {
-            axios.post(process.env.REACT_APP_BACKEND_URL + process.env.REACT_APP_BACKEND_PORT + '/objectives/addSecondary',
+            addSecondary(
                 {
                     title: mainObjectiveTitle,
                     target: secondTarget,
@@ -281,21 +251,15 @@ export default function Objectives({deleteToken, token, setPage}) {
                     mainObjective: mainId,
                     deadline: date
                 },
-                {
-                    headers: {
-                        'Authorization': 'Bearer ' + token
-                    }
-                }).then(response => {
-                console.log(response.data);
-                setOpenSnackbarSuccess(true);
-                setRender(Math.random(100).toString());
-            }).catch(error => {
-                if(error.response.data.error === 'Authentification failed. Check secret token.') {
-                    deleteToken();
-                    navigate("/");
-                }
-                setOpenSnackbarError(true)
-            });
+                () => {
+                    setOpenSnackbarSuccess(true);
+                    setRender(render + 1);
+                },
+                token,
+                (error) => {
+                    errorFunction(error);
+                    setOpenSnackbarError(true)
+                });
             handleCloseFormSecond();
         } else {
             if(mainObjectiveTitle === '') {
@@ -318,24 +282,17 @@ export default function Objectives({deleteToken, token, setPage}) {
         sliders?.forEach(slider => {
             mainId.secondary?.forEach(goal => {
                 if(slider._id === goal._id && slider.progress !== goal.progress) {
-                    axios.post(process.env.REACT_APP_BACKEND_URL + process.env.REACT_APP_BACKEND_PORT + '/objectives/editProgress',
+                    editProgress(
                         {
                             objective: goal,
                             progress: slider.progress
                         },
-                        {
-                            headers: {
-                                'Authorization': 'Bearer ' + token
-                            }
-                        }).then(response => {
-                        console.log(response.data);
-                        setRender(Math.random(100).toString());
-                    }).catch(error => {
-                        if(error.response.data.error === 'Authentification failed. Check secret token.') {
-                            deleteToken();
-                            navigate("/");
-                        }
-                    });
+                        (response) => {
+                            setRender(render + 1);
+                        },
+                        token,
+                        (error) => errorFunction(error)
+                    );
                 }
             })
         })
@@ -344,7 +301,6 @@ export default function Objectives({deleteToken, token, setPage}) {
 
     useEffect(() => {
         setNumberOfPagesPersonalObjectives(Math.ceil(mainPersonalObjectives.length/objectivesPerPage));
-        setLoading(false);
     }, [mainPersonalObjectives]);
 
     useEffect(() => {
@@ -352,78 +308,53 @@ export default function Objectives({deleteToken, token, setPage}) {
     }, [mainTeamObjectives]);
 
     useEffect(() => {
-        axios.get(process.env.REACT_APP_BACKEND_URL + process.env.REACT_APP_BACKEND_PORT + '/objectives/main', {
-            headers: {
-                'Authorization': 'Bearer ' + token
-            }
-        }).then(async response => {
-            const mainPersObjectives = response.data;
-            mainPersObjectives.forEach(main => {
-                main["secondary"] = [];
-                axios.get(process.env.REACT_APP_BACKEND_URL + process.env.REACT_APP_BACKEND_PORT + '/objectives/secondary', {
-                    params: {
-                        mainObjective: main._id
-                    },
-                    headers: {
-                        'Authorization': 'Bearer ' + token
-                    }
-                }).then(response => {
-                    main["secondary"] = main["secondary"].concat(response.data);
-                    main["progress"] = getProgress(main);
-                }).catch(error => {
-                    if (error.response.data.error === 'Authentification failed. Check secret token.') {
-                        deleteToken();
-                        navigate("/");
-                    }
-                });
-            })
-            await new Promise(r => setTimeout(r, 600));
-            setMainPersonalObjectives(mainPersObjectives);
-        }).catch(error => {
-            if (error.response.data.error === 'Authentification failed. Check secret token.') {
-                deleteToken();
-                navigate("/");
-            }
-        });
-        axios.get(process.env.REACT_APP_BACKEND_URL + process.env.REACT_APP_BACKEND_PORT + '/objectives/team/main', {
-            headers: {
-                'Authorization': 'Bearer ' + token
-            }
-        }).then(response => {
-            setIsManager(response.data["isManager"]);
-            const teamObjectives = response.data["objectives"]
-            teamObjectives.forEach(main => {
-                main["secondary"] = [];
-                axios.get(process.env.REACT_APP_BACKEND_URL + process.env.REACT_APP_BACKEND_PORT + '/objectives/team/secondary', {
-                    params: {
-                        mainObjective: main._id
-                    },
-                    headers: {
-                        'Authorization': 'Bearer ' + token
-                    }
-                }).then(async response => {
-                    main["secondary"] = main["secondary"].concat(response.data["objectives"]);
-                    main["progress"] = getProgress(main);
-                    await new Promise(r => setTimeout(r, 600));
-                    setMainTeamObjectives(teamObjectives);
-                }).catch(error => {
-                    if (error.response.data.error === 'Authentification failed. Check secret token.') {
-                        deleteToken();
-                        navigate("/");
-                    }
-                });
-            });
-        }).catch(error => {
-            if (error.response.data.error === 'Authentification failed. Check secret token.') {
-                deleteToken();
-                navigate("/");
-            }
-        });
+        getMainObjectives(
+            async response => {
+                const mainPersObjectives = response.data;
+                mainPersObjectives.forEach(main => {
+                    main["secondary"] = [];
+                    getSecondaryObjectives(
+                        main._id,
+                        (response) => {
+                            main["secondary"] = main["secondary"].concat(response.data);
+                            main["progress"] = getProgress(main);
+                        },
+                        token,
+                        (error) => errorFunction(error)
+                    )
+                })
+                setMainPersonalObjectives(mainPersObjectives);
+            },
+            token,
+            (error) => errorFunction(error)
+        );
+        getTeamMainObjectives(
+            response => {
+                setIsManager(response.data["isManager"]);
+                const teamObjectives = response.data["objectives"]
+                teamObjectives.forEach(main => {
+                    main["secondary"] = [];
+                    getTeamSecondaryObjectives(
+                        main._id,
+                        (response) => {
+                            main["secondary"] = main["secondary"].concat(response.data["objectives"]);
+                            main["progress"] = getProgress(main);
+                            setMainTeamObjectives(teamObjectives);
+                        },
+                        token,
+                        (error) => errorFunction(error)
+                    );
+                })
+            },
+            token,
+            (error) => errorFunction(error)
+        );
+        setLoading(false);
     }, [render]);
 
     useEffect(() => {
         setPage('Objectives');
-    });
+    }, []);
 
     return(
         <Box component="main" sx={{
@@ -435,11 +366,11 @@ export default function Objectives({deleteToken, token, setPage}) {
                 <Grid container spacing={1}>
                     {/* Add objective button */}
                     <Grid item sm={12}>
-                        <Button startIcon={<AddTaskTwoTone/>} variant={"contained"} onClick={handleClickOpenForm}> New objective</Button>
+                        <Button startIcon={<AddTaskTwoTone/>} variant={"contained"} onClick={() => setOpenForm(true)}> New objective</Button>
                     </Grid>
                     {/* Objetives tabs */}
                     <Grid item sm={12}>
-                        <Tabs value={tab} textColor='primary' variant="fullWidth" centered selectionFollowsFocus onChange={handleChangeTab} aria-label="basic tabs example">
+                        <Tabs value={tab} textColor='primary' variant="fullWidth" centered selectionFollowsFocus onChange={(event, newTab) => setTab(newTab)} aria-label="basic tabs example">
                             <Tab sx={{ fontSize: 18 }} icon={<TrackChangesTwoTone />} iconPosition="start" label="My Objectives"/>
                             {isManager === true ? <Tab sx={{ fontSize: 18 }} icon={<GroupWorkTwoTone />} iconPosition="start" label="Team Objectives"/> : null}
                         </Tabs>
@@ -610,7 +541,7 @@ export default function Objectives({deleteToken, token, setPage}) {
                     </TabPanel>
                 </Grid>
             </Container>
-            <Dialog open={openForm} onClose={handleCloseForm} fullWidth maxWidth={"md"}>
+            <Dialog open={openForm} fullWidth maxWidth={"md"}>
                 <form
                     id="myform"
                     onSubmit={handleSubmit}
@@ -665,7 +596,7 @@ export default function Objectives({deleteToken, token, setPage}) {
                     </DialogActions>
                 </form>
             </Dialog>
-            <Dialog open={openFormSecond} onClose={handleCloseFormSecond} fullWidth maxWidth={"lg"}>
+            <Dialog open={openFormSecond} fullWidth maxWidth={"lg"}>
                 <form
                     id="myformSecond"
                     onSubmit={handleSubmitSecond}
@@ -756,7 +687,7 @@ export default function Objectives({deleteToken, token, setPage}) {
                     </DialogActions>
                 </form>
             </Dialog>
-            <Dialog open={openFormThird} onClose={handleCloseFormThird} fullWidth maxWidth={"lg"}>
+            <Dialog open={openFormThird} fullWidth maxWidth={"lg"}>
                 <form
                     id="myformThird"
                     onSubmit={handleSubmitThird}
@@ -818,7 +749,7 @@ export default function Objectives({deleteToken, token, setPage}) {
                     </DialogActions>
                 </form>
             </Dialog>
-            <Dialog open={openFormEdit} onClose={handleClickCloseEdit} fullWidth maxWidth={"lg"}>
+            <Dialog open={openFormEdit} fullWidth maxWidth={"lg"}>
                 <DialogTitle variant="h6">{'Edit ' + mainId.title + ' of ' + mainId.user?.displayName}</DialogTitle>
                 <DialogContent>
                     <TextField
@@ -861,7 +792,7 @@ export default function Objectives({deleteToken, token, setPage}) {
                     />
                 </DialogContent>
                 <DialogActions sx={{display: 'flex'}}>
-                    <Button variant={"contained"} color='error' onClick={handleClickCloseEdit} sx={{marginRight: 'auto'}}>Cancel</Button>
+                    <Button variant={"contained"} color='error' onClick={() => setOpenFormEdit(false)} sx={{marginRight: 'auto'}}>Cancel</Button>
                     <Button onClick={handleSubmitEdit} variant={"contained"} color={'success'}>Save</Button>
                 </DialogActions>
             </Dialog>
