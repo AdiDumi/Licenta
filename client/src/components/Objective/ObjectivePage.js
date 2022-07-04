@@ -20,7 +20,7 @@ import {
 } from "@mui/icons-material";
 import MuiAlert from "@mui/material/Alert";
 import {DesktopDatePicker} from "@mui/x-date-pickers";
-import {markAsDone, getMainObjectives, editTeam, addMain, addSecondary, editProgress, getSecondaryObjectives, getTeamSecondaryObjectives, getTeamMainObjectives} from "../../api/objectivesApi";
+import {markAsDone, getMainObjectives, editTeam, addMain, addSecondary, editProgress, getSecondaryObjectives, getTeamSecondaryObjectives, getTeamMainObjectives, getProgress} from "../../api/objectivesApi";
 import {OBJECTIVES_PER_PAGE} from "../../constants/Constants";
 
 function TabPanel(props) {
@@ -78,19 +78,6 @@ export default function Objectives({deleteToken, token, setPage}) {
         } else {
             console.log(error);
         }
-    }
-
-    function getProgress(objective) {
-        let goalProgress = 0;
-        const nrGoals = objective.secondary?.length;
-        objective.secondary?.forEach(goal => {
-            if(goal.status === 2) {
-                goalProgress += 1/nrGoals;
-            } else {
-                goalProgress += ((1/nrGoals)/goal.target) * goal.progress
-            }
-        })
-        return (goalProgress * 100).toFixed(2);
     }
 
     function getDaysDifference(deadline) {

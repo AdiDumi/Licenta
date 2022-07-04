@@ -13,7 +13,7 @@ import {
 import {ThumbUp} from "@mui/icons-material";
 import {useNavigate} from "react-router-dom";
 import {getReceivedFeedbacks} from '../../api/feedbacksApi';
-import {getMainObjectives} from '../../api/objectivesApi';
+import {getMainObjectives, getSecondaryObjectives, getProgress} from '../../api/objectivesApi';
 import {FEEDBACKS_DASHBOARD, OBJECTIVES_DASHBOARD} from "../../constants/Constants";
 
 
@@ -40,13 +40,26 @@ export default function Dashboard({deleteToken, token, setPage}) {
             (error) => errorFunction(error)
         );
         getMainObjectives(
-            (response) => {
-                setObjectives(response.data.filter(objective => objective.status === 1));
-                setLoading(false);
+            async response => {
+                const mainPersonalObjectives = response.data.filter(objective => objective.status === 1);
+                mainPersonalObjectives.forEach(mainObjective => {
+                    mainObjective["secondary"] = [];
+                    getSecondaryObjectives(
+                        mainObjective._id,
+                        (response) => {
+                            mainObjective["secondary"] = mainObjective["secondary"].concat(response.data);
+                            mainObjective["progress"] = getProgress(mainObjective);
+                        },
+                        token,
+                        (error) => errorFunction(error)
+                    )
+                })
+                setObjectives(mainPersonalObjectives);
             },
             token,
             (error) => errorFunction(error)
         );
+        setLoading(false);
     }, []);
 
     return(

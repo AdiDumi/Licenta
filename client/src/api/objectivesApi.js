@@ -103,3 +103,16 @@ export function editProgress(data, responseFunction, token, errorFunction) {
     ).then(response => responseFunction(response)
     ).catch(error => errorFunction(error));
 }
+
+export function getProgress(objective) {
+    let goalProgress = 0;
+    const nrGoals = objective.secondary?.length;
+    objective.secondary?.forEach(goal => {
+        if(goal.status === 2) {
+            goalProgress += 1/nrGoals;
+        } else {
+            goalProgress += ((1/nrGoals)/goal.target) * goal.progress
+        }
+    })
+    return (goalProgress * 100).toFixed(2);
+}
