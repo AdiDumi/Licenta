@@ -6,3 +6,5 @@ The application was developed in close coordonation with Bitdefender company to 
 
 For the front-end with all its pages was used React that connects to the Node.js back-end with a MongoDB local database. For accounts, the app was connected
 to the LDAP server of a company, all of them being deployed using docker.
+
+The LDAP server must be started first and, when the server becomes active, automaticaly connects to the application.
