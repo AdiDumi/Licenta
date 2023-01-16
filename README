@@ -1,1 +1,8 @@
-Front end licenta
+Community Catalyst
+
+This repository contains the files for the graduation project for Computer Science, University Politehnica Bucharest.
+
+The application was developed in close coordonation with Bitdefender company to facilitate the feedback exchange between employees and help them grow closer.
+
+For the front-end with all its pages was used React that connects to the Node.js back-end with a MongoDB local database. For accounts, the app was connected
+to the LDAP server of a company, all of them being deployed using docker.
