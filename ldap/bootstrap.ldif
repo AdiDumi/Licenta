@@ -1,0 +1,378 @@
+# create "Groups" OU
+dn: ou=Groups,dc=grow,dc=app
+changetype: add
+objectclass: organizationalUnit
+ou: Groups
+
+# create "Users" OU
+dn: ou=Users,dc=grow,dc=app
+changetype: add
+objectclass: organizationalUnit
+ou: Users
+
+# create the "developer" user, password "123456"
+dn: cn=developer,ou=Users,dc=grow,dc=app
+changetype: add
+objectclass: inetOrgPerson
+cn: developer
+uid: developer
+givenname: John Doe
+sn: Developer
+displayname: Developer User
+mail: developer@grow.app
+userpassword: 123456
+manager: cn=admin,ou=Users,dc=grow,dc=app
+
+# create the "developer0" user, password "123456"
+dn: cn=developer0,ou=Users,dc=grow,dc=app
+changetype: add
+objectclass: inetOrgPerson
+cn: developer0
+uid: developer0
+givenname: John Doe
+sn: Developer0
+displayname: Developer 0 User
+mail: developer0@grow.app
+userpassword: 123456
+manager: cn=developer,ou=Users,dc=grow,dc=app
+
+# create the "developer1" user, password "123456"
+dn: cn=developer1,ou=Users,dc=grow,dc=app
+changetype: add
+objectclass: inetOrgPerson
+cn: developer1
+uid: developer1
+givenname: John Doe
+sn: Developer1
+displayname: Developer 1 User
+mail: developer1@grow.app
+userpassword: 123456
+manager: cn=developer,ou=Users,dc=grow,dc=app
+
+# create the "developer2" user, password "123456"
+dn: cn=developer2,ou=Users,dc=grow,dc=app
+changetype: add
+objectclass: inetOrgPerson
+cn: developer2
+uid: developer2
+givenname: John Doe
+sn: Developer2
+displayname: Developer 2 User
+mail: developer2@grow.app
+userpassword: 123456
+manager: cn=developer,ou=Users,dc=grow,dc=app
+
+# create the "developer3" user, password "123456"
+dn: cn=developer3,ou=Users,dc=grow,dc=app
+changetype: add
+objectclass: inetOrgPerson
+cn: developer3
+uid: developer3
+givenname: John Doe
+sn: Developer3
+displayname: Developer 3 User
+mail: developer3@grow.app
+userpassword: 123456
+manager: cn=developer,ou=Users,dc=grow,dc=app
+
+# create the "developer4" user, password "123456"
+dn: cn=developer4,ou=Users,dc=grow,dc=app
+changetype: add
+objectclass: inetOrgPerson
+cn: developer4
+uid: developer4
+givenname: John Doe
+sn: Developer4
+displayname: Developer 4 User
+mail: developer4@grow.app
+userpassword: 123456
+manager: cn=developer,ou=Users,dc=grow,dc=app
+
+# create the "developer5" user, password "123456"
+dn: cn=developer5,ou=Users,dc=grow,dc=app
+changetype: add
+objectclass: inetOrgPerson
+cn: developer5
+uid: developer5
+givenname: John Doe
+sn: Developer5
+displayname: Developer 5 User
+mail: developer5@grow.app
+userpassword: 123456
+manager: cn=developer,ou=Users,dc=grow,dc=app
+
+# create the "developer6" user, password "123456"
+dn: cn=developer6,ou=Users,dc=grow,dc=app
+changetype: add
+objectclass: inetOrgPerson
+cn: developer6
+uid: developer6
+givenname: John Doe
+sn: Developer6
+displayname: Developer 6 User
+mail: developer6@grow.app
+userpassword: 123456
+manager: cn=developer,ou=Users,dc=grow,dc=app
+
+# create the "developer7" user, password "123456"
+dn: cn=developer7,ou=Users,dc=grow,dc=app
+changetype: add
+objectclass: inetOrgPerson
+cn: developer7
+uid: developer7
+givenname: John Doe
+sn: Developer7
+displayname: Developer 7 User
+mail: developer7@grow.app
+userpassword: 123456
+manager: cn=developer,ou=Users,dc=grow,dc=app
+
+# create the "developer8" user, password "123456"
+dn: cn=developer8,ou=Users,dc=grow,dc=app
+changetype: add
+objectclass: inetOrgPerson
+cn: developer8
+uid: developer8
+givenname: John Doe
+sn: Developer8
+displayname: Developer 8 User
+mail: developer8@grow.app
+userpassword: 123456
+manager: cn=developer,ou=Users,dc=grow,dc=app
+
+# create the "developer9" user, password "123456"
+dn: cn=developer9,ou=Users,dc=grow,dc=app
+changetype: add
+objectclass: inetOrgPerson
+cn: developer9
+uid: developer9
+givenname: John Doe
+sn: Developer9
+displayname: Developer 9 User
+mail: developer9@grow.app
+userpassword: 123456
+manager: cn=developer,ou=Users,dc=grow,dc=app
+
+# create the "developer10" user, password "123456"
+dn: cn=developer10,ou=Users,dc=grow,dc=app
+changetype: add
+objectclass: inetOrgPerson
+cn: developer10
+uid: developer10
+givenname: John Doe
+sn: Developer10
+displayname: Developer 10 User
+mail: developer10@grow.app
+userpassword: 123456
+manager: cn=developer,ou=Users,dc=grow,dc=app
+
+# create the "tester" user, password "123456"
+dn: cn=tester,ou=Users,dc=grow,dc=app
+changetype: add
+objectclass: inetOrgPerson
+cn: tester
+uid: tester
+givenname: John Doe
+sn: Tester
+displayname: Tester User
+mail: tester@grow.app
+userpassword: 123456
+manager: cn=developer,ou=Users,dc=grow,dc=app
+
+# create the "tester0" user, password "123456"
+dn: cn=tester0,ou=Users,dc=grow,dc=app
+changetype: add
+objectclass: inetOrgPerson
+cn: tester0
+uid: tester0
+givenname: John Doe
+sn: Tester0
+displayname: Tester 0 User
+mail: tester0@grow.app
+userpassword: 123456
+manager: cn=tester,ou=Users,dc=grow,dc=app
+
+# create the "tester1" user, password "123456"
+dn: cn=tester1,ou=Users,dc=grow,dc=app
+changetype: add
+objectclass: inetOrgPerson
+cn: tester1
+uid: tester1
+givenname: John Doe
+sn: Tester1
+displayname: Tester 1 User
+mail: tester1@grow.app
+userpassword: 123456
+manager: cn=tester,ou=Users,dc=grow,dc=app
+
+# create the "tester2" user, password "123456"
+dn: cn=tester2,ou=Users,dc=grow,dc=app
+changetype: add
+objectclass: inetOrgPerson
+cn: tester2
+uid: tester2
+givenname: John Doe
+sn: Tester2
+displayname: Tester 2 User
+mail: tester2@grow.app
+userpassword: 123456
+manager: cn=tester,ou=Users,dc=grow,dc=app
+
+# create the "tester3" user, password "123456"
+dn: cn=tester3,ou=Users,dc=grow,dc=app
+changetype: add
+objectclass: inetOrgPerson
+cn: tester3
+uid: tester3
+givenname: John Doe
+sn: Tester3
+displayname: Tester 3 User
+mail: tester3@grow.app
+userpassword: 123456
+manager: cn=tester,ou=Users,dc=grow,dc=app
+
+# create the "tester4" user, password "123456"
+dn: cn=tester4,ou=Users,dc=grow,dc=app
+changetype: add
+objectclass: inetOrgPerson
+cn: tester4
+uid: tester4
+givenname: John Doe
+sn: Tester4
+displayname: Tester 4 User
+mail: tester4@grow.app
+userpassword: 123456
+manager: cn=tester,ou=Users,dc=grow,dc=app
+
+# create the "tester5" user, password "123456"
+dn: cn=tester5,ou=Users,dc=grow,dc=app
+changetype: add
+objectclass: inetOrgPerson
+cn: tester5
+uid: tester5
+givenname: John Doe
+sn: Tester5
+displayname: Tester 5 User
+mail: tester5@grow.app
+userpassword: 123456
+manager: cn=tester,ou=Users,dc=grow,dc=app
+
+# create the "tester6" user, password "123456"
+dn: cn=tester6,ou=Users,dc=grow,dc=app
+changetype: add
+objectclass: inetOrgPerson
+cn: tester6
+uid: tester6
+givenname: John Doe
+sn: Tester6
+displayname: Tester 6 User
+mail: tester6@grow.app
+userpassword: 123456
+manager: cn=tester,ou=Users,dc=grow,dc=app
+
+# create the "tester7" user, password "123456"
+dn: cn=tester7,ou=Users,dc=grow,dc=app
+changetype: add
+objectclass: inetOrgPerson
+cn: tester7
+uid: tester7
+givenname: John Doe
+sn: Tester7
+displayname: Tester 7 User
+mail: tester7@grow.app
+userpassword: 123456
+manager: cn=tester,ou=Users,dc=grow,dc=app
+
+# create the "tester8" user, password "123456"
+dn: cn=tester8,ou=Users,dc=grow,dc=app
+changetype: add
+objectclass: inetOrgPerson
+cn: tester8
+uid: tester8
+givenname: John Doe
+sn: Tester8
+displayname: Tester 8 User
+mail: tester8@grow.app
+userpassword: 123456
+manager: cn=tester,ou=Users,dc=grow,dc=app
+
+# create the "tester9" user, password "123456"
+dn: cn=tester9,ou=Users,dc=grow,dc=app
+changetype: add
+objectclass: inetOrgPerson
+cn: tester9
+uid: tester9
+givenname: John Doe
+sn: Tester9
+displayname: Tester 9 User
+mail: tester9@grow.app
+userpassword: 123456
+manager: cn=tester,ou=Users,dc=grow,dc=app
+
+# create the "tester10" user, password "123456"
+dn: cn=tester10,ou=Users,dc=grow,dc=app
+changetype: add
+objectclass: inetOrgPerson
+cn: tester10
+uid: tester10
+givenname: John Doe
+sn: Tester10
+displayname: Tester 10 User
+mail: tester10@grow.app
+userpassword: 123456
+manager: cn=tester,ou=Users,dc=grow,dc=app
+
+# create the "admin" user, password "123456"
+dn: cn=admin,ou=Users,dc=grow,dc=app
+changetype: add
+objectclass: inetOrgPerson
+cn: admin
+uid: admin
+givenname: John Doe
+sn: admin
+displayname: Admin User
+mail: admin@grow.app
+userpassword: 123456
+
+# create the "Admins" group and add user "admin" to it
+dn: cn=Admins,ou=Groups,dc=grow,dc=app
+changetype: add
+cn: Admins
+objectclass: groupOfUniqueNames
+uniquemember: cn=admin,ou=Users,dc=grow,dc=app
+
+# create the "Developers" group and add user "developer" to it
+dn: cn=Developers,ou=Groups,dc=grow,dc=app
+changetype: add
+cn: Developers
+objectclass: groupOfUniqueNames
+uniquemember: cn=developer,ou=Users,dc=grow,dc=app
+uniquemember: cn=developer0,ou=Users,dc=grow,dc=app
+uniquemember: cn=developer1,ou=Users,dc=grow,dc=app
+uniquemember: cn=developer2,ou=Users,dc=grow,dc=app
+uniquemember: cn=developer3,ou=Users,dc=grow,dc=app
+uniquemember: cn=developer4,ou=Users,dc=grow,dc=app
+uniquemember: cn=developer5,ou=Users,dc=grow,dc=app
+uniquemember: cn=developer6,ou=Users,dc=grow,dc=app
+uniquemember: cn=developer7,ou=Users,dc=grow,dc=app
+uniquemember: cn=developer8,ou=Users,dc=grow,dc=app
+uniquemember: cn=developer9,ou=Users,dc=grow,dc=app
+uniquemember: cn=developer10,ou=Users,dc=grow,dc=app
+
+# create the "Testers" group and add user "admin" to it
+dn: cn=Testers,ou=Groups,dc=grow,dc=app
+changetype: add
+cn: Testers
+objectclass: groupOfUniqueNames
+uniquemember: cn=tester,ou=Users,dc=grow,dc=app
+uniquemember: cn=tester0,ou=Users,dc=grow,dc=app
+uniquemember: cn=tester1,ou=Users,dc=grow,dc=app
+uniquemember: cn=tester2,ou=Users,dc=grow,dc=app
+uniquemember: cn=tester3,ou=Users,dc=grow,dc=app
+uniquemember: cn=tester4,ou=Users,dc=grow,dc=app
+uniquemember: cn=tester5,ou=Users,dc=grow,dc=app
+uniquemember: cn=tester6,ou=Users,dc=grow,dc=app
+uniquemember: cn=tester7,ou=Users,dc=grow,dc=app
+uniquemember: cn=tester8,ou=Users,dc=grow,dc=app
+uniquemember: cn=tester9,ou=Users,dc=grow,dc=app
+uniquemember: cn=tester10,ou=Users,dc=grow,dc=app
